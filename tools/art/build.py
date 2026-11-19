@@ -5,6 +5,7 @@
                                           y exporta src/gfx/*.h
   python3 tools/art/build.py --only-c   → solo cabeceras de fuente/paletas/tablas
   python3 tools/art/build.py --enemies  → solo enemigos (importa assets/ai/)
+  python3 tools/art/build.py --title    → solo título (assets/ai/titulo_logo.png + titulo_fondo.png)
   python3 tools/art/build.py --hero     → solo héroe (assets/ai/heroe.png + heroe_mapa.png)
 
 Después, `make sprites` exporta los .aseprite a C (también tras editarlos a mano).
@@ -66,8 +67,7 @@ def build_sprites():
     os.makedirs(ASSETS, exist_ok=True)
     build_hero()
     build_enemies()
-    print("Título…")
-    assemble("titulo", title.W, title.H, [("logo", [title.build()])], [])
+    build_title()
     print("Fondos…")
     for b in BIOME_ORDER:
         layers = bg.BUILDERS[b]()
@@ -92,6 +92,16 @@ def build_hero():
     print("Héroe…")
     w, h, _, hl = HERO()
     assemble("heroe", w, h, [(n, hl[n]) for n in hero.LAYERS], hero.TAGS)
+
+
+def build_title():
+    """Logo (importado de assets/ai si existe) y fondo del título."""
+    print("Título…")
+    logo = import_ai.load_logo(title.W, title.H) or title.build()
+    assemble("titulo", title.W, title.H, [("logo", [logo])], [])
+    fondo = import_ai.load_title_bg(bg.W, bg.H)
+    if fondo:
+        assemble("titulo_fondo", bg.W, bg.H, [("fondo", [fondo])], [])
 
 
 def enemy_art():
@@ -167,7 +177,7 @@ def build_tables():
         cols = ", ".join("{0x%02X, 0x%02X, 0x%02X}" % c for c in BIOMAS[b])
         pals.append(f"    {{{cols}}},  // {b}")
     includes = "\n".join(f'#include "{n}_gfx.h"' for n in
-                         ["heroe", "titulo"] + [c.name for c in enemies.ENEMIES] +
+                         ["heroe", "titulo", "titulo_fondo"] + [c.name for c in enemies.ENEMIES] +
                          ["bg_" + b for b in BIOME_ORDER])
     art = []
     for c, frames in ENEMY_ART():
@@ -221,7 +231,9 @@ static const EnemyArt kEnemyArt[] = {{
 
 
 if __name__ == "__main__":
-    if "--enemies" in sys.argv or "--hero" in sys.argv:
+    if {"--enemies", "--hero", "--title"} & set(sys.argv):
+        if "--title" in sys.argv:
+            build_title()
         if "--hero" in sys.argv:
             build_hero()
         if "--enemies" in sys.argv:

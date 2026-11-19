@@ -192,7 +192,7 @@ The characters are drawn between `suelo` and `frente`.
 
 ## 7. Title logo
 
-`assets/sprites/titulo.aseprite` holds the logo: a single layer, **208 × 72 px**. The game animates it with a drop-in, a glint and sparkles. The glint only passes over non-black pixels.
+`assets/sprites/titulo.aseprite` holds the logo: a single layer, **208 × 72 px**. It is imported from `assets/ai/titulo_logo.png` (magenta background). The title background is `assets/sprites/titulo_fondo.aseprite` (**240 × 135**, opaque), imported from `assets/ai/titulo_fondo.png` with ordered dithering. Rebuild both with `python3 tools/art/build.py --title` and `make sprites`. The game animates it with a drop-in, a glint and sparkles. The glint only passes over non-black pixels.
 
 ## 8. How to deliver art
 

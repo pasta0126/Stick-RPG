@@ -417,3 +417,65 @@ def load_hero():
     if not all(os.path.exists(os.path.join(SRC, f)) for f in (HERO_FILE, HERO_MAP)):
         return None
     return ImportedHero()
+
+
+# ------------------------------------------------------------------ título
+TITLE_LOGO, TITLE_BG = "titulo_logo.png", "titulo_fondo.png"
+BAYER4 = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+
+
+def load_logo(W=208, H=72):
+    """Logo sobre magenta → Layer W×H (encajado y centrado, fondo KEY)."""
+    path = os.path.join(SRC, TITLE_LOGO)
+    if not os.path.exists(path):
+        return None
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    p = im.load()
+    idx = [[KEY if is_bg(*p[x, y]) else classify(*p[x, y]) for x in range(w)]
+           for y in range(h)]
+    ys = [y for y in range(h) if any(c != KEY for c in idx[y])]
+    xs = [x for x in range(w) if any(idx[y][x] != KEY for y in ys)]
+    x0, x1, y0, y1 = min(xs), max(xs) + 1, min(ys), max(ys) + 1
+    sub = [row[x0:x1] for row in idx[y0:y1]]
+    s = min((W - 2) / (x1 - x0), (H - 2) / (y1 - y0))
+    px, fw, fh = downscale(sub, x1 - x0, y1 - y0, s)
+    L = Layer(W, H)
+    ox, oy = (W - fw) // 2, (H - fh) // 2
+    for y in range(fh):
+        for x in range(fw):
+            if px[y][x] != KEY:
+                L.px[oy + y][ox + x] = px[y][x]
+    clean(L.px, W, H)
+    return L
+
+
+def load_title_bg(W=240, H=135):
+    """Ilustración del título → Layer W×H opaca. Los neutros se traman con
+    Bayer 4×4 entre los dos tonos vecinos; los acentos solo si son claros."""
+    path = os.path.join(SRC, TITLE_BG)
+    if not os.path.exists(path):
+        return None
+    im = Image.open(path).convert("RGB").resize((W, H), Image.BOX)
+    sharp = Image.open(path).convert("RGB").resize((W, H), Image.NEAREST)
+    p, q = im.load(), sharp.load()
+    lums = [0.3 * r + 0.59 * g + 0.11 * b for r, g, b in (PAL[i] for i in NEUTRAL)]
+    L = Layer(W, H)
+    for y in range(H):
+        for x in range(W):
+            # acentos: del muestreo nítido (no se diluyen las ascuas)
+            c = classify(*q[x, y])
+            if c in (SANGRE, ORO, ESPECTRAL):
+                L.px[y][x] = c
+                continue
+            r, g, b = p[x, y]
+            lum = (0.3 * r + 0.59 * g + 0.11 * b) * 0.9  # algo más oscuro
+            k = 0
+            while k < len(lums) - 2 and lum > lums[k + 1]:
+                k += 1
+            lo, hi = lums[k], lums[k + 1]
+            t = min(1.0, max(0.0, (lum - lo) / (hi - lo)))
+            # trama solo en la franja de transición; fuera, tono plano
+            t = min(1.0, max(0.0, (t - 0.3) / 0.4))
+            L.px[y][x] = NEUTRAL[k + 1] if t * 16 > BAYER4[y % 4][x % 4] + 0.5 else NEUTRAL[k]
+    return L

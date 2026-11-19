@@ -987,12 +987,10 @@ void sparkle(int x, int y, uint32_t phase) {
 }
 
 void drawTitle() {
-  drawBackground(0, 6);
-  // Viñeteado: bordes más oscuros.
-  c4.shade(0, 0, 18, H, pal::NEGRO, 8);
-  c4.shade(W - 18, 0, 18, H, pal::NEGRO, 8);
-  c4.shade(18, 0, W - 36, 8, pal::NEGRO, 6);
-  c4.shade(0, 96, W, H - 96, pal::NEGRO, 6);
+  // Ilustración del título (ya trae su viñeteado); solo se oscurece la franja
+  // inferior para que se lean el récord y el sonido.
+  c4.blit(gfx::titulo_fondo::sheet, 0, 0, 0, 0, Remap::identity());
+  c4.shade(0, 118, W, H - 118, pal::NEGRO, 6);
 
   // Ascuas que suben desde el suelo.
   for (const Ember& e : embers) {
