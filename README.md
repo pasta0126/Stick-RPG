@@ -11,6 +11,7 @@ El guerrero avanza solo entre encuentros; el jugador decide cómo atacar (normal
 
 ```sh
 pio run -t upload        # firmware al M5StickC Plus2
+make sprites             # exportar assets/sprites/*.aseprite (requiere Aseprite)
 make test                # pruebas de la lógica en el PC
 make sim ARGS="--skill 0.7 --games 10000"   # simulador de balance
 ```

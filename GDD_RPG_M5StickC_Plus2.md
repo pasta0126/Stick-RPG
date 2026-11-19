@@ -363,10 +363,36 @@ El prototipo dibuja personajes y fondo con primitivas (rectángulos, líneas, c�
 | Fondo         | Tiles de 16–24 px | Scroll horizontal con parallax           |
 
 - **Vista lateral**, mirando a la derecha (héroe) y a la izquierda (enemigos).
-- Solo los 16 colores de la paleta, con un índice transparente.
-- Formato final: arrays de 4 bpp en C (`.h`), generados por un script desde PNG indexado.
+- Solo los 16 colores de la paleta (§8.2). El índice 1 (Noche) es el transparente: los personajes no usan ese color.
 
-**Herramienta en evaluación:** SpriteCast (plugin de Claude Code, MIT). Puede limitar la salida a 16 colores con una paleta propia, pero está pensado para sprites de 64–96 px con cámara 3D y animación de caminar en 8 direcciones. Necesita claves de pago de OpenAI y Tripo. Pendiente de una prueba con el héroe.
+## 11.1. Flujo de trabajo (Aseprite)
+
+1. La fuente de cada sprite es `assets/sprites/<nombre>.aseprite`: modo indexado, paleta del juego, una **capa por pieza** y una **etiqueta por animación** (`idle`, `run`, `attack`, `hit`…).
+2. `make sprites` exporta cada archivo a `src/gfx/<nombre>_gfx.h` (4 bpp, 2 píxeles por byte, en flash). Los nombres de capa y de etiqueta pasan a ser constantes en C++.
+3. El firmware dibuja capa a capa con una tabla de recoloreado.
+
+## 11.2. Héroe
+
+Lienzo de 32 × 36 px, con los pies en (13, 35). Diez frames: `idle` (2 × 400 ms), `run` (4 × 100 ms), `attack` (3 × 90 ms: preparación, tajo, remate) y `hit` (1).
+
+| **Capa** (de abajo arriba) | **Se dibuja si…**              | **Recoloreado**              |
+|----------------------------|--------------------------------|------------------------------|
+| escudo                     | hay escudo equipado            | Rareza del escudo            |
+| cuerpo                     | siempre                        | —                            |
+| botas                      | hay botas                      | Rareza de las botas          |
+| pechera                    | hay pechera                    | Rareza de la pechera         |
+| casco                      | hay casco                      | Rareza del casco             |
+| brazo (brazo + espada)     | siempre                        | Rareza de la espada          |
+
+Las piezas de equipo se dibujan en Gris claro y Gris. El juego cambia esos dos colores según la rareza: Común sin cambio, Rara en Azul y Pizarra, Épica en Morado y Pizarra. El Blanco (brillo) y el resto de colores no cambian. Al recibir un golpe, el sprite parpadea en blanco.
+
+La primera versión del héroe la generó `tools/sprites/gen_heroe.lua` (`make gen-heroe`, **sobrescribe** el archivo). A partir de ahí se edita a mano en Aseprite.
+
+## 11.3. Pendiente
+
+- Enemigos (Bandido, Golem, Lobo, Ogro, Jefe) con `idle`, `attack`, `hit` y `prepare`, siguiendo el mismo flujo. Una sola capa, salvo que se quiera variar su color.
+- Fondo en tiles con parallax.
+- SpriteCast queda descartado por ahora: pensado para sprites grandes con cámara 3D y servicios de pago. Se puede revisar si hacen falta ilustraciones grandes (por ejemplo, para la pantalla de título).
 
 # 12. Estructura técnica
 
@@ -376,11 +402,15 @@ El prototipo dibuja personajes y fondo con primitivas (rectángulos, líneas, c�
 | `src/core/balance.h`    | Todos los parámetros de balance                                     |
 | `src/main.cpp`          | Firmware: estados, entrada, render 4 bpp, sonido, NVS              |
 | `src/palette.h`         | Paleta de 16 colores                                                |
+| `src/gfx/`              | Dibujo de sprites (`sprite.h`) y cabeceras exportadas (`*_gfx.h`)   |
+| `assets/sprites/`       | Fuentes `.aseprite`                                                 |
+| `tools/sprites/`        | Exportador a C y generador del héroe                                |
 | `tools/sim/`            | Simulador de balance para PC                                        |
 | `tools/test/`           | Pruebas de la lógica                                                |
 
 - Firmware: `pio run -t upload` (PlatformIO + M5Unified).
 - PC: `make test` y `make sim ARGS="--skill 0.7"`.
+- Sprites: `make sprites` (necesita Aseprite; ruta configurable con `ASEPRITE=`).
 
 > **PRINCIPIO DE DISEÑO**
 >

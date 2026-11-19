@@ -11,6 +11,7 @@
 #include "core/balance.h"
 #include "core/combat.h"
 #include "core/progression.h"
+#include "gfx/heroe_gfx.h"
 #include "palette.h"
 
 namespace {
@@ -377,35 +378,56 @@ void drawBackground() {
   }
 }
 
+// Recoloreado del equipo por rareza: el sprite usa GRIS_CLARO / GRIS.
+gfx::Remap remapRareza(const Item& it) {
+  gfx::Remap r = gfx::Remap::identity();
+  if (!it.present) return r;
+  if (it.rareza == Rareza::RARA) {
+    r.to[pal::GRIS_CLARO] = pal::AZUL;
+    r.to[pal::GRIS] = pal::PIZARRA;
+  } else if (it.rareza == Rareza::EPICA) {
+    r.to[pal::GRIS_CLARO] = pal::MORADO;
+    r.to[pal::GRIS] = pal::PIZARRA;
+  }
+  return r;
+}
+
 void drawHero(int x, bool running) {
-  int y = SUELO_Y;
-  if (gt - heroAtkT < 180) x += 10;
-  if (gt - heroHitT < 250) x -= ((gt / 40) % 2) ? 2 : -2;
-  int step = running ? static_cast<int>((gt / 120) % 2) : 0;
-  const Item* eq = hero.equip;
-  // Piernas y botas.
-  int l1 = step ? -5 : -2, l2 = step ? 3 : 2;
-  cv.drawLine(x, y - 13, x + l1, y - 1, pal::PIEL);
-  cv.drawLine(x + 1, y - 13, x + l2, y - 1, pal::PIEL);
-  uint8_t bota = eq[(int)Slot::BOTAS].present ? rarezaColor(eq[(int)Slot::BOTAS].rareza) : pal::MARRON;
-  cv.fillRect(x + l1 - 1, y - 3, 4, 3, bota);
-  cv.fillRect(x + l2 - 1, y - 3, 4, 3, bota);
-  // Cuerpo.
-  uint8_t pecho = eq[(int)Slot::PECHERA].present ? rarezaColor(eq[(int)Slot::PECHERA].rareza) : pal::PIEL;
-  cv.fillRect(x - 3, y - 25, 7, 13, pecho);
-  // Cabeza y casco.
-  cv.fillCircle(x, y - 30, 4, pal::PIEL);
-  if (eq[(int)Slot::CASCO].present) {
-    cv.fillRect(x - 4, y - 35, 9, 4, rarezaColor(eq[(int)Slot::CASCO].rareza));
+  namespace H = gfx::heroe;
+  // Punto de apoyo: pies en (13, 35) dentro del frame.
+  int x0 = x - 13, y0 = SUELO_Y - 35;
+  int frame;
+  bool flash = false;
+  if (gt - heroHitT < 250) {
+    frame = H::HIT.from;
+    x0 -= 2;
+    flash = (gt / 50) % 2 == 0;
+  } else if (gt - heroAtkT < H::ATTACK.duration()) {
+    frame = H::ATTACK.frameAt(gt - heroAtkT, false);
+  } else if (running) {
+    frame = H::RUN.frameAt(gt);
+  } else {
+    frame = H::IDLE.frameAt(gt);
   }
-  // Escudo.
-  if (eq[(int)Slot::ESCUDO].present) {
-    cv.fillRoundRect(x - 9, y - 25, 5, 11, 2, rarezaColor(eq[(int)Slot::ESCUDO].rareza));
+
+  gfx::Remap blanco = gfx::Remap::identity();
+  for (auto& c : blanco.to) c = pal::BLANCO;
+
+  struct { int layer; int slot; } capas[] = {
+      {H::ESCUDO, (int)Slot::ESCUDO}, {H::CUERPO, -1},
+      {H::BOTAS, (int)Slot::BOTAS},   {H::PECHERA, (int)Slot::PECHERA},
+      {H::CASCO, (int)Slot::CASCO},   {H::BRAZO, (int)Slot::ESPADA},
+  };
+  for (auto& c : capas) {
+    gfx::Remap r = gfx::Remap::identity();
+    if (c.slot >= 0) {
+      const Item& it = hero.equip[c.slot];
+      // El brazo se dibuja siempre; el resto solo si la pieza está equipada.
+      if (!it.present && c.layer != H::BRAZO) continue;
+      r = remapRareza(it);
+    }
+    gfx::drawCel(cv, H::sheet, c.layer, frame, x0, y0, flash ? blanco : r);
   }
-  // Brazo y espada.
-  cv.drawLine(x + 3, y - 22, x + 8, y - 18, pal::PIEL);
-  cv.drawLine(x + 8, y - 18, x + 17, y - 31, pal::BLANCO);
-  cv.drawLine(x + 6, y - 20, x + 10, y - 16, pal::AMARILLO);
 }
 
 void drawEnemy(int x) {
