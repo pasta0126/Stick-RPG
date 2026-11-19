@@ -313,3 +313,34 @@ ESTILO
 PALETA ESTRICTA (solo estos 8 colores):
 #0A0E0D negro, #1B2925 oscuro, #3B5247 medio, #7A9380 claro, #D4DEC8 brillo (luna, reflejos), #9C2E30 rojo (capa, penacho), #D6A248 oro (ventana del castillo, cruz, ascuas), #9FE05A verde espectral (muy poco: fuegos fatuos en el cementerio).
 ````
+
+---
+
+## Logo del título
+
+El juego lo anima: cae desde arriba, rebota con un temblor y un destello, y un reflejo blanco recorre las letras (solo sobre los píxeles que no son negros). Lienzo final: **208 × 72 px**, fondo transparente.
+
+````
+Diseña el logotipo de un videojuego en pixel art de 16 bits. El texto dice exactamente "STICK RPG". Revisa la ortografía letra a letra: S-T-I-C-K y debajo R-P-G. No añadas ninguna otra palabra.
+
+FORMATO
+- Imagen horizontal muy apaisada, proporción 208:72 (por ejemplo 1664×576), pensada para reducirse a 208×72 píxeles: dibújala como si cada píxel del juego fuera un bloque de 8×8, con bloques grandes y limpios.
+- El logo ocupa casi todo el lienzo, con un margen pequeño y centrado.
+- Fondo magenta puro #FF00FF, liso. Nada de escenario, cielo ni sombras sobre el fondo.
+
+DISEÑO
+- "STICK" en letras enormes, gruesas y anchas, de estilo medieval épico (serifas talladas en forma de cuña, como letras forjadas en metal), ocupando unos dos tercios de la altura.
+- Las letras son de oro macizo con relieve biselado: cara superior iluminada, cara inferior en sombra y un borde superior brillante. Un par de muescas y arañazos de batalla.
+- Contorno negro grueso alrededor de todas las letras, con una segunda línea oscura por dentro para dar volumen.
+- Una espada larga de acero cruza horizontalmente por debajo de "STICK" como si fuera un subrayado: empuñadura y guarda doradas a la izquierda y punta afilada a la derecha, sobresaliendo un poco por los lados del texto.
+- Debajo de la espada, "R P G" en letras más pequeñas, espaciadas, en acero pálido con contorno negro, flanqueadas por dos rombos dorados pequeños: ◆ R P G ◆.
+- Detalle opcional: un goteo o una mancha de sangre roja en la punta de la espada, y unos pocos píxeles de brillo verde espectral en el filo.
+- Debe leerse perfectamente a tamaño diminuto: formas grandes, contraste fuerte y nada de detalles finos de un píxel.
+
+ESTILO
+- Pixel art limpio, sin antialiasing, sin degradados suaves, sin desenfoque ni resplandores difusos, sin texturas de ruido.
+- Luz desde arriba a la izquierda.
+
+PALETA ESTRICTA (solo estos colores):
+#0A0E0D negro (contornos), #1B2925 oscuro, #3B5247 medio, #7A9380 claro (acero), #D4DEC8 brillo (reflejos), #9C2E30 rojo (sangre), #D6A248 oro (letras, guarda, rombos), #9FE05A verde espectral (casi nada).
+````
