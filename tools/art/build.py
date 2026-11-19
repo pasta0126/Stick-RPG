@@ -4,6 +4,7 @@
                                           (SOBRESCRIBE los retoques a mano),
                                           y exporta src/gfx/*.h
   python3 tools/art/build.py --only-c   → solo cabeceras de fuente/paletas/tablas
+  python3 tools/art/build.py --enemies  → solo enemigos (importa stick_rpg_sprites/)
 
 Después, `make sprites` exporta los .aseprite a C (también tras editarlos a mano).
 """
@@ -20,6 +21,7 @@ import bg  # noqa: E402
 import enemies  # noqa: E402
 import font  # noqa: E402
 import hero  # noqa: E402
+import import_ai  # noqa: E402
 import title  # noqa: E402
 from palettes import BIOMAS, KEY, full16  # noqa: E402
 
@@ -65,16 +67,38 @@ def build_sprites():
     hl = hero.build()
     assemble("heroe", hero.W, hero.H, [(n, hl[n]) for n in hero.LAYERS],
              hero.TAGS)
-    print("Enemigos…")
-    for cls in enemies.ENEMIES:
-        assemble(cls.name, cls.W, cls.H, [("cuerpo", enemies.build(cls))],
-                 enemies.TAGS)
+    build_enemies()
     print("Título…")
     assemble("titulo", title.W, title.H, [("logo", [title.build()])], [])
     print("Fondos…")
     for b in BIOME_ORDER:
         layers = bg.BUILDERS[b]()
         assemble("bg_" + b, bg.W, bg.H, [(n, [layers[n]]) for n in bg.ORDER], [])
+
+
+def enemy_art():
+    """Enemigos importados de las tiras de IA si existen; si no, los de
+    enemies.py. Mismo orden que EnemyType."""
+    out = []
+    for cls in enemies.ENEMIES:
+        imp = import_ai.load(cls.name)
+        out.append((imp, imp.frames) if imp else (cls, enemies.build(cls)))
+    return out
+
+
+def build_enemies():
+    print("Enemigos…")
+    for cls, frames in ENEMY_ART():
+        assemble(cls.name, cls.W, cls.H, [("cuerpo", frames)], enemies.TAGS)
+
+
+_cache = []
+
+
+def ENEMY_ART():
+    if not _cache:
+        _cache.extend(enemy_art())
+    return _cache
 
 
 # ------------------------------------------------------------- cabeceras
@@ -128,10 +152,16 @@ def build_tables():
                          ["heroe", "titulo"] + [c.name for c in enemies.ENEMIES] +
                          ["bg_" + b for b in BIOME_ORDER])
     art = []
-    for c in enemies.ENEMIES:
-        ax = c.W - 1 - c.ANCHOR[0]  # tras voltear
+    for c, frames in ENEMY_ART():
+        if isinstance(c, import_ai.Imported):
+            ax = c.ANCHOR[0]  # ya mira a la izquierda
+        else:
+            ax = c.W - 1 - c.ANCHOR[0]  # tras voltear
+        # píxeles visibles a la izquierda de los pies al caminar (frames 0-1)
+        left = min(x for L in frames[:2] for row in L.px
+                   for x, v in enumerate(row) if v != KEY)
         n = c.name
-        art.append(f"    {{&{n}::sheet, {ax}, {c.ANCHOR[1]}, {n}::WALK, {n}::IDLE, "
+        art.append(f"    {{&{n}::sheet, {ax}, {c.ANCHOR[1]}, {ax - left}, {n}::WALK, {n}::IDLE, "
                    f"{n}::ATTACK, {n}::HIT, {n}::PREPARE}},  // {n}")
     par = ", ".join(str(bg.PARALLAX[n]) for n in bg.ORDER)
     write(os.path.join(GFX, "assets.h"), f"""#pragma once
@@ -159,6 +189,7 @@ constexpr int HERO_AX = {hero.ANCHOR[0]}, HERO_AY = {hero.ANCHOR[1]};
 struct EnemyArt {{
   const Sheet* sheet;
   uint8_t ax, ay;  // pies
+  uint8_t reach;   // píxeles visibles a la izquierda de los pies al caminar
   Anim walk, idle, attack, hit, prepare;
 }};
 
@@ -172,7 +203,9 @@ static const EnemyArt kEnemyArt[] = {{
 
 
 if __name__ == "__main__":
-    if "--only-c" not in sys.argv:
+    if "--enemies" in sys.argv:
+        build_enemies()
+    elif "--only-c" not in sys.argv:
         build_sprites()
     print("Cabeceras…")
     os.makedirs(GFX, exist_ok=True)

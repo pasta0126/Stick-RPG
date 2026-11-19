@@ -38,20 +38,21 @@ constexpr int HERO_AX = 30, HERO_AY = 71;
 struct EnemyArt {
   const Sheet* sheet;
   uint8_t ax, ay;  // pies
+  uint8_t reach;   // píxeles visibles a la izquierda de los pies al caminar
   Anim walk, idle, attack, hit, prepare;
 };
 
 // Mismo orden que EnemyType (src/core/game_types.h).
 static const EnemyArt kEnemyArt[] = {
-    {&salteador::sheet, 31, 71, salteador::WALK, salteador::IDLE, salteador::ATTACK, salteador::HIT, salteador::PREPARE},  // salteador
-    {&golem::sheet, 37, 77, golem::WALK, golem::IDLE, golem::ATTACK, golem::HIT, golem::PREPARE},  // golem
-    {&huargo::sheet, 45, 63, huargo::WALK, huargo::IDLE, huargo::ATTACK, huargo::HIT, huargo::PREPARE},  // huargo
-    {&troll::sheet, 49, 87, troll::WALK, troll::IDLE, troll::ATTACK, troll::HIT, troll::PREPARE},  // troll
-    {&rey_ciervo::sheet, 53, 107, rey_ciervo::WALK, rey_ciervo::IDLE, rey_ciervo::ATTACK, rey_ciervo::HIT, rey_ciervo::PREPARE},  // rey_ciervo
-    {&dama_espectral::sheet, 47, 103, dama_espectral::WALK, dama_espectral::IDLE, dama_espectral::ATTACK, dama_espectral::HIT, dama_espectral::PREPARE},  // dama_espectral
-    {&caballero_negro::sheet, 59, 103, caballero_negro::WALK, caballero_negro::IDLE, caballero_negro::ATTACK, caballero_negro::HIT, caballero_negro::PREPARE},  // caballero_negro
-    {&tejedora::sheet, 61, 91, tejedora::WALK, tejedora::IDLE, tejedora::ATTACK, tejedora::HIT, tejedora::PREPARE},  // tejedora
-    {&rey_liche::sheet, 55, 107, rey_liche::WALK, rey_liche::IDLE, rey_liche::ATTACK, rey_liche::HIT, rey_liche::PREPARE},  // rey_liche
+    {&salteador::sheet, 56, 71, 41, salteador::WALK, salteador::IDLE, salteador::ATTACK, salteador::HIT, salteador::PREPARE},  // salteador
+    {&golem::sheet, 68, 77, 56, golem::WALK, golem::IDLE, golem::ATTACK, golem::HIT, golem::PREPARE},  // golem
+    {&huargo::sheet, 66, 64, 60, huargo::WALK, huargo::IDLE, huargo::ATTACK, huargo::HIT, huargo::PREPARE},  // huargo
+    {&troll::sheet, 95, 91, 84, troll::WALK, troll::IDLE, troll::ATTACK, troll::HIT, troll::PREPARE},  // troll
+    {&rey_ciervo::sheet, 106, 107, 64, rey_ciervo::WALK, rey_ciervo::IDLE, rey_ciervo::ATTACK, rey_ciervo::HIT, rey_ciervo::PREPARE},  // rey_ciervo
+    {&dama_espectral::sheet, 118, 101, 73, dama_espectral::WALK, dama_espectral::IDLE, dama_espectral::ATTACK, dama_espectral::HIT, dama_espectral::PREPARE},  // dama_espectral
+    {&caballero_negro::sheet, 119, 100, 104, caballero_negro::WALK, caballero_negro::IDLE, caballero_negro::ATTACK, caballero_negro::HIT, caballero_negro::PREPARE},  // caballero_negro
+    {&tejedora::sheet, 114, 91, 87, tejedora::WALK, tejedora::IDLE, tejedora::ATTACK, tejedora::HIT, tejedora::PREPARE},  // tejedora
+    {&rey_liche::sheet, 91, 107, 56, rey_liche::WALK, rey_liche::IDLE, rey_liche::ATTACK, rey_liche::HIT, rey_liche::PREPARE},  // rey_liche
 };
 
 }  // namespace gfx

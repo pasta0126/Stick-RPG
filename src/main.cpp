@@ -27,7 +27,7 @@ constexpr int H = 135;
 constexpr int FEET_Y = 113;     // fila bajo los pies
 constexpr int HERO_FX = 50;     // pies del héroe
 constexpr int ENEMY_FX = 186;   // pies del enemigo
-constexpr int ENEMY_START = 300;
+constexpr int ENEMY_START = 300;  // mínimo; ver enemyStart()
 constexpr uint32_t FRAME_MS = 33;
 constexpr uint32_t T_APAGAR_MS = 2000;
 constexpr uint32_t T_ATENUAR_MS = 10000;
@@ -151,6 +151,8 @@ void fadeTo(FadeAct act) {
 }
 
 const gfx::EnemyArt& art() { return gfx::kEnemyArt[static_cast<int>(enemy.type)]; }
+// Entra desde justo fuera de la pantalla, sea cual sea el ancho del sprite.
+int enemyStart() { return std::max(ENEMY_START, W + art().reach + 2); }
 int enemyTop() { return FEET_Y - art().ay; }
 
 void roman(int n, char* out) {
@@ -189,7 +191,7 @@ void applyPalette() {
 void startEncounter() {
   enemy = makeEnemy(rng, nivel);
   battle.reset();
-  enemyX = ENEMY_START;
+  enemyX = enemyStart();
   resetTimers();
   for (Floater& f : floaters) f.on = false;
 }
@@ -477,7 +479,7 @@ void update() {
     case St::ENEMY_ENTER: {
       float u = clamp01(since(stT) / static_cast<float>(T_ENTRADA));
       float e = 1 - (1 - u) * (1 - u);  // frena al llegar
-      enemyX = static_cast<int>(lerp(ENEMY_START, ENEMY_FX, e));
+      enemyX = static_cast<int>(lerp(enemyStart(), ENEMY_FX, e));
       const gfx::Anim& wa = art().walk;
       if ((since(stT) % (wa.ms * 2)) < FRAME_MS && u < 0.9f) audio::sfx(140, 20);
       if (u >= 1) setState(isBoss(enemy.type) ? St::BOSS_INTRO : St::HERO_TURN);

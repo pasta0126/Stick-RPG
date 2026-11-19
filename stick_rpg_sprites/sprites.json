@@ -1,0 +1,72 @@
+[
+  {
+    "id": "caballero",
+    "frames": 6,
+    "file": "01_caballero_magenta.png",
+    "width": 1536,
+    "height": 118
+  },
+  {
+    "id": "salteador",
+    "frames": 8,
+    "file": "02_salteador_magenta.png",
+    "width": 1536,
+    "height": 108
+  },
+  {
+    "id": "golem",
+    "frames": 8,
+    "file": "03_golem_magenta.png",
+    "width": 1536,
+    "height": 115
+  },
+  {
+    "id": "huargo",
+    "frames": 8,
+    "file": "04_huargo_magenta.png",
+    "width": 1536,
+    "height": 86
+  },
+  {
+    "id": "troll",
+    "frames": 8,
+    "file": "05_troll_magenta.png",
+    "width": 1536,
+    "height": 108
+  },
+  {
+    "id": "rey_ciervo",
+    "frames": 8,
+    "file": "06_rey_ciervo_magenta.png",
+    "width": 1536,
+    "height": 110
+  },
+  {
+    "id": "dama_espectral",
+    "frames": 8,
+    "file": "07_dama_espectral_magenta.png",
+    "width": 1536,
+    "height": 84
+  },
+  {
+    "id": "caballero_negro",
+    "frames": 8,
+    "file": "08_caballero_negro_magenta.png",
+    "width": 1536,
+    "height": 85
+  },
+  {
+    "id": "la_tejedora",
+    "frames": 8,
+    "file": "09_la_tejedora_magenta.png",
+    "width": 1536,
+    "height": 91
+  },
+  {
+    "id": "rey_liche",
+    "frames": 8,
+    "file": "10_rey_liche_magenta.png",
+    "width": 1536,
+    "height": 119
+  }
+]

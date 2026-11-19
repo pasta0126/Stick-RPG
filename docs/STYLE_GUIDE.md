@@ -136,15 +136,19 @@ The anchor is the feet position inside the canvas, in the left-facing file. Keep
 
 | Name (file)       | Canvas    | Anchor (x, y) | Type    |
 |-------------------|-----------|---------------|---------|
-| `salteador`       | 64 × 72   | (31, 71)      | Regular |
-| `golem`           | 76 × 78   | (37, 77)      | Regular |
-| `huargo`          | 92 × 64   | (45, 63)      | Regular |
-| `troll`           | 92 × 88   | (49, 87)      | Regular |
-| `rey_ciervo`      | 100 × 108 | (53, 107)     | Boss    |
-| `dama_espectral`  | 92 × 104  | (47, 103)     | Boss    |
-| `caballero_negro` | 104 × 104 | (59, 103)     | Boss    |
-| `tejedora`        | 124 × 92  | (61, 91)      | Boss    |
-| `rey_liche`       | 100 × 108 | (55, 107)     | Boss    |
+| `salteador`       | 100 × 72  | (56, 71)      | Regular |
+| `golem`           | 138 × 78  | (68, 77)      | Regular |
+| `huargo`          | 132 × 65  | (66, 64)      | Regular |
+| `troll`           | 164 × 92  | (95, 91)      | Regular |
+| `rey_ciervo`      | 196 × 108 | (106, 107)    | Boss    |
+| `dama_espectral`  | 204 × 102 | (118, 101)    | Boss    |
+| `caballero_negro` | 200 × 101 | (119, 100)    | Boss    |
+| `tejedora`        | 202 × 92  | (114, 91)     | Boss    |
+| `rey_liche`       | 174 × 108 | (91, 107)     | Boss    |
+
+### AI-generated strips
+
+The current enemies come from the strips in `stick_rpg_sprites/` (8 frames in a row, facing left, magenta background). `python3 tools/art/build.py --enemies` imports them with `tools/art/import_ai.py`: it splits the frames, maps every pixel to the 8 palette roles, scales to the height set in `SOURCES`, aligns the frames by the torso, closes the black outline and recomputes canvas and anchor. To replace an enemy, drop a new strip there with the same name and run that command, then `make sprites`.
 
 ### Screen placement
 
