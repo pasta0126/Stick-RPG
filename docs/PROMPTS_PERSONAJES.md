@@ -344,3 +344,97 @@ ESTILO
 PALETA ESTRICTA (solo estos colores):
 #0A0E0D negro (contornos), #1B2925 oscuro, #3B5247 medio, #7A9380 claro (acero), #D4DEC8 brillo (reflejos), #9C2E30 rojo (sangre), #D6A248 oro (letras, guarda, rombos), #9FE05A verde espectral (casi nada).
 ````
+
+---
+
+## Fondos de los biomas (por capas)
+
+Cada fondo tiene capas que se desplazan a distinta velocidad (parallax) y **se repiten en horizontal**. Se hace en **una conversación por bioma**: primero la escena completa como referencia y después cada capa por separado, calcando esa escena.
+
+La niebla y las nubes las genera el juego, así que no hace falta pedirlas. Todo se dibuja con la paleta del Bosque: el juego cambia el tono en el Cementerio (violeta) y en el Castillo (cálido).
+
+### Mensaje 1: escena completa (pegar el bloque común y el del bioma)
+
+**Bloque común**
+
+````
+Genera un fondo de escenario de pixel art de 16 bits para un RPG de combate por turnos visto de lado, de fantasía medieval oscura. Formato 16:9 (1920×1080), pensado para reducirse a 240×135 píxeles: dibújalo como si cada píxel del juego fuera un bloque de 8×8, con bloques grandes y limpios.
+
+Es solo el escenario: no hay personajes, ni texto, ni interfaz.
+
+COMPOSICIÓN (muy importante)
+- Vista lateral pura, como un plataformas 2D. El suelo es una franja plana y horizontal: su borde superior está al 83 % de la altura (fila 112 de 135) y llega hasta abajo.
+- Encima del suelo combatirán dos personajes: uno a la izquierda (entre el 8 % y el 33 % del ancho) y otro a la derecha (entre el 58 % y el 96 %), de pie sobre el borde del suelo y de hasta el 75 % de la altura. Detrás de ellos el fondo debe ser oscuro y de poco contraste, sin objetos llamativos.
+- La parte de arriba (del 3 % al 40 % de la altura) es cielo limpio; el juego le pone nubes.
+- La imagen debe poder repetirse en horizontal: el borde izquierdo y el derecho encajan sin costura.
+
+ESTILO
+- Pixel art limpio, sin antialiasing, sin degradados suaves, sin desenfoque, sin texturas de ruido. Los degradados se hacen con tramado (dithering) ordenado.
+- Profundidad por planos: lo lejano son siluetas oscuras y planas, y lo cercano tiene más detalle y contraste.
+- Contorno oscuro en los objetos cercanos. Luz desde arriba a la izquierda.
+
+PALETA ESTRICTA (solo estos 8 colores):
+#0A0E0D negro, #1B2925 oscuro, #3B5247 medio, #7A9380 claro, #D4DEC8 brillo, #9C2E30 rojo (muy poco), #D6A248 oro (muy poco: antorchas, ventanas), #9FE05A verde espectral (muy poco: magia, fuegos fatuos).
+````
+
+**El Bosque**
+
+````
+ESCENARIO: un bosque siniestro de noche.
+- Cielo: oscuro con una luna llena pálida arriba a la izquierda y algunas estrellas.
+- Lejos: hileras de pinos y colinas en silueta oscura y plana, con la base envuelta en bruma.
+- Plano medio: troncos de árboles muertos, retorcidos y sin hojas, con ramas como garras, separados entre sí y repartidos para no tapar a los personajes.
+- Suelo: tierra oscura con raíces, piedras y matas de hierba.
+- Primer plano: helechos y raíces muy oscuros, casi negros, solo en los bordes inferiores izquierdo y derecho.
+- Detalles: unas pocas setas o luciérnagas en verde espectral.
+````
+
+**El Cementerio**
+
+````
+ESCENARIO: un cementerio abandonado de noche.
+- Cielo: oscuro con una luna creciente y estrellas.
+- Lejos: silueta de una iglesia en ruinas con campanario y cipreses altos, en el horizonte.
+- Plano medio: verja de hierro forjado rota, lápidas inclinadas, cruces de piedra, un ángel de piedra decapitado y algún árbol muerto, repartidos para no tapar a los personajes.
+- Suelo: tierra removida, losas rotas y hierba seca.
+- Primer plano: lápidas caídas y zarzas muy oscuras, solo en los bordes inferiores izquierdo y derecho.
+- Detalles: dos o tres fuegos fatuos en verde espectral.
+````
+
+**El Castillo**
+
+````
+ESCENARIO: el gran salón de un castillo en ruinas, en interiores (no hay cielo).
+- Fondo (en lugar de cielo): muro de sillares de piedra oscura con ventanales góticos altos por los que entra luz pálida de luna.
+- Lejos: arcos y columnas lejanas en penumbra.
+- Plano medio: columnas gruesas de piedra, estandartes rojos rasgados que cuelgan y antorchas en la pared con fuego dorado, repartidos para no tapar a los personajes.
+- Suelo: losas de piedra con grietas y una alfombra roja raída.
+- Primer plano: cascotes y trozos de columna caídos, muy oscuros, solo en los bordes inferiores izquierdo y derecho.
+- En este fondo la franja de arriba no tiene que estar vacía (no hay nubes).
+````
+
+### Mensajes 2 a 6: cada capa por separado (sobre la escena anterior)
+
+Envíalos uno a uno en la misma conversación, después de la escena completa.
+
+````
+Ahora, a partir de la escena que acabas de generar, dame SOLO la capa del CIELO (o del muro del fondo en el Castillo): cielo, luna y estrellas, sin nada delante. Debe ser opaca y ocupar toda la imagen; donde antes había objetos, continúa el cielo. Mismo tamaño, misma paleta y mismo estilo.
+````
+
+````
+Ahora dame SOLO la capa LEJANA de esa escena (siluetas del horizonte: colinas y pinos, la iglesia o los arcos lejanos), en su misma posición y tamaño, sobre fondo magenta puro #FF00FF. Todo lo demás es magenta. Debe repetirse en horizontal sin costura.
+````
+
+````
+Ahora dame SOLO la capa del PLANO MEDIO (árboles muertos, lápidas y verja, o columnas, estandartes y antorchas), en su misma posición y tamaño, sobre fondo magenta puro #FF00FF. Nada del suelo ni del cielo. Debe repetirse en horizontal sin costura.
+````
+
+````
+Ahora dame SOLO la capa del SUELO: la franja inferior desde el 80 % de la altura hasta abajo, sobre fondo magenta puro #FF00FF por encima. Debe repetirse en horizontal sin costura.
+````
+
+````
+Ahora dame SOLO la capa del PRIMER PLANO: los elementos muy oscuros de los bordes inferiores izquierdo y derecho, en su misma posición y tamaño, sobre fondo magenta puro #FF00FF. El centro queda vacío (magenta).
+````
+
+> Pásame por bioma las 6 imágenes (la escena y las 5 capas) con nombres como `bosque_escena.png`, `bosque_cielo.png`, `bosque_lejos.png`, `bosque_medio.png`, `bosque_suelo.png` y `bosque_frente.png`. Si alguna capa no cuadra con la escena, la recorto yo a partir de la escena completa.

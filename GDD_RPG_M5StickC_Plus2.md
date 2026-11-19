@@ -56,14 +56,15 @@ Landscape game with **dark medieval fantasy** pixel art and 8 colours per biome 
 | Title              | Start                                                                     | Sound on / off                     |
 | Biome intro        | Skip (after a short delay)                                                | —                                  |
 | Enemy walking in   | —                                                                         | —                                  |
-| Hero turn          | Tap: normal attack. Hold: charge the special (when ready, §4.3).          | Open the stats screen              |
-| Stats screen       | —                                                                         | Close                              |
+| Hero turn          | Tap: normal attack. Hold: charge the special (when ready, §4.3).          | Sound on / off                     |
 | Enemy turn         | —                                                                         | —                                  |
 | Gear reward        | Confirm the highlighted panel                                             | Switch panel (keep / equip)        |
 | Potion reward      | Confirm the highlighted panel                                             | Switch panel (restore / max HP)    |
 | Defeat             | Back to title                                                             | —                                  |
 
 An extra turn is a normal hero turn and is controlled the same way. While A is held, B does nothing.
+
+**B toggles sound at any moment** (title, combat, intros, pause, defeat) and shows a short “SONIDO SI / NO” notice; the only exception is the reward screens, where B switches panel.
 
 **PWR button** (any state): short press = pause / resume. Hold 2 s = power off. While paused, the screen dims after a few seconds of inactivity.
 
@@ -173,6 +174,8 @@ Caps are starting values. Stats above their cap have no extra effect; the stats 
 **Each item has at most 3 stats:** 1 primary and up to 2 secondaries, no repeats. Weapons mostly give offensive stats; armour and shield give defence plus secondary bonuses (crit, luck, extra turn or lifesteal). There is no inventory: every reward is either kept (replacing the current piece) or discarded.
 
 ## 5.2. Stats screen
+
+> Currently not reachable: B was reassigned to the sound toggle. The panel code is kept for a future entry point.
 
 During the hero’s turn, B opens a single **Atributos** (*Attributes*) panel: one row per attribute with its full name (Vida, Ataque, Defensa, Crítico, Poder crítico, Turno extra, Suerte, Vampirismo) and its value right-aligned; shown in gold with “max” when capped. Combat is paused; B goes back.
 
@@ -363,7 +366,7 @@ Stored in NVS: the record (enemies defeated) and the sound setting. The current 
 - Proportional damage, stat caps, gear recalculation.
 - Victory heal and one reward per fight (gear comparison with up to 3 stats, or potion choice).
 - 4 random regular enemies and 5 unique bosses every 10 encounters; 3 biomes with their own palettes and backgrounds.
-- Stats screen (B), pause (PWR), defeat screen with persistent record.
+- Sound toggle at any moment (B), pause (PWR), defeat screen with persistent record.
 
 # 10. Balance parameters
 

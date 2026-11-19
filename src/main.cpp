@@ -90,7 +90,8 @@ uint32_t record = 0;
 bool nuevoRecord = false;
 
 // UI y efectos.
-bool statsOpen = false, paused = false;
+bool paused = false;
+uint32_t soundToastMs = 0;  // millis() del último cambio de sonido
 uint32_t pausedAtMs = 0;
 bool aArmed = false, charging = false, inPerfect = false;
 uint32_t aPressMs = 0;
@@ -249,7 +250,6 @@ void onEnter(St s) {
     }
     case St::HERO_TURN:
       aArmed = charging = inPerfect = false;
-      statsOpen = false;
       break;
     case St::ENEMY_DIE:
       ++derrotados;
@@ -378,11 +378,6 @@ void resolveEnemyTurn() {
 // ------------------------------------------------------------------- update
 
 void updateTitle() {
-  if (M5.BtnB.wasPressed()) {
-    audio::setEnabled(!audio::enabled());
-    prefs.putBool("sound", audio::enabled());
-    audio::sfx(880, 60);
-  }
   if (M5.BtnA.wasPressed() && since(stT) > 300) {
     audio::sfx(660, 60, true);
     fadeTo(FadeAct::NEW_GAME);
@@ -408,15 +403,6 @@ void updateFade() {
 }
 
 void updateHeroTurn() {
-  // B abre/cierra las estadísticas; con A pulsado no hace nada (el ataque
-  // sale al soltar A).
-  if (!aArmed && M5.BtnB.wasPressed()) {
-    statsOpen = !statsOpen;
-    audio::sfx(770, 30);
-    return;
-  }
-  if (statsOpen) return;
-
   // Sin el especial disponible (§4.3), A ataca al pulsar.
   if (M5.BtnA.wasPressed() && !hero.especialListo()) {
     startHeroAttack(false, 1.0f, false);
@@ -784,7 +770,7 @@ const char* statLabel(Stat s) {
   }
 }
 
-void drawStatsPanel() {
+[[maybe_unused]] void drawStatsPanel() {
   c4.shade(0, 0, W, H, pal::NEGRO, 11);
   char buf[28];
   // Una sola placa: nombre del atributo a la izquierda, valor a la derecha.
@@ -1109,7 +1095,6 @@ void drawCombat(St view) {
   }
   if (view == St::HERO_TURN) {
     if (charging) drawChargeBar();
-    if (statsOpen) drawStatsPanel();
   }
   if (view == St::BOSS_INTRO) drawBossBanner();
   drawFloaters();
@@ -1135,6 +1120,10 @@ void render() {
     case St::GAME_OVER: drawGameOver(); break;
     default: drawCombat(view); break;
   }
+  // Aviso breve al cambiar el sonido (en el título ya lo indica su rótulo).
+  if (view != St::TITLE && soundToastMs && millis() - soundToastMs < 1000)
+    c4.label(audio::enabled() ? "SONIDO SI" : "SONIDO NO", W / 2, 24,
+             pal::BRILLO, pal::NEGRO, 1, 1, true);
   if (paused) {
     panel(70, 44, 169, 90);
     txt(B12, "Pausa", W / 2, 60, pal::ORO, middle_center, NONE);
@@ -1155,6 +1144,18 @@ void render() {
   if (sx || sy || wasShaking) M5.Display.fillScreen(TFT_BLACK);
   wasShaking = sx || sy;
   cv.pushSprite(sx, sy);
+}
+
+// B activa/desactiva el sonido en cualquier momento, salvo en el botín (donde
+// cambia de panel) y con A pulsado (cargando el especial).
+void handleSound() {
+  if (!M5.BtnB.wasPressed()) return;
+  if (!paused && (st == St::LOOT_ITEM || st == St::LOOT_POTION)) return;
+  if (aArmed) return;
+  audio::setEnabled(!audio::enabled());
+  prefs.putBool("sound", audio::enabled());
+  audio::sfx(880, 60);
+  soundToastMs = millis();
 }
 
 void handlePower() {
@@ -1210,6 +1211,7 @@ void loop() {
 
   M5.update();
   handlePower();
+  handleSound();
   audio::update();
   if (!paused) {
     gt += dt;
