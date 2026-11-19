@@ -819,7 +819,7 @@ void delta(int x, int y, int d) {
       c4.pset(x + 4 + j, up ? y - 2 + k : y + 2 - k, col);
   char num[12];
   std::snprintf(num, sizeof(num), "%d", up ? d : -d);
-  txt(S9, num, x + 11, y, col, middle_left, NONE);
+  c4.label(num, x + 11, y - 3, col, pal::NEGRO);
 }
 
 // Marco de una placa seleccionable: oro doble con esquinas que laten, o
@@ -859,23 +859,24 @@ void lootColumn(const Item& it, const Item* other, int x0, int x1,
   for (int x = x0 + 6; x < x1 - 5; ++x)
     if (x % 2) c4.pset(x, 43, pal::MEDIO);
 
-  int step = n > 5 ? 11 : 12;
+  // Lista en fuente pixel (nítida a tamaño pequeño) con interlineado amplio.
+  int step = n > 5 ? 12 : 14;
   for (int i = 0; i < n; ++i) {
     Stat s = list[i];
-    int y = 54 + i * step;
+    int y = 50 + i * step;  // parte superior del texto (7 px de alto)
     int v = it.present ? it.get(s) : 0;
-    int vx = isNew ? x1 - 36 : x1 - 8;
-    txt(S9, statName(s), x0 + 8, y, pal::CLARO, middle_left, NONE);
+    int vx = isNew ? x1 - 34 : x1 - 9;
+    c4.label(statName(s), x0 + 9, y, pal::CLARO, pal::NEGRO);
     if (v) {
       std::snprintf(buf, sizeof(buf), "%+d%s", v, statIsPercent(s) ? "%" : "");
-      txt(S9, buf, vx, y, pal::BRILLO, middle_right, NONE);
+      c4.label(buf, vx, y, pal::BRILLO, pal::NEGRO, 2);
     } else {
-      txt(S9, "--", vx, y, pal::MEDIO, middle_right, NONE);
+      c4.label("--", vx, y, pal::MEDIO, pal::NEGRO, 2);
     }
     if (isNew) {
       int a = other && other->present ? other->get(s) : 0;
       int d = v - a;
-      if (d) delta(x1 - 32, y, d);
+      if (d) delta(x1 - 29, y + 3, d);
     }
   }
 
