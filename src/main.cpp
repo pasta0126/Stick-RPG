@@ -401,14 +401,17 @@ void updateFade() {
 }
 
 void updateHeroTurn() {
-  // B durante la carga la cancela sin atacar: las runas se conservan.
-  if (charging && M5.BtnB.wasPressed()) {
+  // B con A pulsado (cargando o a punto de cargar) cancela sin atacar: las
+  // runas se conservan y el turno sigue siendo del héroe.
+  if (aArmed && M5.BtnB.wasPressed()) {
     aArmed = charging = inPerfect = false;
-    audio::sfx(260, 80);
+    audio::sfx(260, 80, true);
+    floatText("CANCELADO", pal::CLARO, HERO_FX, FEET_Y - 82);
     return;
   }
-  if (!charging && M5.BtnB.wasPressed()) {
+  if (M5.BtnB.wasPressed()) {
     statsOpen = !statsOpen;
+    aArmed = charging = false;
     audio::sfx(770, 30);
     return;
   }
@@ -423,6 +426,7 @@ void updateHeroTurn() {
     aArmed = true;
     aPressMs = millis();
     charging = inPerfect = false;
+    return;
   }
   if (!aArmed) return;
   uint32_t held = millis() - aPressMs;
@@ -435,15 +439,16 @@ void updateHeroTurn() {
       if (perf && !inPerfect) audio::sfx(1760, 40);
       inPerfect = perf;
     }
-  } else {
-    // Solo se lanza el especial (y se gastan las runas) con una carga real;
-    // una pulsación que apenas pasa del umbral es un ataque normal.
-    bool charged = held > bal::T_UMBRAL_MS + bal::T_CARGA_MIN_MS;
-    float f = chargeFill(held);
-    aArmed = charging = false;
-    startHeroAttack(charged, charged ? chargeMultiplier(f) : 1.0f,
-                    charged && chargeIsPerfect(f));
+    return;
   }
+  // A se ha soltado con el ataque preparado.
+  // Solo se lanza el especial (y se gastan las runas) con una carga real;
+  // una pulsación que apenas pasa del umbral es un ataque normal.
+  bool charged = held > bal::T_UMBRAL_MS + bal::T_CARGA_MIN_MS;
+  float f = chargeFill(held);
+  aArmed = charging = false;
+  startHeroAttack(charged, charged ? chargeMultiplier(f) : 1.0f,
+                  charged && chargeIsPerfect(f));
 }
 
 void updateLoot(bool potion) {
