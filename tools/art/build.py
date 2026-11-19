@@ -5,6 +5,7 @@
                                           y exporta src/gfx/*.h
   python3 tools/art/build.py --only-c   → solo cabeceras de fuente/paletas/tablas
   python3 tools/art/build.py --enemies  → solo enemigos (importa assets/ai/)
+  python3 tools/art/build.py --bg       → solo fondos (assets/ai/bg_<bioma>.png, 5 franjas)
   python3 tools/art/build.py --title    → solo título (assets/ai/titulo_logo.png + titulo_fondo.png)
   python3 tools/art/build.py --hero     → solo héroe (assets/ai/heroe.png + heroe_mapa.png)
 
@@ -68,9 +69,18 @@ def build_sprites():
     build_hero()
     build_enemies()
     build_title()
+    build_backgrounds()
+
+
+def build_backgrounds():
+    """Fondos: capas importadas de assets/ai/bg_<bioma>.png si existen (la
+    niebla sigue siendo procedural); si no, las de bg.py."""
     print("Fondos…")
     for b in BIOME_ORDER:
         layers = bg.BUILDERS[b]()
+        imp = import_ai.load_biome_bg(b, bg.W, bg.H)
+        if imp:
+            layers.update(imp)
         assemble("bg_" + b, bg.W, bg.H, [(n, [layers[n]]) for n in bg.ORDER], [])
 
 
@@ -231,7 +241,9 @@ static const EnemyArt kEnemyArt[] = {{
 
 
 if __name__ == "__main__":
-    if {"--enemies", "--hero", "--title"} & set(sys.argv):
+    if {"--enemies", "--hero", "--title", "--bg"} & set(sys.argv):
+        if "--bg" in sys.argv:
+            build_backgrounds()
         if "--title" in sys.argv:
             build_title()
         if "--hero" in sys.argv:

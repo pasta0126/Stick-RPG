@@ -183,6 +183,10 @@ Use these exact names, listed back to front:
 
 The characters are drawn between `suelo` and `frente`.
 
+### AI-generated backgrounds
+
+`assets/ai/bg_<biome>.png` holds one portrait image per biome with the five layers stacked as horizontal bands (sky, far, middle, ground, foreground; magenta behind the cut-out ones). `python3 tools/art/build.py --bg` splits the bands, scales them to 240 px wide, places each layer at its row (`BG_PLACE` in `tools/art/import_ai.py`) and keeps the procedural mist. Run `make sprites` afterwards.
+
 ### Background tips
 
 - The game draws **procedural clouds** over the sky in outdoor biomes. Leave the upper sky (y ≈ 4–56) fairly clean; a moon or stars are fine.

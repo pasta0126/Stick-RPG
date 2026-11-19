@@ -479,3 +479,104 @@ def load_title_bg(W=240, H=135):
             t = min(1.0, max(0.0, (t - 0.3) / 0.4))
             L.px[y][x] = NEUTRAL[k + 1] if t * 16 > BAYER4[y % 4][x % 4] + 0.5 else NEUTRAL[k]
     return L
+
+
+# ------------------------------------------------------------------- fondos
+# Una imagen vertical por bioma con 5 franjas apiladas: cielo, lejos, medio,
+# suelo y frente. Las franjas empiezan donde arranca una fila toda magenta
+# (o en una línea oscura de separación).
+BG_BANDS = ["cielo", "lejos", "medio", "suelo", "frente"]
+# Colocación en pantalla (240×135): fila donde cae el borde inferior del
+# contenido ("bottom") o el superior ("top").
+BG_PLACE = {
+    "lejos": ("bottom", 104),   # el pie lo tapa el suelo
+    "medio": ("bottom", 113),   # raíces y pies de columna sobre el suelo
+    "suelo": ("top", 106),
+    "frente": ("top", 101),     # casi todo queda bajo el HUD (y ≥ 112)
+}
+
+
+def classify_bg(r, g, b):
+    """Como classify, pero la hierba verde no cuenta como brillo mágico:
+    solo los verdes muy luminosos (fuegos fatuos, luciérnagas)."""
+    c = classify(r, g, b)
+    if c == ESPECTRAL and g < 185:
+        lum = 0.3 * r + 0.59 * g + 0.11 * b
+        c = min(NEUTRAL, key=lambda i: abs(lum - (0.3 * PAL[i][0] + 0.59 * PAL[i][1] + 0.11 * PAL[i][2])))
+    return c
+
+
+def _band_rows(p, w, h):
+    """Inicio de cada franja: filas donde empieza una racha toda magenta."""
+    full = [sum(is_bg(*p[x, y]) for x in range(0, w, 4)) / (w / 4) > 0.97
+            for y in range(h)]
+    starts = [0]
+    for y in range(1, h):
+        if full[y] and not full[y - 1] and y - starts[-1] > h // 20:
+            starts.append(y)
+    assert len(starts) == 5, f"{len(starts)} franjas en vez de 5"
+    return starts + [h]
+
+
+def _quant_dither(px_avg, x, y):
+    """Neutro tramado (Bayer 4×4) entre los dos tonos vecinos."""
+    r, g, b = px_avg
+    lums = [0.3 * pr + 0.59 * pg + 0.11 * pb for pr, pg, pb in (PAL[i] for i in NEUTRAL)]
+    lum = 0.3 * r + 0.59 * g + 0.11 * b
+    k = 0
+    while k < len(lums) - 2 and lum > lums[k + 1]:
+        k += 1
+    t = min(1.0, max(0.0, (lum - lums[k]) / (lums[k + 1] - lums[k])))
+    t = min(1.0, max(0.0, (t - 0.3) / 0.4))
+    return NEUTRAL[k + 1] if t * 16 > BAYER4[y % 4][x % 4] + 0.5 else NEUTRAL[k]
+
+
+def load_biome_bg(biome, W=240, H=135):
+    """{capa: Layer} para cielo, lejos, medio, suelo y frente, o None."""
+    path = os.path.join(SRC, f"bg_{biome}.png")
+    if not os.path.exists(path):
+        return None
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    p = im.load()
+    rows = _band_rows(p, w, h)
+    s = W / w
+    out = {}
+    for i, name in enumerate(BG_BANDS):
+        y0, y1 = rows[i], rows[i + 1]
+        band = im.crop((0, y0, w, y1))
+        L = Layer(W, H)
+        if name == "cielo":
+            avg = band.resize((W, H), Image.BOX).load()
+            sharp = band.resize((W, H), Image.NEAREST).load()
+            for y in range(H):
+                for x in range(W):
+                    c = classify_bg(*sharp[x, y])
+                    L.px[y][x] = c if c in (SANGRE, ORO, ESPECTRAL) else _quant_dither(avg[x, y], x, y)
+            out[name] = L
+            continue
+        bp = band.load()
+        bw, bh = band.size
+        idx = [[KEY if is_bg(*bp[x, y]) else classify_bg(*bp[x, y]) for x in range(bw)]
+               for y in range(bh)]
+        px, fw, fh = downscale(idx, bw, bh, s)
+        ys = [y for y in range(fh) if any(c != KEY for c in px[y])]
+        top, bot = min(ys), max(ys)
+        mode, row = BG_PLACE[name]
+        oy = row - bot if mode == "bottom" else row - top
+        for y in range(top, bot + 1):
+            sy = oy + y
+            if 0 <= sy < H:
+                for x in range(min(fw, W)):
+                    if px[y][x] != KEY:
+                        L.px[sy][x] = px[y][x]
+        if name == "suelo":  # opaco hasta abajo
+            for x in range(W):
+                last = NEGRO
+                for y in range(H):
+                    if L.px[y][x] != KEY:
+                        last = L.px[y][x]
+                    elif y > row + 4:
+                        L.px[y][x] = last if last in (NEGRO, OSCURO) else OSCURO
+        out[name] = L
+    return out
