@@ -1,4 +1,4 @@
-"""Importa las tiras de sprites generadas con IA (stick_rpg_sprites/).
+"""Importa las tiras de sprites generadas con IA (assets/ai/).
 
 Cada tira tiene 8 fotogramas en fila, mirando a la izquierda, sobre magenta.
 Para cada una:
@@ -20,7 +20,7 @@ from palettes import (BIOMAS, BRILLO, CLARO, ESPECTRAL, KEY, MEDIO, NEGRO,
 from raster import Layer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.abspath(os.path.join(HERE, "..", "..", "stick_rpg_sprites"))
+SRC = os.path.abspath(os.path.join(HERE, "..", "..", "assets", "ai"))
 
 # nombre del juego → (archivo, altura del fotograma de reposo en px)
 SOURCES = {
@@ -90,6 +90,13 @@ def segments(mask, w, h, n):
         k = gaps.index(min(gaps))
         segs[k] = [segs[k][0], segs[k + 1][1]]
         del segs[k + 1]
+    # dos fotogramas que se tocan: corta el más ancho por su columna más vacía
+    while len(segs) < n:
+        k = max(range(len(segs)), key=lambda i: segs[i][1] - segs[i][0])
+        a, b = segs[k]
+        m = (b - a) // 5
+        cut = min(range(a + m, b - m), key=lambda x: sum(mask[y][x] for y in range(h)))
+        segs[k:k + 1] = [[a, cut], [cut, b]]
     assert len(segs) == n, f"{len(segs)} fotogramas en vez de {n}"
     return segs
 
@@ -200,3 +207,213 @@ def load(name):
     if not os.path.exists(os.path.join(SRC, fname)):
         return None
     return Imported(name, fname, th)
+
+
+# -------------------------------------------------------------------- héroe
+# Tira de 7 fotogramas mirando a la derecha + mapa de piezas con la misma
+# silueta, un color plano por capa.
+HERO_FILE, HERO_MAP, HERO_H = "heroe.png", "heroe_mapa.png", 66
+HERO_LAYERS = ["cuerpo", "botas", "pechera", "casco", "escudo", "brazo"]
+MAP_COLORS = {
+    (128, 128, 128): "cuerpo", (0, 255, 255): "botas", (255, 255, 0): "pechera",
+    (0, 0, 255): "casco", (255, 128, 0): "escudo", (0, 255, 0): "brazo",
+}
+
+
+def map_label(r, g, b):
+    if is_bg(r, g, b):
+        return None
+    best, bd = None, 120
+    for (cr, cg, cb), n in MAP_COLORS.items():
+        d = abs(r - cr) + abs(g - cg) + abs(b - cb)
+        if d < bd:
+            best, bd = HERO_LAYERS.index(n), d
+    return best
+
+
+def fill_labels(lab, mask, w, h):
+    """Píxeles del personaje sin etiqueta (contornos que el mapa no tiene):
+    toman la etiqueta más cercana (BFS)."""
+    from collections import deque
+    q = deque((x, y) for y in range(h) for x in range(w) if lab[y][x] is not None)
+    while q:
+        x, y = q.popleft()
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < w and 0 <= ny < h and mask[ny][nx] and lab[ny][nx] is None:
+                lab[ny][nx] = lab[y][x]
+                q.append((nx, ny))
+
+
+def behind_shield(layers, W, H):
+    """Rellena en `cuerpo` la parte del torso que tapa el escudo, para que no
+    quede un agujero cuando no hay escudo: prolonga hacia la derecha el color
+    del cuerpo un tercio del ancho del escudo en cada fila."""
+    cu, es = layers["cuerpo"], layers["escudo"]
+    others = [layers[n] for n in HERO_LAYERS if n != "escudo"]
+    for y in range(H):
+        xs = [x for x in range(W) if es.px[y][x] != KEY]
+        if not xs:
+            continue
+        x0, x1 = min(xs), max(xs)
+        # color del cuerpo justo a la izquierda (saltando el contorno)
+        src = None
+        for x in range(x0 - 1, max(-1, x0 - 6), -1):
+            v = next((L.px[y][x] for L in others if L.px[y][x] != KEY), KEY)
+            if v == KEY:
+                break
+            if v != NEGRO:
+                src = v
+                break
+        if src is None:
+            continue
+        end = x0 + max(1, (x1 - x0 + 1) // 3)
+        for x in range(x0, end):
+            if es.px[y][x] != KEY and all(L.px[y][x] == KEY for L in others):
+                cu.px[y][x] = src
+        if end < W and es.px[y][end] != KEY and all(L.px[y][end] == KEY for L in others):
+            cu.px[y][end] = NEGRO
+
+
+class ImportedHero:
+    def __init__(self):
+        im = Image.open(os.path.join(SRC, HERO_FILE)).convert("RGB")
+        mp = Image.open(os.path.join(SRC, HERO_MAP)).convert("RGB")
+        if mp.size != im.size:
+            mp = mp.resize(im.size, Image.NEAREST)
+        w, h = im.size
+        p, q = im.load(), mp.load()
+        idx = [[KEY if is_bg(*p[x, y]) else classify(*p[x, y]) for x in range(w)]
+               for y in range(h)]
+        mask = [[c != KEY for c in row] for row in idx]
+        lab = [[map_label(*q[x, y]) if mask[y][x] else None for x in range(w)]
+               for y in range(h)]
+        fill_labels(lab, mask, w, h)
+        n = len(HERO_LAYERS)
+        # índice combinado: capa * 16 + color, para reducir ambos a la vez
+        comb = [[KEY if idx[y][x] == KEY else (lab[y][x] or 0) * 16 + idx[y][x]
+                 for x in range(w)] for y in range(h)]
+        segs = segments(mask, w, h, 7)
+        ground = max(y for y in range(h) if any(mask[y]))
+        x0, x1 = segs[0]
+        top = min(y for y in range(h) if any(mask[y][x0:x1]))
+        s = HERO_H / (ground - top + 1)
+
+        for x0, x1 in segs:
+            drop_specks(comb, mask, x0, x1, h)
+        cels = []
+        for x0, x1 in segs:
+            top = min(y for y in range(h) if any(mask[y][x0:x1]))
+            sub = [row[x0:x1] for row in comb[top:ground + 1]]
+            px, fw, fh = downscale_comb(sub, x1 - x0, ground + 1 - top, s)
+            # pies: mediana de las botas en la franja inferior
+            xs = sorted(x for y in range(fh - max(3, fh // 10), fh)
+                        for x in range(fw) if px[y][x] != KEY
+                        and px[y][x] // 16 == HERO_LAYERS.index("botas"))
+            fx = xs[len(xs) // 2] if xs else fw // 2
+            cels.append((px, fw, fh, fx))
+
+        left = max(fx for _, _, _, fx in cels)
+        right = max(fw - fx for _, fw, _, fx in cels)
+        W = left + right + 2
+        W += W % 2
+        H = max(fh for _, _, fh, _ in cels) + 1
+        ax = left + 1
+        self.W, self.H, self.ANCHOR = W, H, (ax, H - 1)
+        self.layers = {name: [] for name in HERO_LAYERS}
+        for px, fw, fh, fx in cels:
+            comp = [[KEY] * W for _ in range(H)]
+            lay = [[0] * W for _ in range(H)]
+            ox, oy = ax - fx, H - fh
+            for y in range(fh):
+                for x in range(fw):
+                    v = px[y][x]
+                    if v != KEY:
+                        comp[oy + y][ox + x] = v % 16
+                        lay[oy + y][ox + x] = v // 16
+            before = [row[:] for row in comp]
+            clean(comp, W, H)
+            # los píxeles nuevos del contorno toman la capa de un vecino
+            for y in range(H):
+                for x in range(W):
+                    if comp[y][x] != KEY and before[y][x] == KEY:
+                        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                            nx, ny = x + dx, y + dy
+                            if 0 <= nx < W and 0 <= ny < H and before[ny][nx] != KEY:
+                                lay[y][x] = lay[ny][nx]
+                                break
+            frame = {}
+            for li, name in enumerate(HERO_LAYERS):
+                L = Layer(W, H)
+                for y in range(H):
+                    for x in range(W):
+                        if comp[y][x] != KEY and lay[y][x] == li:
+                            L.px[y][x] = comp[y][x]
+                frame[name] = L
+            behind_shield(frame, W, H)
+            for name in HERO_LAYERS:
+                self.layers[name].append(frame[name])
+
+
+def drop_specks(comb, mask, x0, x1, h):
+    """Borra los trozos sueltos (p. ej. la punta de la espada del fotograma
+    vecino) dejando solo la pieza conectada más grande."""
+    from collections import deque
+    seen = set()
+    comps = []
+    for y in range(h):
+        for x in range(x0, x1):
+            if mask[y][x] and (x, y) not in seen:
+                comp, q = [], deque([(x, y)])
+                seen.add((x, y))
+                while q:
+                    cx, cy = q.popleft()
+                    comp.append((cx, cy))
+                    for dx in (-1, 0, 1):
+                        for dy in (-1, 0, 1):
+                            nx, ny = cx + dx, cy + dy
+                            if x0 <= nx < x1 and 0 <= ny < h and mask[ny][nx] \
+                                    and (nx, ny) not in seen:
+                                seen.add((nx, ny))
+                                q.append((nx, ny))
+                comps.append(comp)
+    comps.sort(key=len)
+    for comp in comps[:-1]:
+        for x, y in comp:
+            mask[y][x] = False
+            comb[y][x] = KEY
+
+
+def downscale_comb(idx, w, h, s):
+    """Como downscale, pero con valores capa*16+color: vota la capa y luego el
+    color dentro de esa capa."""
+    nw, nh = max(1, round(w * s)), max(1, round(h * s))
+    out = [[KEY] * nw for _ in range(nh)]
+    for ty in range(nh):
+        y0, y1 = int(ty / s), max(int(ty / s) + 1, int((ty + 1) / s))
+        for tx in range(nw):
+            x0, x1 = int(tx / s), max(int(tx / s) + 1, int((tx + 1) / s))
+            votes, total, bg = {}, 0, 0
+            for y in range(y0, min(y1, h)):
+                for x in range(x0, min(x1, w)):
+                    v = idx[y][x]
+                    total += 1
+                    if v == KEY:
+                        bg += 1
+                    else:
+                        votes[v] = votes.get(v, 0) + 1
+            if not votes or bg * 2 > total:
+                continue
+            layer_votes = {}
+            for v, c in votes.items():
+                layer_votes[v // 16] = layer_votes.get(v // 16, 0) + c
+            li = max(layer_votes, key=layer_votes.get)
+            cand = {v: c for v, c in votes.items() if v // 16 == li}
+            out[ty][tx] = max(cand, key=lambda v: cand[v] + (0.6 if v % 16 == NEGRO else 0))
+    return out, nw, nh
+
+
+def load_hero():
+    if not all(os.path.exists(os.path.join(SRC, f)) for f in (HERO_FILE, HERO_MAP)):
+        return None
+    return ImportedHero()

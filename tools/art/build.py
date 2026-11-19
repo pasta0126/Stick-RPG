@@ -4,7 +4,8 @@
                                           (SOBRESCRIBE los retoques a mano),
                                           y exporta src/gfx/*.h
   python3 tools/art/build.py --only-c   → solo cabeceras de fuente/paletas/tablas
-  python3 tools/art/build.py --enemies  → solo enemigos (importa stick_rpg_sprites/)
+  python3 tools/art/build.py --enemies  → solo enemigos (importa assets/ai/)
+  python3 tools/art/build.py --hero     → solo héroe (assets/ai/heroe.png + heroe_mapa.png)
 
 Después, `make sprites` exporta los .aseprite a C (también tras editarlos a mano).
 """
@@ -63,10 +64,7 @@ def assemble(name, w, h, layers, tags):
 
 def build_sprites():
     os.makedirs(ASSETS, exist_ok=True)
-    print("Héroe…")
-    hl = hero.build()
-    assemble("heroe", hero.W, hero.H, [(n, hl[n]) for n in hero.LAYERS],
-             hero.TAGS)
+    build_hero()
     build_enemies()
     print("Título…")
     assemble("titulo", title.W, title.H, [("logo", [title.build()])], [])
@@ -74,6 +72,26 @@ def build_sprites():
     for b in BIOME_ORDER:
         layers = bg.BUILDERS[b]()
         assemble("bg_" + b, bg.W, bg.H, [(n, [layers[n]]) for n in bg.ORDER], [])
+
+
+_hero = []
+
+
+def HERO():
+    """(W, H, ANCHOR, {capa: frames}): importado de assets/ai si existe."""
+    if not _hero:
+        imp = import_ai.load_hero()
+        if imp:
+            _hero.append((imp.W, imp.H, imp.ANCHOR, imp.layers))
+        else:
+            _hero.append((hero.W, hero.H, hero.ANCHOR, hero.build()))
+    return _hero[0]
+
+
+def build_hero():
+    print("Héroe…")
+    w, h, _, hl = HERO()
+    assemble("heroe", w, h, [(n, hl[n]) for n in hero.LAYERS], hero.TAGS)
 
 
 def enemy_art():
@@ -184,7 +202,7 @@ static const Sheet* const kBiomeBg[NUM_BIOMAS] = {{
 static const int16_t kParallax[{len(bg.ORDER)}] = {{{par}}};
 constexpr int BG_LAYER_PERSONAJES = {bg.ORDER.index("frente")};  // se dibujan antes de esta capa
 
-constexpr int HERO_AX = {hero.ANCHOR[0]}, HERO_AY = {hero.ANCHOR[1]};
+constexpr int HERO_AX = {HERO()[2][0]}, HERO_AY = {HERO()[2][1]};
 
 struct EnemyArt {{
   const Sheet* sheet;
@@ -203,8 +221,11 @@ static const EnemyArt kEnemyArt[] = {{
 
 
 if __name__ == "__main__":
-    if "--enemies" in sys.argv:
-        build_enemies()
+    if "--enemies" in sys.argv or "--hero" in sys.argv:
+        if "--hero" in sys.argv:
+            build_hero()
+        if "--enemies" in sys.argv:
+            build_enemies()
     elif "--only-c" not in sys.argv:
         build_sprites()
     print("Cabeceras…")

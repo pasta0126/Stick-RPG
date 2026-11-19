@@ -74,9 +74,9 @@ The files have 16 entries in index order: 0–7 are the real colours, 8–14 are
 | Property     | Value                                                              |
 |--------------|--------------------------------------------------------------------|
 | File         | `assets/sprites/heroe.aseprite`                                    |
-| Canvas       | **80 × 72 px**                                                     |
+| Canvas       | **70 × 90 px**                                                     |
 | Facing       | **Right**                                                          |
-| Anchor       | Feet at **(30, 71)**: the bottom row, x = 30                       |
+| Anchor       | Feet at **(26, 89)**: the bottom row, x = 26                       |
 | Mode         | Indexed, Forest palette, transparent index **15**                  |
 
 ### Layers
@@ -148,7 +148,9 @@ The anchor is the feet position inside the canvas, in the left-facing file. Keep
 
 ### AI-generated strips
 
-The current enemies come from the strips in `stick_rpg_sprites/` (8 frames in a row, facing left, magenta background). `python3 tools/art/build.py --enemies` imports them with `tools/art/import_ai.py`: it splits the frames, maps every pixel to the 8 palette roles, scales to the height set in `SOURCES`, aligns the frames by the torso, closes the black outline and recomputes canvas and anchor. To replace an enemy, drop a new strip there with the same name and run that command, then `make sprites`.
+The current enemies come from the strips in `assets/ai/` (8 frames in a row, facing left, magenta background). `python3 tools/art/build.py --enemies` imports them with `tools/art/import_ai.py`: it splits the frames, maps every pixel to the 8 palette roles, scales to the height set in `SOURCES`, aligns the frames by the torso, closes the black outline and recomputes canvas and anchor. To replace an enemy, drop a new strip there with the same name and run that command, then `make sprites`.
+
+The hero comes from `assets/ai/heroe.png` (7 frames facing right) and `assets/ai/heroe_mapa.png` (same silhouette, one flat colour per layer: helmet blue, chestplate yellow, boots cyan, shield orange, sword arm green, body grey). `python3 tools/art/build.py --hero` splits it into the six layers and fills the torso behind the shield so the hero looks right without one.
 
 ### Screen placement
 

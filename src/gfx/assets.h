@@ -33,7 +33,7 @@ static const Sheet* const kBiomeBg[NUM_BIOMAS] = {
 static const int16_t kParallax[6] = {0, 17, 29, 53, 89, 131};
 constexpr int BG_LAYER_PERSONAJES = 5;  // se dibujan antes de esta capa
 
-constexpr int HERO_AX = 30, HERO_AY = 71;
+constexpr int HERO_AX = 26, HERO_AY = 89;
 
 struct EnemyArt {
   const Sheet* sheet;
