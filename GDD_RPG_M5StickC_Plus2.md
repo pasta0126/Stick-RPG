@@ -283,7 +283,7 @@ El bioma cambia **después de cada jefe**: encuentros 1–10 Bosque, 11–20 Cem
 ## 8.1. Lenguaje visual
 
 - 8 colores por bioma, con el mismo papel en todos. Mantener el contraste del texto y el HUD.
-- Interfaz tematizada: placas de hierro con remaches dorados, barras segmentadas, número de encuentro en **números romanos**, runas del especial, títulos en serif (FreeSerifBold) y textos en una fuente pixel propia de 5×7.
+- Interfaz tematizada, abajo para dejar el cielo libre a los jefes: placas de hierro con remaches dorados, barras segmentadas, número de encuentro en **números romanos**, runas del especial, títulos en serif (FreeSerifBold) y textos en una fuente pixel propia de 5×7.
 - Sprites y animaciones pequeños pero reconocibles a 240 × 135 píxeles.
 - La información crítica (vidas, selección, carga, crítico, fallo y turno extra) debe leerse en segundos.
 - En combate no hay desplazamiento ni selección compleja: el juego espera la pulsación o la liberación de A.
@@ -306,9 +306,32 @@ Cada índice tiene un papel fijo; el bioma solo cambia el tono. Los sprites y fo
 
 Los índices 8–15 no se usan; el 15 es la transparencia de los sprites.
 
-## 8.3. Sonido
+## 8.3. Sonido y música
 
-Pitidos cortos con el zumbador para: golpe, fallo, crítico, turno extra, entrada en la zona perfecta de la carga, aviso de golpe fuerte, victoria, botín y Game Over. Se puede silenciar desde Start (B) y el ajuste se guarda.
+Zumbador integrado, con secuenciador de notas que no bloquea el juego.
+
+| **Momento**        | **Sonido**                                                    |
+|--------------------|---------------------------------------------------------------|
+| Pantalla de inicio | Jingle corto: fanfarria en La menor (~1,6 s)                  |
+| Aparece un jefe    | Micro jingle: tritono amenazante (~0,9 s) y temblor           |
+| Nuevo bioma        | Arpegio ascendente con el título del capítulo                 |
+| Victoria           | Arpegio breve mientras el enemigo se desvanece                |
+| Derrota            | Melodía descendente                                           |
+| Combate            | Golpe, fallo, crítico, turno extra, carga, zona perfecta, pasos del enemigo, aviso de golpe fuerte |
+
+Se puede silenciar desde el inicio (B); el ajuste se guarda.
+
+## 8.6. Efectos y animación
+
+- **Respiración**: héroe y enemigos alternan dos frames en reposo; los fantasmas (Dama Espectral, Rey Liche) flotan.
+- **Entrada**: cada enemigo entra caminando desde la derecha y frena al llegar.
+- **Golpes**: el héroe tarda ~180 ms en descargar el tajo; el golpeado retrocede y parpadea en blanco.
+- **Temblor de pantalla**: fuerte al recibir un crítico, medio con golpe fuerte, crítico propio o carga perfecta; leve en golpes normales.
+- **Destello**: la carga perfecta aclara toda la paleta un instante.
+- **Muerte**: el enemigo se disuelve con trama.
+- **Fundidos** de paleta entre encuentros; al cambiar de bioma, cartela «CAPÍTULO II · El Cementerio».
+- **Jefes**: banda negra con su nombre en oro.
+- **Carga del especial**: la espada se alza con chispas espectrales y la barra aparece sobre el héroe.
 
 ## 8.4. Ritmo de los textos de combate
 
@@ -414,8 +437,8 @@ El equipo usa los tonos Medio, Claro y Brillo. Según la rareza, el Claro pasa a
 
 ## 11.5. Estado
 
-- Hecho (propuesta): héroe, Salteador, fondo del bosque, interfaz de combate.
-- Pendiente: Golem, Huargo, Troll, los 5 jefes, fondos de cementerio y castillo, resto de pantallas (botín, inicio, Game Over) y la integración en el firmware.
+- Hecho: héroe, 4 enemigos, 5 jefes, fondos de los 3 biomas, interfaz completa (combate, botín, poción, estadísticas, inicio, capítulo, jefe, pausa, derrota) e integración en el firmware.
+- Siguiente: probar en el dispositivo y pulir.
 
 # 12. Estructura técnica
 

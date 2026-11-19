@@ -6,7 +6,7 @@ CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra
 CORE     := $(wildcard src/core/*.cpp)
 HDRS     := $(wildcard src/core/*.h)
 
-.PHONY: all sim test clean sprites gen-heroe
+.PHONY: all sim test clean sprites art
 
 ASEPRITE ?= /Applications/Aseprite.app/Contents/MacOS/aseprite
 SPRITES  := $(wildcard assets/sprites/*.aseprite)
@@ -38,7 +38,8 @@ src/gfx/%_gfx.h: assets/sprites/%.aseprite tools/sprites/export_c.lua
 	$(ASEPRITE) -b $< --script-param out=$@ --script-param name=$* \
 		--script tools/sprites/export_c.lua
 
-# Regenera el héroe desde el script (SOBRESCRIBE los cambios hechos a mano).
-gen-heroe:
-	$(ASEPRITE) -b --script-param out=assets/sprites/heroe.aseprite \
-		--script tools/sprites/gen_heroe.lua
+# Regenera TODO el arte desde tools/art (SOBRESCRIBE los retoques a mano en
+# assets/sprites/*.aseprite) y lo exporta a C.
+art:
+	ASEPRITE=$(ASEPRITE) python3 tools/art/build.py
+	$(MAKE) sprites

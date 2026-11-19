@@ -89,12 +89,11 @@ def roman(n):
     return out
 
 
-def render(bioma="bosque", nivel=7, msg="CRITICO!", charging=0.7):
+def render(bioma="bosque", nivel=7, msg="CRITICO!", charging=0.7, enemy=None):
     pal = BIOMAS[bioma]
     S = Screen(240, 135)
-    layers = bg.build_bosque()
-    offs = dict(cielo=0, lejos=nivel * 37, medio=nivel * 83, suelo=nivel * 131,
-                frente=nivel * 151, niebla=nivel * 19)
+    layers = bg.BUILDERS[bioma]()
+    offs = {k: v * nivel for k, v in bg.PARALLAX.items()}
     for name in bg.ORDER:
         L = layers[name]
         for y in range(L.h):
@@ -108,7 +107,7 @@ def render(bioma="bosque", nivel=7, msg="CRITICO!", charging=0.7):
             for lname in hero.LAYERS:
                 fr = hl[lname][0]
                 S.blit(fr, 50 - hero.ANCHOR[0], 113 - hero.ANCHOR[1])
-            e = enemies.Salteador
+            e = enemy or enemies.Salteador
             fr = enemies.build(e)[2]
             S.blit(fr, 186 - (e.W - 1 - e.ANCHOR[0]), 113 - e.ANCHOR[1])
 
@@ -124,7 +123,7 @@ def render(bioma="bosque", nivel=7, msg="CRITICO!", charging=0.7):
 
     S.panel(147, 1, 238, 21)
     S.icon(SKULL, 228, 5, {"#": NEGRO, "c": CLARO})
-    S.text("SALTEADOR", 224, 5, BRILLO, align="right")
+    S.text((enemy or enemies.Salteador).name.replace("_", " ").upper(), 224, 5, BRILLO, align="right")
     S.bar(150, 14, 86, 5, 0.45, SANGRE)
 
     S.panel(102, 1, 137, 13)

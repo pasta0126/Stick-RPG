@@ -112,3 +112,36 @@ BAYER4 = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
 def dither(x, y, t):
     """True si en (x, y) toca el segundo color para una mezcla t ∈ [0, 1]."""
     return BAYER4[y % 4][x % 4] < t * 16
+
+
+# ------------------------------------------------------------- atajos
+def poly(L, pts, ramp, **kw):
+    return L.part(lambda d: d.polygon([tuple(p) for p in pts], fill=1), ramp, **kw)
+
+
+def ellipse(L, cx, cy, rx, ry, ramp, **kw):
+    return L.part(lambda d: d.ellipse([cx - rx, cy - ry, cx + rx, cy + ry],
+                                      fill=1), ramp, **kw)
+
+
+def limb(L, pts, width, ramp, **kw):
+    """Extremidad: polilínea gruesa con articulaciones redondeadas."""
+    def fn(d):
+        pts2 = [tuple(p) for p in pts]
+        d.line(pts2, fill=1, width=width)
+        r = width / 2 - 0.5
+        for x, y in pts2:
+            d.ellipse([x - r, y - r, x + r, y + r], fill=1)
+    return L.part(fn, ramp, **kw)
+
+
+def flat_poly(L, pts, color):
+    L.flat(lambda d: d.polygon([tuple(p) for p in pts], fill=1), color)
+
+
+def flat_line(L, pts, color, width=1):
+    L.flat(lambda d: d.line([tuple(p) for p in pts], fill=1, width=width), color)
+
+
+def dot(L, x, y, color):
+    L.flat(lambda d: d.point((x, y)), color)

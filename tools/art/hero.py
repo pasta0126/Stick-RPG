@@ -30,7 +30,7 @@ POSES = [
     dict(bx=0, by=0, hand=(21, 9), dir=(0.18, -1)),      # charge
     dict(bx=-3, by=1, hand=(40, 35), dir=(0.9, -1)),     # hit
 ]
-TAGS = [("idle", 0, 2, 450), ("attack", 2, 3, 90), ("charge", 5, 1, 100),
+TAGS = [("idle", 0, 2, 700), ("attack", 2, 3, 90), ("charge", 5, 1, 100),
         ("hit", 6, 1, 200)]
 
 
