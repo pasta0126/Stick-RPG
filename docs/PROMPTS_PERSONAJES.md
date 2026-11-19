@@ -283,3 +283,33 @@ El fondo sigue en magenta #FF00FF. Sin contorno negro: cada píxel del caballero
 ````
 
 > Si el mapa no coincide con la tira (le cambia la pose o la silueta), pídele: *"No coincide con la imagen anterior. Repítelo calcando exactamente la misma silueta"*. Si sigue sin coincidir, pásamelo igual: lo uso solo como guía para recortar.
+
+---
+
+## Pantalla de título (fondo de la splash)
+
+El logo "STICK RPG", los textos y las ascuas los dibuja el juego encima, así que la imagen es **solo el fondo, sin ningún texto**. La pantalla mide 240 × 135 (16:9).
+
+````
+Genera una ilustración de pixel art de 16 bits para el fondo de la pantalla de título de un RPG de fantasía medieval oscura. Formato horizontal 16:9 (1920×1080), pensado para reducirse a 240×135 píxeles: dibújalo como si cada píxel del juego fuera un bloque de 8×8, con bloques grandes y limpios.
+
+ESCENA
+Un caballero solitario de espaldas, visto de tres cuartos y pequeño en el encuadre, en el borde de una colina en la parte inferior izquierda. Lleva yelmo cerrado con penacho rojo, capa roja al viento, escudo con cruz dorada a la espalda y la espada apoyada en el suelo.
+Mira hacia un valle brumoso. Al fondo, en el horizonte, a la derecha, la silueta de un castillo en ruinas con una sola ventana iluminada en dorado. Entre él y el castillo, un bosque de árboles muertos y retorcidos y, a media distancia, un cementerio con cruces y lápidas inclinadas que asoman entre la niebla.
+Cielo nocturno con una luna llena enorme y pálida, algunas estrellas y jirones de nubes. Ascuas y chispas sueltas flotando en el aire.
+
+COMPOSICIÓN (muy importante, encima irá texto)
+- Mitad superior (franja central, del 5 % al 60 % de la altura): solo cielo oscuro, liso y con poco contraste. Ahí irá el logo; ni castillo, ni árboles, ni luna dentro de esa zona central. La luna puede ir arriba a la derecha, parcialmente fuera del centro.
+- Centro, del 62 % al 85 % de la altura: zona oscura y tranquila (niebla, valle). Ahí irán dos líneas de texto centradas.
+- Los elementos con detalle (caballero, árboles, castillo) van hacia los lados y la parte baja, dejando el centro despejado.
+- Bordes algo más oscuros (viñeteado).
+- Nada de texto, letras, títulos, logos ni firmas.
+
+ESTILO
+- Pixel art limpio de 16 bits, sin antialiasing, sin degradados suaves, sin desenfoque, sin texturas de ruido. Los degradados del cielo y la niebla se hacen con tramado (dithering) ordenado.
+- Siluetas grandes y legibles con contorno oscuro. Luz de la luna desde arriba a la derecha.
+- Ambiente: sombrío, silencioso y épico.
+
+PALETA ESTRICTA (solo estos 8 colores):
+#0A0E0D negro, #1B2925 oscuro, #3B5247 medio, #7A9380 claro, #D4DEC8 brillo (luna, reflejos), #9C2E30 rojo (capa, penacho), #D6A248 oro (ventana del castillo, cruz, ascuas), #9FE05A verde espectral (muy poco: fuegos fatuos en el cementerio).
+````
