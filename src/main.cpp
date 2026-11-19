@@ -807,45 +807,37 @@ void arrow(int x, int y, bool up, uint8_t c) {
     for (int j = -k; j <= k; ++j) c4.pset(x + 3 + j, up ? y + k : y + 3 - k, c);
 }
 
-// Columna de la pantalla de botín: una placa por objeto.
-void lootColumn(const Item& it, const Item* other, const char* title, int x0,
-                int x1, const Stat* list, int n, bool selected, bool isNew) {
-  panel(x0, 3, x1, 108);
-  if (selected) c4.frame(x0, 3, x1 - x0 + 1, 106, pal::ORO);
+// Placa de un objeto en la pantalla de botín. La placa es el propio botón:
+// la elegida se enmarca en oro y la otra se atenúa.
+void lootColumn(const Item& it, const Item* other, int x0, int x1,
+                const Stat* list, int n, bool selected, bool isNew) {
+  const int y0 = 3, y1 = 131;
+  panel(x0, y0, x1, y1);
   int cx = (x0 + x1) / 2;
   char buf[40];
   if (it.present) {
-    std::snprintf(buf, sizeof(buf), "%s - %s", title, rarezaName(it.rareza));
+    uint8_t rc = rarityColor(it.rareza);
+    txt(B12, slotName(it.slot), cx, 22, rc, middle_center, NONE);
+    txt(I9, rarezaName(it.rareza), cx, 40, rc, middle_center, NONE);
   } else {
-    std::snprintf(buf, sizeof(buf), "%s", title);
-  }
-  txt(I9, buf, cx, 12, pal::MEDIO, middle_center, NONE);
-  uint8_t rc = it.present ? rarityColor(it.rareza) : pal::MEDIO;
-  if (it.present) {
-    itemName(it, buf, sizeof(buf));
-    // "Espada de Hierro" → "Espada" en grande y "de Hierro" debajo.
-    char* de = std::strstr(buf, " de ");
-    if (de) *de = 0;
-    txt(B12, buf, cx, 29, rc, middle_center, NONE);
-    if (de) txt(S9, de + 1, cx, 45, pal::CLARO, middle_center, NONE);
-  } else {
-    txt(B12, "Vacio", cx, 29, rc, middle_center, NONE);
-    txt(S9, "sin objeto", cx, 45, pal::MEDIO, middle_center, NONE);
+    txt(B12, "Vacio", cx, 22, pal::MEDIO, middle_center, NONE);
+    txt(I9, "sin objeto", cx, 40, pal::MEDIO, middle_center, NONE);
   }
   for (int x = x0 + 6; x < x1 - 5; ++x)
-    if (x % 2) c4.pset(x, 54, pal::MEDIO);
+    if (x % 2) c4.pset(x, 50, pal::MEDIO);
 
-  int step = n > 4 ? 10 : 12;
+  int step = n > 5 ? 12 : 13;
   for (int i = 0; i < n; ++i) {
     Stat s = list[i];
-    int y = 63 + i * step;
+    int y = 62 + i * step;
     int v = it.present ? it.get(s) : 0;
-    txt(S9, statName(s), x0 + 7, y, pal::CLARO, middle_left, NONE);
+    int vx = isNew ? x1 - 30 : x1 - 8;
+    txt(S9, statName(s), x0 + 8, y, pal::CLARO, middle_left, NONE);
     if (v) {
       std::snprintf(buf, sizeof(buf), "%+d%s", v, statIsPercent(s) ? "%" : "");
-      txt(B9, buf, isNew ? x1 - 30 : x1 - 7, y, pal::BRILLO, middle_right, NONE);
+      txt(B9, buf, vx, y, pal::BRILLO, middle_right, NONE);
     } else {
-      txt(S9, "--", isNew ? x1 - 30 : x1 - 7, y, pal::MEDIO, middle_right, NONE);
+      txt(S9, "--", vx, y, pal::MEDIO, middle_right, NONE);
     }
     if (isNew) {
       int a = other && other->present ? other->get(s) : 0;
@@ -858,6 +850,21 @@ void lootColumn(const Item& it, const Item* other, const char* title, int x0,
       }
     }
   }
+
+  if (selected) {
+    c4.frame(x0, y0, x1 - x0 + 1, y1 - y0 + 1, pal::ORO);
+    c4.frame(x0 + 2, y0 + 2, x1 - x0 - 3, y1 - y0 - 3, pal::ORO);
+    // Marcas en las esquinas que laten suavemente.
+    if ((gt / 400) % 2 == 0)
+      for (int k = 0; k < 6; ++k) {
+        c4.pset(x0 + 3 + k, y0 + 3, pal::BRILLO);
+        c4.pset(x0 + 3, y0 + 3 + k, pal::BRILLO);
+        c4.pset(x1 - 3 - k, y1 - 3, pal::BRILLO);
+        c4.pset(x1 - 3, y1 - 3 - k, pal::BRILLO);
+      }
+  } else {
+    c4.shade(x0, y0, x1 - x0 + 1, y1 - y0 + 1, pal::NEGRO, 7);
+  }
 }
 
 void drawLootItem() {
@@ -866,20 +873,18 @@ void drawLootItem() {
   const Item& cur = hero.equip[static_cast<int>(loot.item.slot)];
   const Item& nue = loot.item;
 
-  // Filas comunes a ambas columnas para que queden alineadas.
+  // Filas comunes a ambas placas para que queden alineadas.
   Stat list[2 * MAX_MODS];
   int n = 0;
   auto add = [&](Stat s) {
     for (int i = 0; i < n; ++i) if (list[i] == s) return;
-    if (n < 5) list[n++] = s;
+    if (n < 2 * MAX_MODS) list[n++] = s;
   };
   for (int i = 0; i < nue.nMods; ++i) add(nue.mods[i].stat);
   for (int i = 0; cur.present && i < cur.nMods; ++i) add(cur.mods[i].stat);
 
-  lootColumn(cur, nullptr, "Actual", 3, 117, list, n, sel == 0, false);
-  lootColumn(nue, &cur, "Nuevo", 122, 236, list, n, sel == 1, true);
-  button("Conservar", 60, 114, sel == 0);
-  button("Equipar", 179, 114, sel == 1);
+  lootColumn(cur, nullptr, 3, 117, list, n, sel == 0, false);
+  lootColumn(nue, &cur, 122, 236, list, n, sel == 1, true);
 }
 
 void drawLootPotion() {
