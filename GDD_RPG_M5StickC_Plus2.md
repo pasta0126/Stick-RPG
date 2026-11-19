@@ -10,7 +10,7 @@ M5StickC Plus2 · Pantalla horizontal 240 × 135 px · 16 colores máximo
 
 | **DOCUMENTO**                         | **ESTADO**                                                 |
 |---------------------------------------|------------------------------------------------------------|
-| Versión 1.1 · 19 de noviembre de 2026 | Diseño conceptual consolidado, primera revisión            |
+| Versión 1.2 · 19 de noviembre de 2026 | Segunda revisión; prototipo de firmware y simulador        |
 | Alcance                               | Decisiones acordadas y parámetros pendientes de equilibrar |
 
 Nombre de trabajo: «Stick RPG» (coincide con el repositorio). El título definitivo todavía no está decidido.
@@ -121,6 +121,14 @@ La probabilidad de turno extra (EXTRA %) sale de las estadísticas del héroe y 
 - La probabilidad base está limitada por un tope (ver §5).
 - Un ataque fallido también puede activar turno extra (regla simple: la comprobación ocurre siempre). Puede cambiarse durante el balance.
 
+## 4.5. Golpe fuerte anunciado
+
+En su turno, el enemigo puede **prepararse** en lugar de atacar. Ese turno no hace daño, pero aparece un «!» naranja parpadeando sobre él y el texto «¡SE PREPARA!». Su siguiente acción es un **golpe fuerte** (`GOLPE_FUERTE`, ×2,5), que también puede fallar o ser crítico.
+
+- El aviso no desaparece con los turnos extra del héroe: el golpe fuerte llega en el siguiente turno real del enemigo.
+- Así hay algo que decidir sin añadir botones: arriesgar una carga perfecta para matarlo antes, o asumir el golpe.
+- Cada tipo de enemigo se prepara con una frecuencia distinta (§7.1).
+
 # 5. Estadísticas y equipamiento
 
 El guerrero tiene estadísticas base y bonificadores de las piezas equipadas. Al sustituir un objeto, se retiran sus modificadores y se aplican los del nuevo; las estadísticas visibles se actualizan al instante.
@@ -164,7 +172,25 @@ Al ganar cada combate, el héroe recupera automáticamente un **porcentaje de su
 
 Cada enemigo derrotado deja exactamente 1 recompensa: una pieza de equipo (espada, casco, pechera, botas o escudo) o, con baja probabilidad, una poción. No se acumula una cola de botín. El nivel del enemigo marca la escala general del objeto; la suerte aumenta la probabilidad de obtener mejores estadísticas, pero no la cantidad de objetos.
 
-Probabilidad inicial propuesta de poción: 10 % (por balancear).
+Probabilidad inicial propuesta de poción: 10 % (por balancear). Los jefes nunca dejan poción.
+
+### Rarezas
+
+| **Rareza** | **Color**  | **Peso base** | **Potencia** | **2.ª estadística** |
+|------------|------------|---------------|--------------|---------------------|
+| Común      | Gris claro | 70 %          | ×1,0         | 40 %                |
+| Rara       | Azul       | 25 %          | ×1,25        | 80 %                |
+| Épica      | Morado     | 5 %           | ×1,55        | Siempre             |
+
+- **LUCK**: cada punto pasa 1 punto de peso de Común a Rara (70 %) y Épica (30 %). Común nunca baja del 10 %. El nombre y el marco del objeto se pintan del color de su rareza, así el efecto de la suerte se ve.
+- **Jefes**: siempre dejan un objeto Raro o Épico.
+
+### Generación de objetos
+
+- **Estadística principal**: ATK en la espada y DEF en el resto. Su valor = base × factor de ranura × crecimiento por encuentro × rareza × **variación aleatoria ±25 %**.
+- **Estadística secundaria** (según la rareza): CRIT, CRIT DMG, EXTRA o LUCK. Su valor es pequeño y casi fijo; crece poco con el nivel para no romper los topes.
+- **Material** (nombre): cambia cada 6 encuentros (Madera, Hierro, Acero, Plata, Mitril, Rúnico, Astral). Por ejemplo, «Espada de Acero».
+- **¿Puede salir peor?** Sí. Por la variación ±25 % y porque la pieza nueva puede traer otra estadística secundaria (o ninguna), un objeto de más nivel puede ser peor que el actual. La comparación lo enseña con claridad.
 
 ## 6.3. Equipo: comparar y decidir
 
@@ -202,6 +228,21 @@ Cada nuevo enemigo es un escalón de dificultad. A medida que avanza la partida 
 
 La progresión se basa en la secuencia de encuentros y el equipamiento. No hay experiencia, oro, tiendas ni niveles propios del héroe en esta versión.
 
+Las estadísticas de los enemigos crecen de forma exponencial con el número de encuentro (HP ×1,07, ATK ×1,05 y DEF ×1,065 por encuentro, valores iniciales). Como el héroe solo sube su vida máxima con pociones, la dificultad acaba superándolo: la partida siempre termina.
+
+## 7.1. Tipos de enemigo
+
+| **Tipo**  | **Perfil**                    | **HP** | **ATK** | **DEF** | **CRIT** | **Fallo** | **Se prepara** |
+|-----------|-------------------------------|--------|---------|---------|----------|-----------|----------------|
+| Bandido   | Equilibrado                   | ×1,0   | ×1,0    | ×1,0    | 5 %      | 10 %      | 15 %           |
+| Golem     | Tanque                        | ×1,4   | ×0,8    | ×1,7    | 3 %      | 12 %      | 10 %           |
+| Lobo      | Ágil: crítico alto, DEF baja  | ×0,8   | ×0,95   | ×0,6    | 20 %     | 5 %       | 10 %           |
+| Ogro      | Bruto: pega fuerte y avisa    | ×1,15  | ×1,25   | ×0,85   | 5 %      | 14 %      | 35 %           |
+| **Jefe**  | Cada 10 encuentros            | ×1,9   | ×1,1    | ×1,15   | 10 %     | 8 %       | 25 %           |
+
+- El encuentro 1 siempre es un Bandido. A partir del 2, el tipo es aleatorio entre los cuatro normales.
+- El jefe aparece en los encuentros 10, 20, 30… El número de encuentro se pinta en morado y su botín es como mínimo Raro.
+
 # 8. Pantallas y presentación
 
 | **Pantalla**             | **Información imprescindible**                                                                                                      |
@@ -223,11 +264,47 @@ La progresión se basa en la secuencia de encuentros y el equipamiento. No hay e
 - En combate no hay desplazamiento ni selección compleja: el juego espera la pulsación o la liberación de A.
 - Durante las transiciones no hace falta pulsar nada y el héroe corre solo.
 
-## 8.2. Sonido
+## 8.2. Paleta
 
-Pitidos cortos con el zumbador para: golpe, fallo, crítico, turno extra, entrada en la zona perfecta de la carga, victoria, botín y Game Over. Se puede silenciar desde Start (B) y el ajuste se guarda.
+Paleta fija de 16 colores. Cada color tiene un uso reservado para que la información se reconozca siempre igual.
 
-## 8.3. Persistencia
+| **#** | **Nombre**   | **Hex**   | **Uso principal**                         |
+|-------|--------------|-----------|-------------------------------------------|
+| 0     | Negro        | `#0B0B14` | Contornos, paneles, sombras de texto      |
+| 1     | Noche        | `#1E2140` | Cielo, fondo de pantallas                 |
+| 2     | Pizarra      | `#33406B` | Montañas lejanas, separadores             |
+| 3     | Gris         | `#5B6B8C` | Golem, texto desactivado                  |
+| 4     | Gris claro   | `#A6AEBF` | Texto secundario, rareza Común            |
+| 5     | Blanco       | `#F2F2EB` | Texto principal, hoja de la espada        |
+| 6     | Marrón osc.  | `#4A2E22` | Tierra                                    |
+| 7     | Marrón       | `#8C5A3C` | Madera, lobo, zona perfecta (fondo)       |
+| 8     | Piel         | `#E8B58A` | Piel                                      |
+| 9     | Rojo         | `#C23B3B` | Daño recibido, ▼, vida enemiga, bandido   |
+| 10    | Naranja      | `#F08A3C` | Aviso de golpe fuerte, estadística topada |
+| 11    | Amarillo     | `#F7D046` | Crítico, zona perfecta, selección, título |
+| 12    | Verde        | `#4CB050` | Vida del héroe, curación, ▲               |
+| 13    | Verde osc.   | `#2A6B4F` | Hierba, ogro                              |
+| 14    | Azul         | `#4AA3F0` | Rareza Rara, turno extra, barra de carga  |
+| 15    | Morado       | `#9A5BD6` | Rareza Épica, jefe                        |
+
+## 8.3. Sonido
+
+Pitidos cortos con el zumbador para: golpe, fallo, crítico, turno extra, entrada en la zona perfecta de la carga, aviso de golpe fuerte, victoria, botín y Game Over. Se puede silenciar desde Start (B) y el ajuste se guarda.
+
+## 8.4. Ritmo de los textos de combate
+
+| **Evento**                     | **Duración** |
+|--------------------------------|--------------|
+| Golpe / fallo                  | 450 ms       |
+| Crítico / golpe fuerte         | 650 ms       |
+| Turno extra                    | 500 ms       |
+| Textos dentro de una cadena    | 300 ms       |
+| Pausa antes del turno enemigo  | 450 ms       |
+| «¡SE PREPARA!»                 | 650 ms       |
+
+Los textos de un mismo golpe se juntan en un solo mensaje (por ejemplo, «PERFECTO CRITICO +TURNO») en lugar de mostrarse uno detrás de otro. El daño aparece como un número que sube sobre el personaje golpeado.
+
+## 8.5. Persistencia
 
 Se guardan en la memoria no volátil (NVS): el récord de enemigos derrotados y el ajuste de sonido. La partida en curso no se guarda; al apagar se pierde.
 
@@ -241,6 +318,8 @@ Se guardan en la memoria no volátil (NVS): el récord de enemigos derrotados y 
 - Panel de estadísticas con B y pausa con PWR.
 - Escalado inicial de dificultad y repetición infinita de encuentros.
 - Game Over con enemigos derrotados, récord persistente y reinicio.
+- Cuatro tipos de enemigo + jefe cada 10, con golpe fuerte anunciado.
+- Rarezas visibles por color.
 - Efectos de sonido básicos.
 
 # 10. Parámetros pendientes de balance
@@ -256,6 +335,52 @@ Se guardan en la memoria no volátil (NVS): el récord de enemigos derrotados y 
 | Curación       | `CURA_VICTORIA` y `POCION_HPMAX`.                                                                             |
 | Personaje      | Estadísticas iniciales y propiedades del equipo básico.                                                       |
 | Transiciones   | Duración de la carrera y del scroll.                                                                          |
+| Golpe fuerte   | Multiplicador (×2,5) y frecuencia por tipo.                                                                   |
+
+Todos los valores viven en `src/core/balance.h`. El simulador (`make sim`) juega miles de partidas con un jugador automático para ajustarlos.
+
+**Primera pasada del simulador** (5000 partidas, `skill` = probabilidad de soltar en la zona perfecta):
+
+| **Jugador**                  | **Media** | **p10** | **Mediana** | **p90** |
+|------------------------------|-----------|---------|-------------|---------|
+| Solo ataque normal           | 13,9      | 9       | 14          | 19      |
+| Carga sin timing (skill 0)   | 14,9      | 9       | 15          | 19      |
+| Carga con skill 0,5          | 20,8      | 16      | 20          | 27      |
+| Carga con skill 0,9          | 24,9      | 19      | 25          | 29      |
+
+Se cumple lo buscado: cargar sin timing apenas mejora el ataque normal, y la habilidad sí se nota. Las muertes ante un jefe rondan el 32 %; habrá que revisarlo.
+
+# 11. Sprites y gráficos
+
+El prototipo dibuja personajes y fondo con primitivas (rectángulos, líneas, círculos) en un lienzo de 4 bpp con la paleta de §8.2. Los sprites definitivos sustituirán esas funciones de dibujo.
+
+**Requisitos de los sprites:**
+
+| **Elemento**  | **Tamaño aprox.** | **Animaciones**                          |
+|---------------|-------------------|------------------------------------------|
+| Héroe         | 24–40 px de alto  | Correr, reposo, ataque, recibir golpe    |
+| Enemigos (×5) | 24–56 px de alto  | Reposo, ataque, recibir golpe, prepararse |
+| Fondo         | Tiles de 16–24 px | Scroll horizontal con parallax           |
+
+- **Vista lateral**, mirando a la derecha (héroe) y a la izquierda (enemigos).
+- Solo los 16 colores de la paleta, con un índice transparente.
+- Formato final: arrays de 4 bpp en C (`.h`), generados por un script desde PNG indexado.
+
+**Herramienta en evaluación:** SpriteCast (plugin de Claude Code, MIT). Puede limitar la salida a 16 colores con una paleta propia, pero está pensado para sprites de 64–96 px con cámara 3D y animación de caminar en 8 direcciones. Necesita claves de pago de OpenAI y Tripo. Pendiente de una prueba con el héroe.
+
+# 12. Estructura técnica
+
+| **Ruta**                | **Contenido**                                                      |
+|-------------------------|--------------------------------------------------------------------|
+| `src/core/`             | Reglas del juego en C++ puro, sin Arduino (combate, botín, enemigos) |
+| `src/core/balance.h`    | Todos los parámetros de balance                                     |
+| `src/main.cpp`          | Firmware: estados, entrada, render 4 bpp, sonido, NVS              |
+| `src/palette.h`         | Paleta de 16 colores                                                |
+| `tools/sim/`            | Simulador de balance para PC                                        |
+| `tools/test/`           | Pruebas de la lógica                                                |
+
+- Firmware: `pio run -t upload` (PlatformIO + M5Unified).
+- PC: `make test` y `make sim ARGS="--skill 0.7"`.
 
 > **PRINCIPIO DE DISEÑO**
 >

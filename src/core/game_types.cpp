@@ -1,0 +1,98 @@
+#include "game_types.h"
+
+#include <cstdio>
+
+#include "balance.h"
+
+// Los textos van sin tildes: la fuente del dispositivo es ASCII.
+
+const char* statName(Stat s) {
+  switch (s) {
+    case Stat::ATK: return "ATK";
+    case Stat::DEF: return "DEF";
+    case Stat::CRIT: return "CRIT";
+    case Stat::CRIT_DMG: return "C.DMG";
+    case Stat::EXTRA: return "EXTRA";
+    case Stat::LUCK: return "LUCK";
+    default: return "?";
+  }
+}
+
+bool statIsPercent(Stat s) {
+  return s == Stat::CRIT || s == Stat::CRIT_DMG || s == Stat::EXTRA;
+}
+
+const char* slotName(Slot s) {
+  switch (s) {
+    case Slot::CASCO: return "Casco";
+    case Slot::PECHERA: return "Pechera";
+    case Slot::BOTAS: return "Botas";
+    case Slot::ESPADA: return "Espada";
+    case Slot::ESCUDO: return "Escudo";
+    default: return "?";
+  }
+}
+
+const char* rarezaName(Rareza r) {
+  switch (r) {
+    case Rareza::COMUN: return "Comun";
+    case Rareza::RARA: return "Rara";
+    case Rareza::EPICA: return "Epica";
+    default: return "?";
+  }
+}
+
+static const char* const kMateriales[] = {"Madera", "Hierro", "Acero",
+                                          "Plata",  "Mitril", "Runico",
+                                          "Astral"};
+constexpr int kNumMateriales = sizeof(kMateriales) / sizeof(kMateriales[0]);
+
+void itemName(const Item& it, char* buf, int len) {
+  if (!it.present) {
+    std::snprintf(buf, len, "(vacio)");
+    return;
+  }
+  int t = it.tier < kNumMateriales ? it.tier : kNumMateriales - 1;
+  std::snprintf(buf, len, "%s de %s", slotName(it.slot), kMateriales[t]);
+}
+
+const char* enemyName(EnemyType t) {
+  switch (t) {
+    case EnemyType::BANDIDO: return "Bandido";
+    case EnemyType::GOLEM: return "Golem";
+    case EnemyType::LOBO: return "Lobo";
+    case EnemyType::OGRO: return "Ogro";
+    case EnemyType::JEFE: return "Jefe";
+    default: return "?";
+  }
+}
+
+int Hero::raw(Stat s) const {
+  int v = base[static_cast<int>(s)];
+  for (const Item& it : equip)
+    if (it.present) v += it.get(s);
+  return v;
+}
+
+static int clampi(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+int Hero::eff(Stat s) const {
+  int v = raw(s);
+  switch (s) {
+    case Stat::ATK: return v < 1 ? 1 : v;
+    case Stat::CRIT: return clampi(v, 0, bal::TOPE_CRIT);
+    case Stat::CRIT_DMG: return clampi(v, 0, bal::TOPE_CRIT_DMG);
+    case Stat::EXTRA: return clampi(v, 0, bal::TOPE_EXTRA);
+    default: return v < 0 ? 0 : v;
+  }
+}
+
+Combatant Hero::combatant() const {
+  Combatant c;
+  c.atk = eff(Stat::ATK);
+  c.def = eff(Stat::DEF);
+  c.crit = eff(Stat::CRIT);
+  c.critDmg = eff(Stat::CRIT_DMG);
+  c.fallo = fallo < bal::TOPE_FALLO_MIN ? bal::TOPE_FALLO_MIN : fallo;
+  return c;
+}
