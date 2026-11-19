@@ -401,6 +401,12 @@ void updateFade() {
 }
 
 void updateHeroTurn() {
+  // B durante la carga la cancela sin atacar: las runas se conservan.
+  if (charging && M5.BtnB.wasPressed()) {
+    aArmed = charging = inPerfect = false;
+    audio::sfx(260, 80);
+    return;
+  }
   if (!charging && M5.BtnB.wasPressed()) {
     statsOpen = !statsOpen;
     audio::sfx(770, 30);
@@ -430,7 +436,9 @@ void updateHeroTurn() {
       inPerfect = perf;
     }
   } else {
-    bool charged = held > bal::T_UMBRAL_MS;
+    // Solo se lanza el especial (y se gastan las runas) con una carga real;
+    // una pulsación que apenas pasa del umbral es un ataque normal.
+    bool charged = held > bal::T_UMBRAL_MS + bal::T_CARGA_MIN_MS;
     float f = chargeFill(held);
     aArmed = charging = false;
     startHeroAttack(charged, charged ? chargeMultiplier(f) : 1.0f,

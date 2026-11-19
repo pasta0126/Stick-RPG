@@ -7,7 +7,8 @@
 namespace bal {
 
 // --- Entrada (§4.3) ---------------------------------------------------------
-constexpr uint32_t T_UMBRAL_MS      = 200;   // toque vs. mantener
+constexpr uint32_t T_UMBRAL_MS      = 350;   // toque vs. mantener
+constexpr uint32_t T_CARGA_MIN_MS   = 150;   // carga más corta: cuenta como toque
 constexpr uint32_t CICLO_CARGA_MS   = 1100;  // 0 → 100 % de la barra
 constexpr int      ESPECIAL_CADA    = 3;     // golpes normales para habilitar la carga
 
