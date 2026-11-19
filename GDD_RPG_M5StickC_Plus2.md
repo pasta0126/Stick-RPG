@@ -336,7 +336,7 @@ Se puede silenciar desde el inicio (B); el ajuste se guarda.
 - **Muerte**: el enemigo se disuelve con trama.
 - **Fundidos** de paleta entre encuentros; al cambiar de bioma, cartela «CAPÍTULO II · El Cementerio».
 - **Jefes**: banda negra con su nombre en oro.
-- **Carga del especial**: la espada se alza con chispas espectrales y la barra aparece sobre el héroe.
+- **Carga del especial**: la espada se alza con chispas espectrales y la barra aparece arriba, a lo ancho de toda la pantalla.
 
 ## 8.4. Ritmo de los textos de combate
 

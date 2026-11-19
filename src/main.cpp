@@ -741,15 +741,18 @@ void drawHud() {
   bar(140, 125, 235 - nw - 143, 6, enemy.hp, enemy.hpMax, pal::SANGRE);
 }
 
+// Barra de carga del especial: a lo ancho de la pantalla, arriba.
 void drawChargeBar() {
-  int x0 = 12, y0 = 28, w = 76;
-  panel(x0 - 3, y0 - 3, x0 + w + 2, y0 + 9);
+  const int x0 = 8, y0 = 6, w = W - 16, h = 9;
+  panel(x0 - 4, y0 - 4, x0 + w + 3, y0 + h + 3);
   int zone = static_cast<int>(w * bal::ZONA_PERFECTA);
-  c4.rect(x0, y0, w, 7, pal::OSCURO);
-  c4.shade(x0 + zone, y0, w - zone, 7, pal::ORO, 8);
+  c4.rect(x0, y0, w, h, pal::OSCURO);
+  c4.shade(x0 + zone, y0, w - zone, h, pal::ORO, 8);
   int f = static_cast<int>(w * chargeF);
-  c4.rect(x0, y0 + 1, f, 5, inPerfect ? pal::ORO : pal::ESPECTRAL);
-  for (int y = y0 - 2; y < y0 + 9; ++y) c4.pset(x0 + zone, y, pal::ORO);
+  uint8_t col = inPerfect ? pal::ORO : pal::ESPECTRAL;
+  c4.rect(x0, y0 + 1, f, h - 2, col);
+  for (int x = x0 + 1; x < x0 + f; x += 2) c4.pset(x, y0 + 1, pal::BRILLO);
+  for (int y = y0 - 3; y < y0 + h + 3; ++y) c4.pset(x0 + zone, y, pal::ORO);
 }
 
 void drawFloaters() {
