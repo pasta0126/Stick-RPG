@@ -692,27 +692,31 @@ void drawBackground(int fromLayer, int toLayer) {
   }
 }
 
+const char* const RUNE5[] = {"..#..", ".#o#.", "#ooo#", ".#o#.", "..#.."};
+
 void drawHud() {
   char buf[24];
-  // Héroe: corazón, vida y runas del especial; barra debajo.
+  // Héroe (espejo de la placa del enemigo): nombre arriba; vida y barra debajo.
   panel(1, 112, 98, 134);
-  icon(HEART, 6, 6, 116, '#', pal::NEGRO, 'r', pal::SANGRE);
+  icon(HEART, 6, 5, 116, '#', pal::NEGRO, 'r', pal::SANGRE);
+  c4.label("CABALLERO", 15, 116, pal::BRILLO, pal::NEGRO);
   std::snprintf(buf, sizeof(buf), "%d/%d", hero.hp, hero.hpMax);
-  c4.label(buf, 16, 116, pal::BRILLO, pal::NEGRO);
+  int hw = gfx::Canvas4::textWidth(buf, 1, true);
+  c4.label(buf, 4, 125, pal::BRILLO, pal::NEGRO);
+  bar(hw + 7, 125, 95 - hw - 7, 6, hero.hp, hero.hpMax, pal::SANGRE);
+
+  // Centro: encuentro en números romanos y runas del especial.
+  panel(100, 112, 135, 134);
+  roman(nivel, buf);
+  c4.label(buf, 118, 116, isBossLevel(nivel) ? pal::SANGRE : pal::ORO,
+           pal::NEGRO, 1);
   bool ready = hero.especialListo();
   for (int i = 0; i < bal::ESPECIAL_CADA; ++i) {
     bool on = i < hero.golpesEspecial;
     bool blink = ready && (gt / 250) % 2 == 0;
-    icon(RUNE, 7, 66 + i * 10, 115, '#', on ? pal::MEDIO : pal::OSCURO, 'o',
+    icon(RUNE5, 5, 108 + i * 7, 125, '#', on ? pal::MEDIO : pal::OSCURO, 'o',
          on ? (blink ? pal::BRILLO : pal::ESPECTRAL) : pal::NEGRO);
   }
-  bar(4, 125, 92, 6, hero.hp, hero.hpMax, pal::SANGRE);
-
-  // Encuentro en números romanos.
-  panel(100, 114, 135, 132);
-  roman(nivel, buf);
-  c4.label(buf, 118, 120, isBossLevel(nivel) ? pal::SANGRE : pal::ORO,
-           pal::NEGRO, 1);
 
   // Enemigo: nombre arriba; barra y vida restante debajo.
   panel(137, 112, 238, 134);
@@ -803,61 +807,79 @@ void arrow(int x, int y, bool up, uint8_t c) {
     for (int j = -k; j <= k; ++j) c4.pset(x + 3 + j, up ? y + k : y + 3 - k, c);
 }
 
+// Columna de la pantalla de botín: una placa por objeto.
+void lootColumn(const Item& it, const Item* other, const char* title, int x0,
+                int x1, const Stat* list, int n, bool selected, bool isNew) {
+  panel(x0, 3, x1, 108);
+  if (selected) c4.frame(x0, 3, x1 - x0 + 1, 106, pal::ORO);
+  int cx = (x0 + x1) / 2;
+  char buf[40];
+  if (it.present) {
+    std::snprintf(buf, sizeof(buf), "%s - %s", title, rarezaName(it.rareza));
+  } else {
+    std::snprintf(buf, sizeof(buf), "%s", title);
+  }
+  txt(I9, buf, cx, 12, pal::MEDIO, middle_center, NONE);
+  uint8_t rc = it.present ? rarityColor(it.rareza) : pal::MEDIO;
+  if (it.present) {
+    itemName(it, buf, sizeof(buf));
+    // "Espada de Hierro" → "Espada" en grande y "de Hierro" debajo.
+    char* de = std::strstr(buf, " de ");
+    if (de) *de = 0;
+    txt(B12, buf, cx, 29, rc, middle_center, NONE);
+    if (de) txt(S9, de + 1, cx, 45, pal::CLARO, middle_center, NONE);
+  } else {
+    txt(B12, "Vacio", cx, 29, rc, middle_center, NONE);
+    txt(S9, "sin objeto", cx, 45, pal::MEDIO, middle_center, NONE);
+  }
+  for (int x = x0 + 6; x < x1 - 5; ++x)
+    if (x % 2) c4.pset(x, 54, pal::MEDIO);
+
+  int step = n > 4 ? 10 : 12;
+  for (int i = 0; i < n; ++i) {
+    Stat s = list[i];
+    int y = 63 + i * step;
+    int v = it.present ? it.get(s) : 0;
+    txt(S9, statName(s), x0 + 7, y, pal::CLARO, middle_left, NONE);
+    if (v) {
+      std::snprintf(buf, sizeof(buf), "%+d%s", v, statIsPercent(s) ? "%" : "");
+      txt(B9, buf, isNew ? x1 - 30 : x1 - 7, y, pal::BRILLO, middle_right, NONE);
+    } else {
+      txt(S9, "--", isNew ? x1 - 30 : x1 - 7, y, pal::MEDIO, middle_right, NONE);
+    }
+    if (isNew) {
+      int a = other && other->present ? other->get(s) : 0;
+      int d = v - a;
+      if (d) {
+        uint8_t col = d > 0 ? pal::ESPECTRAL : pal::SANGRE;
+        arrow(x1 - 26, y - 2, d > 0, col);
+        std::snprintf(buf, sizeof(buf), "%d", d > 0 ? d : -d);
+        c4.label(buf, x1 - 17, y - 3, col, pal::NEGRO, 0, 1, false, true);
+      }
+    }
+  }
+}
+
 void drawLootItem() {
   drawSceneNoEnemy();
   c4.shade(0, 0, W, H, pal::NEGRO, 11);
   const Item& cur = hero.equip[static_cast<int>(loot.item.slot)];
   const Item& nue = loot.item;
-  char buf[40], name[28];
-  panel(2, 2, 237, 132);
-  txt(B9, "Botin", 12, 12, pal::ORO, middle_left, NONE);
-  txt(B9, rarezaName(nue.rareza), 228, 12, rarityColor(nue.rareza),
-      middle_right, NONE);
-  itemName(nue, name, sizeof(name));
-  txt(B12, name, W / 2, 29, rarityColor(nue.rareza), middle_center, NONE);
-  if (cur.present) {
-    itemName(cur, name, sizeof(name));
-    std::snprintf(buf, sizeof(buf), "Sustituye a %s", name);
-  } else {
-    std::snprintf(buf, sizeof(buf), "Ranura vacia");
-  }
-  txt(S9, buf, W / 2, 45, pal::MEDIO, middle_center, NONE);
-  for (int x = 12; x < 228; ++x)
-    if (x % 2) c4.pset(x, 53, pal::MEDIO);
 
-  // Una fila por estadística: valor del objeto nuevo y diferencia.
+  // Filas comunes a ambas columnas para que queden alineadas.
   Stat list[2 * MAX_MODS];
   int n = 0;
   auto add = [&](Stat s) {
     for (int i = 0; i < n; ++i) if (list[i] == s) return;
-    if (n < 2 * MAX_MODS) list[n++] = s;
+    if (n < 5) list[n++] = s;
   };
   for (int i = 0; i < nue.nMods; ++i) add(nue.mods[i].stat);
   for (int i = 0; cur.present && i < cur.nMods; ++i) add(cur.mods[i].stat);
-  int step = n > 5 ? 9 : 11;
-  for (int i = 0; i < n; ++i) {
-    Stat s = list[i];
-    int y = 61 + i * step;
-    int a = cur.present ? cur.get(s) : 0, b = nue.get(s);
-    txt(S9, statName(s), 40, y, pal::CLARO, middle_left, NONE);
-    if (b) {
-      std::snprintf(buf, sizeof(buf), "%+d%s", b, statIsPercent(s) ? "%" : "");
-      txt(B9, buf, 140, y, pal::BRILLO, middle_right, NONE);
-    } else {
-      txt(S9, "--", 140, y, pal::MEDIO, middle_right, NONE);
-    }
-    int d = b - a;
-    if (d) {
-      uint8_t col = d > 0 ? pal::ESPECTRAL : pal::SANGRE;
-      arrow(160, y - 2, d > 0, col);
-      std::snprintf(buf, sizeof(buf), "%d", d > 0 ? d : -d);
-      txt(B9, buf, 172, y, col, middle_left, NONE);
-    } else {
-      txt(S9, "=", 162, y, pal::MEDIO, middle_left, NONE);
-    }
-  }
-  button("Conservar", W / 4 + 4, 113, sel == 0);
-  button("Equipar", W * 3 / 4 - 4, 113, sel == 1);
+
+  lootColumn(cur, nullptr, "Actual", 3, 117, list, n, sel == 0, false);
+  lootColumn(nue, &cur, "Nuevo", 122, 236, list, n, sel == 1, true);
+  button("Conservar", 60, 114, sel == 0);
+  button("Equipar", 179, 114, sel == 1);
 }
 
 void drawLootPotion() {
