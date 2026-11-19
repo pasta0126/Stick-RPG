@@ -206,3 +206,80 @@ ChatGPT no clava ni el tamaño exacto ni la paleta, así que pásame las tiras t
 1. Recorto cada fotograma y lo reduzco a la resolución real (vecino más cercano).
 2. Lo cuantizo a los 8 índices de la paleta y pongo el magenta como transparencia.
 3. Lo coloco con el lienzo y el anclaje de cada personaje (ver `docs/STYLE_GUIDE.md` §5) y lo meto en su `.aseprite`.
+
+---
+
+## Héroe v2 — versión con capas (usar esta)
+
+Se hace en **dos mensajes dentro de la misma conversación**: primero la tira y después el mapa de piezas sobre esa misma imagen.
+
+### Mensaje 1 — la tira
+
+````
+Genera una tira de sprites de pixel art del héroe de un RPG de fantasía medieval oscura.
+
+PERSONAJE
+Un caballero de cuerpo entero, de perfil, mirando a la DERECHA.
+- Proporciones heroicas compactas: unas 4 cabezas de alto. Nada de estilo chibi ni cabeza enorme.
+- Yelmo cerrado de acero con visera de rendijas horizontales y una cresta; penacho rojo que cae hacia atrás.
+- Peto de acero con una hombrera grande en el hombro delantero y un cinturón oscuro con hebilla dorada pequeña.
+- Debajo, cota de malla oscura y un faldón corto de tela oscura.
+- Capa roja que cae por la espalda.
+- Grebas de acero (más anchas en la rodilla) y escarpes de acero.
+- Escudo de acero tipo heater con una cruz dorada, SIEMPRE sujeto con el brazo trasero (el izquierdo, el más alejado) y SIEMPRE visible delante del torso en TODOS los fotogramas.
+- Espada larga de acero con guarda y pomo dorados en el brazo delantero (el derecho), con guantelete de acero.
+
+FOTOGRAMAS: 7, en una fila y en este orden. El escudo aparece en los 7.
+1. Reposo A: en guardia, escudo delante del pecho, espada en alto inclinada hacia delante.
+2. Reposo B: idéntico al 1, pero el torso, la cabeza y los brazos 1 píxel más abajo. Las piernas no se mueven.
+3. Ataque, preparación: espada echada atrás por encima del hombro y escudo delante.
+4. Ataque, tajo: espada horizontal hacia delante y cuerpo algo adelantado; el escudo se queda pegado al costado.
+5. Ataque, remate: espada terminando el arco, apuntando abajo y hacia delante.
+6. Carga: espada levantada en vertical sobre la cabeza y escudo delante del pecho.
+7. Recibe golpe: echado hacia atrás y encogido detrás del escudo.
+
+Las piernas y los pies cambian lo mínimo entre fotogramas: el héroe nunca camina.
+
+COMPOSICIÓN
+- 7 celdas del mismo ancho, una junto a otra.
+- En todas, los pies sobre la misma línea de suelo y en la misma posición horizontal dentro de la celda (en el tercio izquierdo, para que la espada tenga sitio a la derecha).
+- Misma escala en todas: el caballero mide lo mismo en todos los fotogramas.
+- Sin texto, sin números y sin sombra en el suelo.
+
+ESTILO
+- Pixel art limpio de 16 bits, como dibujado a mano en Aseprite a unos 64 px de alto y escalado con vecino más cercano. Todos los píxeles son cuadrados del mismo tamaño.
+- Contorno negro de 1 píxel alrededor de toda la silueta.
+- Luz desde arriba a la izquierda: borde claro arriba y a la izquierda, sombra abajo y a la derecha. Tres tonos por material.
+- Sin antialiasing, sin degradados, sin píxeles sueltos, sin brillos, sin resplandores ni partículas.
+- El borde entre el personaje y el fondo es duro: ningún píxel mezcla el magenta con el personaje.
+
+PALETA ESTRICTA (solo estos colores):
+- #0A0E0D negro: contornos
+- #1B2925 oscuro: malla, cuero, tela oscura
+- #3B5247 medio: sombra del acero
+- #7A9380 claro: acero (color base de TODA la armadura, el escudo y la hoja de la espada)
+- #D4DEC8 brillo: reflejos del acero
+- #9C2E30 rojo: SOLO el penacho, la capa y un pañuelo al cuello
+- #D6A248 oro: SOLO la cruz del escudo, la guarda y el pomo de la espada, y la hebilla
+No uses verde.
+
+FONDO: magenta puro #FF00FF, liso.
+````
+
+### Mensaje 2 — el mapa de piezas (sobre la imagen anterior)
+
+````
+Ahora, sobre la imagen exacta que acabas de generar, haz una versión de mapa de piezas. Debe tener las mismas 7 celdas, las mismas poses y la misma silueta píxel a píxel. No muevas, añadas ni quites nada; solo cambia los colores.
+
+Pinta cada pieza con un único color plano, sin sombras ni contornos:
+- CASCO (yelmo con su penacho): azul puro #0000FF
+- PECHERA (peto, hombrera y cinturón con hebilla): amarillo puro #FFFF00
+- BOTAS (grebas y escarpes, de la rodilla a los pies): cian puro #00FFFF
+- ESCUDO (todo el escudo con su cruz): naranja puro #FF8000
+- BRAZO (el brazo de la espada con el guantelete, más toda la espada): verde puro #00FF00
+- CUERPO (todo lo demás: capa, cota de malla, faldón, muslos, brazo trasero): gris #808080
+
+El fondo sigue en magenta #FF00FF. Sin contorno negro: cada píxel del caballero pasa a ser exactamente uno de esos 6 colores.
+````
+
+> Si el mapa no coincide con la tira (le cambia la pose o la silueta), pídele: *"No coincide con la imagen anterior. Repítelo calcando exactamente la misma silueta"*. Si sigue sin coincidir, pásamelo igual: lo uso solo como guía para recortar.
