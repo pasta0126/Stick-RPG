@@ -819,7 +819,7 @@ void delta(int x, int y, int d) {
       c4.pset(x + 4 + j, up ? y - 2 + k : y + 2 - k, col);
   char num[12];
   std::snprintf(num, sizeof(num), "%d", up ? d : -d);
-  txt(B9, num, x + 11, y, col, middle_left, NONE);
+  txt(S9, num, x + 11, y, col, middle_left, NONE);
 }
 
 // Marco de una placa seleccionable: oro doble con esquinas que laten, o
@@ -850,25 +850,25 @@ void lootColumn(const Item& it, const Item* other, int x0, int x1,
   char buf[40];
   if (it.present) {
     uint8_t rc = rarityColor(it.rareza);
-    txt(B12, slotName(it.slot), cx, 22, rc, middle_center, NONE);
-    txt(I9, rarezaName(it.rareza), cx, 40, rc, middle_center, NONE);
+    txt(B9, slotName(it.slot), cx, 18, rc, middle_center, NONE);
+    txt(I9, rarezaName(it.rareza), cx, 33, rc, middle_center, NONE);
   } else {
-    txt(B12, "Vacio", cx, 22, pal::MEDIO, middle_center, NONE);
-    txt(I9, "sin objeto", cx, 40, pal::MEDIO, middle_center, NONE);
+    txt(B9, "Vacio", cx, 18, pal::MEDIO, middle_center, NONE);
+    txt(I9, "sin objeto", cx, 33, pal::MEDIO, middle_center, NONE);
   }
   for (int x = x0 + 6; x < x1 - 5; ++x)
-    if (x % 2) c4.pset(x, 50, pal::MEDIO);
+    if (x % 2) c4.pset(x, 43, pal::MEDIO);
 
-  int step = n > 5 ? 12 : 13;
+  int step = n > 5 ? 11 : 12;
   for (int i = 0; i < n; ++i) {
     Stat s = list[i];
-    int y = 62 + i * step;
+    int y = 54 + i * step;
     int v = it.present ? it.get(s) : 0;
     int vx = isNew ? x1 - 36 : x1 - 8;
     txt(S9, statName(s), x0 + 8, y, pal::CLARO, middle_left, NONE);
     if (v) {
       std::snprintf(buf, sizeof(buf), "%+d%s", v, statIsPercent(s) ? "%" : "");
-      txt(B9, buf, vx, y, pal::BRILLO, middle_right, NONE);
+      txt(S9, buf, vx, y, pal::BRILLO, middle_right, NONE);
     } else {
       txt(S9, "--", vx, y, pal::MEDIO, middle_right, NONE);
     }
@@ -908,16 +908,16 @@ void potionColumn(const char* title, const char* l1, const char* l2,
   const int y0 = 3, y1 = 131;
   panel(x0, y0, x1, y1);
   int cx = (x0 + x1) / 2;
-  txt(B12, title, cx, 22, pal::ORO, middle_center, NONE);
+  txt(B9, title, cx, 18, pal::ORO, middle_center, NONE);
   for (int x = x0 + 6; x < x1 - 5; ++x)
-    if (x % 2) c4.pset(x, 36, pal::MEDIO);
-  txt(S9, l1, cx, 52, pal::CLARO, middle_center, NONE);
-  txt(S9, l2, cx, 67, pal::CLARO, middle_center, NONE);
+    if (x % 2) c4.pset(x, 30, pal::MEDIO);
+  txt(S9, l1, cx, 46, pal::CLARO, middle_center, NONE);
+  txt(S9, l2, cx, 60, pal::CLARO, middle_center, NONE);
   char buf[24];
   std::snprintf(buf, sizeof(buf), "%d/%d", hp, hpMax);
-  txt(B12, buf, cx, 92, pal::ESPECTRAL, middle_center, NONE);
+  txt(B9, buf, cx, 86, pal::ESPECTRAL, middle_center, NONE);
   std::snprintf(buf, sizeof(buf), "ahora %d/%d", hero.hp, hero.hpMax);
-  txt(I9, buf, cx, 113, pal::MEDIO, middle_center, NONE);
+  txt(I9, buf, cx, 106, pal::MEDIO, middle_center, NONE);
   choiceFrame(x0, y0, x1, y1, selected);
 }
 
