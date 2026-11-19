@@ -20,6 +20,7 @@ import bg  # noqa: E402
 import enemies  # noqa: E402
 import font  # noqa: E402
 import hero  # noqa: E402
+import title  # noqa: E402
 from palettes import BIOMAS, KEY, full16  # noqa: E402
 
 ASEPRITE = os.environ.get("ASEPRITE",
@@ -68,6 +69,8 @@ def build_sprites():
     for cls in enemies.ENEMIES:
         assemble(cls.name, cls.W, cls.H, [("cuerpo", enemies.build(cls))],
                  enemies.TAGS)
+    print("Título…")
+    assemble("titulo", title.W, title.H, [("logo", [title.build()])], [])
     print("Fondos…")
     for b in BIOME_ORDER:
         layers = bg.BUILDERS[b]()
@@ -122,7 +125,7 @@ def build_tables():
         cols = ", ".join("{0x%02X, 0x%02X, 0x%02X}" % c for c in BIOMAS[b])
         pals.append(f"    {{{cols}}},  // {b}")
     includes = "\n".join(f'#include "{n}_gfx.h"' for n in
-                         ["heroe"] + [c.name for c in enemies.ENEMIES] +
+                         ["heroe", "titulo"] + [c.name for c in enemies.ENEMIES] +
                          ["bg_" + b for b in BIOME_ORDER])
     art = []
     for c in enemies.ENEMIES:

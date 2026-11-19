@@ -43,6 +43,14 @@ class Canvas4 {
       *p = static_cast<uint8_t>((*p & 0xF0) | (c & 0x0F));
   }
 
+  inline uint8_t pget(int x, int y) const {
+    if (static_cast<unsigned>(x) >= static_cast<unsigned>(w_) ||
+        static_cast<unsigned>(y) >= static_cast<unsigned>(h_))
+      return 0;
+    uint8_t b = buf_[y * stride_ + (x >> 1)];
+    return (((x & 1) == 0) == hiFirst_) ? (b >> 4) : (b & 0x0F);
+  }
+
   void fill(uint8_t c) {
     std::memset(buf_, (c << 4) | c, stride_ * h_);
   }

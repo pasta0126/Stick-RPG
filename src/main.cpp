@@ -134,6 +134,7 @@ void floatText(const char* text, uint8_t color, int x, int y) {
 }
 
 void setState(St s);
+void initTitle();
 
 void show(const char* text, uint8_t color, uint32_t dur, St next) {
   std::snprintf(msg, sizeof(msg), "%s", text);
@@ -229,6 +230,7 @@ void fadeMid() {
 void onEnter(St s) {
   switch (s) {
     case St::TITLE:
+      initTitle();
       audio::jingleInicio();
       break;
     case St::BIOME_INTRO:
@@ -801,10 +803,21 @@ void drawSceneNoEnemy() {
   drawBackground(gfx::BG_LAYER_PERSONAJES, 6);
 }
 
-// Flecha arriba/abajo de 7 px de ancho.
-void arrow(int x, int y, bool up, uint8_t c) {
-  for (int k = 0; k < 4; ++k)
-    for (int j = -k; j <= k; ++j) c4.pset(x + 3 + j, up ? y + k : y + 3 - k, c);
+
+// Etiqueta de mejora/empeora: fondo de color, flecha y número en negrita.
+void badge(int x, int y, int d) {
+  bool up = d > 0;
+  uint8_t bgc = up ? pal::ESPECTRAL : pal::SANGRE;
+  uint8_t fg = up ? pal::NEGRO : pal::BRILLO;
+  char num[12];
+  std::snprintf(num, sizeof(num), "%d", up ? d : -d);
+  int w = 10 + gfx::Canvas4::textWidth(num, 1, true) + 3;
+  c4.rect(x + 1, y, w - 2, 11, bgc);
+  c4.rect(x, y + 1, w, 9, bgc);
+  for (int k = 0; k < 4; ++k)  // flecha
+    for (int j = -k; j <= k; ++j)
+      c4.pset(x + 5 + j, up ? y + 3 + k : y + 7 - k, fg);
+  c4.text(num, x + 10, y + 2, fg, 1, true);
 }
 
 // Placa de un objeto en la pantalla de botín. La placa es el propio botón:
@@ -831,7 +844,7 @@ void lootColumn(const Item& it, const Item* other, int x0, int x1,
     Stat s = list[i];
     int y = 62 + i * step;
     int v = it.present ? it.get(s) : 0;
-    int vx = isNew ? x1 - 30 : x1 - 8;
+    int vx = isNew ? x1 - 33 : x1 - 8;
     txt(S9, statName(s), x0 + 8, y, pal::CLARO, middle_left, NONE);
     if (v) {
       std::snprintf(buf, sizeof(buf), "%+d%s", v, statIsPercent(s) ? "%" : "");
@@ -842,12 +855,7 @@ void lootColumn(const Item& it, const Item* other, int x0, int x1,
     if (isNew) {
       int a = other && other->present ? other->get(s) : 0;
       int d = v - a;
-      if (d) {
-        uint8_t col = d > 0 ? pal::ESPECTRAL : pal::SANGRE;
-        arrow(x1 - 26, y - 2, d > 0, col);
-        std::snprintf(buf, sizeof(buf), "%d", d > 0 ? d : -d);
-        c4.label(buf, x1 - 17, y - 3, col, pal::NEGRO, 0, 1, false, true);
-      }
+      if (d) badge(x1 - 29, y - 5, d);
     }
   }
 
@@ -912,17 +920,108 @@ void drawLootPotion() {
   button("Vida max.", rx, 109, sel == 1);
 }
 
+// ---- Pantalla de título: logo que cae, reflejo, destellos y ascuas.
+struct Ember { int16_t x; uint16_t phase; uint8_t ms; uint8_t c; };
+Ember embers[22];
+bool titleLanded = false;
+
+void initTitle() {
+  titleLanded = false;
+  for (Ember& e : embers) {
+    e.x = static_cast<int16_t>(rng.range(0, W - 1));
+    e.phase = static_cast<uint16_t>(rng.range(0, 4000));
+    e.ms = static_cast<uint8_t>(rng.range(18, 40));
+    e.c = rng.chance(60) ? pal::ORO : (rng.chance(50) ? pal::SANGRE : pal::BRILLO);
+  }
+}
+
+float easeOutBack(float u) {
+  const float c1 = 1.70158f, c3 = c1 + 1;
+  float t = u - 1;
+  return 1 + c3 * t * t * t + c1 * t * t;
+}
+
+bool logoPixel(int sx, int sy) {
+  const gfx::Sheet& s = gfx::titulo::sheet;
+  if (sx < 0 || sy < 0 || sx >= s.w || sy >= s.h) return false;
+  uint8_t b = s.cel(0, 0)[sy * (s.w / 2) + (sx >> 1)];
+  uint8_t c = (sx & 1) ? (b & 0x0F) : (b >> 4);
+  return c != s.key && c != pal::NEGRO;
+}
+
+void sparkle(int x, int y, uint32_t phase) {
+  uint32_t t = (gt + phase) % 1400;
+  int r = t < 350 ? static_cast<int>(t / 117) : (t < 700 ? static_cast<int>((700 - t) / 117) : -1);
+  if (r < 0) return;
+  c4.pset(x, y, pal::BRILLO);
+  for (int k = 1; k <= r; ++k) {
+    uint8_t c = k == r ? pal::ORO : pal::BRILLO;
+    c4.pset(x + k, y, c);
+    c4.pset(x - k, y, c);
+    c4.pset(x, y + k, c);
+    c4.pset(x, y - k, c);
+  }
+}
+
 void drawTitle() {
-  drawSceneNoEnemy();
-  c4.shade(98, 14, 140, 100, pal::NEGRO, 8);
-  txt(B18, "Stick RPG", 168, 36, pal::ORO);
-  txt(I9, "Una leyenda oscura", 168, 58, pal::CLARO);
-  if ((gt / 500) % 2 == 0) txt(B9, "Pulsa A", 168, 80, pal::BRILLO);
+  drawBackground(0, 6);
+  // Viñeteado: bordes más oscuros.
+  c4.shade(0, 0, 18, H, pal::NEGRO, 8);
+  c4.shade(W - 18, 0, 18, H, pal::NEGRO, 8);
+  c4.shade(18, 0, W - 36, 8, pal::NEGRO, 6);
+  c4.shade(0, 96, W, H - 96, pal::NEGRO, 6);
+
+  // Ascuas que suben desde el suelo.
+  for (const Ember& e : embers) {
+    uint32_t t = gt + e.phase;
+    int y = H - static_cast<int>((t / e.ms) % (H + 10));
+    int sway = static_cast<int>((t / 260) % 4);
+    int x = e.x + (sway == 1 ? 1 : (sway == 3 ? -1 : 0));
+    c4.pset(x, y, e.c);
+    if (e.c == pal::ORO && y + 1 < H) c4.pset(x, y + 1, pal::SANGRE);
+  }
+
+  // Logo: cae con rebote y al aterrizar tiembla y destella.
+  const gfx::Sheet& logo = gfx::titulo::sheet;
+  int lx = (W - logo.w) / 2, ly = 8;
+  float u = clamp01(since(stT) / 750.0f);
+  int y = static_cast<int>(lerp(-logo.h - 4, ly, easeOutBack(u)));
+  if (u >= 1 && !titleLanded) {
+    titleLanded = true;
+    shake(3, 320);
+    flashAmt = 0.7f;
+  }
+  c4.blit(logo, 0, 0, lx, y, Remap::identity());
+
+  if (titleLanded) {
+    // Reflejo diagonal que recorre las letras cada 2,8 s.
+    uint32_t t = (since(stT) + 2000) % 2800;
+    if (t < 650) {
+      int band = static_cast<int>(t * (logo.w + logo.h) / 650) - logo.h;
+      for (int sy = 0; sy < logo.h; ++sy)
+        for (int k = 0; k < 6; ++k) {
+          int sx = band + k + sy / 2;
+          if (logoPixel(sx, sy)) c4.pset(lx + sx, ly + sy, pal::BRILLO);
+        }
+    }
+    // Destellos alrededor del logo.
+    sparkle(lx + 8, ly + 6, 0);
+    sparkle(lx + logo.w - 10, ly + 2, 500);
+    sparkle(lx + logo.w - 2, ly + 44, 900);
+    sparkle(lx + 2, ly + 52, 300);
+    sparkle(lx + logo.w / 2 + 30, ly + 30, 1100);
+
+    if (since(stT) > 1100) {
+      txt(I9, "Una leyenda oscura", W / 2, 90, pal::CLARO);
+      bool on = (gt / 450) % 2 == 0;
+      txt(B9, "- Pulsa A -", W / 2, 110, on ? pal::ORO : pal::BRILLO);
+    }
+  }
   char buf[24];
-  std::snprintf(buf, sizeof(buf), "Record: %u", static_cast<unsigned>(record));
-  txt(S9, buf, 168, 98, pal::ESPECTRAL);
-  txt(S9, audio::enabled() ? "B: sonido si" : "B: sonido no", 236, 126,
-      pal::MEDIO, middle_right);
+  std::snprintf(buf, sizeof(buf), "RECORD %u", static_cast<unsigned>(record));
+  c4.label(buf, 6, 126, pal::MEDIO, pal::NEGRO, 0);
+  c4.label(audio::enabled() ? "B: SONIDO SI" : "B: SONIDO NO", 234, 126,
+           pal::MEDIO, pal::NEGRO, 2);
 }
 
 void drawBiomeIntro() {

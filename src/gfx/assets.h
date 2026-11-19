@@ -3,6 +3,7 @@
 
 #include "sprite.h"
 #include "heroe_gfx.h"
+#include "titulo_gfx.h"
 #include "salteador_gfx.h"
 #include "golem_gfx.h"
 #include "huargo_gfx.h"
