@@ -780,43 +780,27 @@ const char* statLabel(Stat s) {
 void drawStatsPanel() {
   c4.shade(0, 0, W, H, pal::NEGRO, 11);
   char buf[28];
-
-  // Atributos: nombre a la izquierda, valor a la derecha.
-  const int ax0 = 3, ax1 = 139;
-  panel(ax0, 3, ax1, 131);
-  txt(B9, "Atributos", (ax0 + ax1) / 2, 13, pal::ORO, middle_center, NONE);
-  for (int x = ax0 + 6; x < ax1 - 5; ++x)
+  // Una sola placa: nombre del atributo a la izquierda, valor a la derecha.
+  const int x0 = 44, x1 = 195;
+  panel(x0, 3, x1, 131);
+  txt(B9, "Atributos", W / 2, 13, pal::ORO, middle_center, NONE);
+  for (int x = x0 + 6; x < x1 - 5; ++x)
     if (x % 2) c4.pset(x, 23, pal::MEDIO);
   int y = 33;
-  txt(S9, "Vida", ax0 + 9, y, pal::CLARO, middle_left, NONE);
+  txt(S9, "Vida", x0 + 10, y, pal::CLARO, middle_left, NONE);
   std::snprintf(buf, sizeof(buf), "%d/%d", hero.hp, hero.hpMax);
-  txt(B9, buf, ax1 - 9, y, pal::SANGRE, middle_right, NONE);
+  txt(B9, buf, x1 - 10, y, pal::SANGRE, middle_right, NONE);
   for (int i = 0; i < STAT_COUNT; ++i) {
     Stat s = static_cast<Stat>(i);
     y += 12;
     bool capped = hero.raw(s) > hero.eff(s);
-    txt(S9, statLabel(s), ax0 + 9, y, pal::CLARO, middle_left, NONE);
+    txt(S9, statLabel(s), x0 + 10, y, pal::CLARO, middle_left, NONE);
     const char* pre = s == Stat::CRIT_DMG ? "+" : "";
     std::snprintf(buf, sizeof(buf), "%s%d%s%s", pre, hero.eff(s),
                   statIsPercent(s) ? "%" : "", capped ? " max" : "");
-    txt(B9, buf, ax1 - 9, y, capped ? pal::ORO : pal::BRILLO, middle_right, NONE);
+    txt(B9, buf, x1 - 10, y, capped ? pal::ORO : pal::BRILLO, middle_right, NONE);
   }
-
-  // Equipo: pieza y rareza en su color.
-  const int ex0 = 143, ex1 = 236;
-  panel(ex0, 3, ex1, 131);
-  txt(B9, "Equipo", (ex0 + ex1) / 2, 13, pal::ORO, middle_center, NONE);
-  for (int x = ex0 + 6; x < ex1 - 5; ++x)
-    if (x % 2) c4.pset(x, 23, pal::MEDIO);
-  for (int i = 0; i < SLOT_COUNT; ++i) {
-    const Item& it = hero.equip[i];
-    int ry = 35 + i * 17;
-    uint8_t rc = it.present ? rarityColor(it.rareza) : pal::MEDIO;
-    txt(B9, slotName(static_cast<Slot>(i)), ex0 + 8, ry, rc, middle_left, NONE);
-    txt(I9, it.present ? rarezaName(it.rareza) : "vacio", ex1 - 8, ry + 1, rc,
-        middle_right, NONE);
-  }
-  txt(I9, "B: volver", (ex0 + ex1) / 2, 122, pal::MEDIO, middle_center, NONE);
+  txt(I9, "B: volver", W / 2, 124, pal::MEDIO, middle_center, NONE);
 }
 
 void drawSceneNoEnemy() {

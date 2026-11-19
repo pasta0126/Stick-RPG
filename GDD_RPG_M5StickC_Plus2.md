@@ -171,7 +171,7 @@ Los topes son valores iniciales y se ajustarán en el balance. Las estadísticas
 
 ## 5.2. Panel de estadísticas
 
-Durante el turno del héroe, B abre una pantalla con dos placas. **Atributos**: una fila por atributo con nombre completo (Vida, Ataque, Defensa, Crítico, Poder crítico, Turno extra, Suerte, Vampirismo) y su valor alineado a la derecha; en oro con «máx» si ha llegado al tope. **Equipo**: las 5 piezas con su rareza en su color, o «vacío». El combate queda en pausa; B vuelve.
+Durante el turno del héroe, B abre una placa de **Atributos**: una fila por atributo con nombre completo (Vida, Ataque, Defensa, Crítico, Poder crítico, Turno extra, Suerte, Vampirismo) y su valor alineado a la derecha; en oro con «máx» si ha llegado al tope. El combate queda en pausa; B vuelve.
 
 # 6. Recompensas y curación
 
