@@ -1,0 +1,20 @@
+GIMP Palette
+Name: Stick RPG - castle
+Columns: 8
+#
+ 14  10  10	00 Black
+ 42  30  29	01 Dark
+ 82  64  58	02 Mid
+142 126 114	03 Light
+228 218 202	04 Bright
+184  48  42	05 Blood
+236 164  58	06 Gold
+164 114 224	07 Spectral
+ 64  64  64	08 unused
+ 64  64  64	09 unused
+ 64  64  64	10 unused
+ 64  64  64	11 unused
+ 64  64  64	12 unused
+ 64  64  64	13 unused
+ 64  64  64	14 unused
+255   0 255	15 TRANSPARENT (key)

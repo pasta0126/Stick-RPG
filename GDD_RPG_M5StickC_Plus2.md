@@ -1,470 +1,465 @@
 # STICK RPG
 
-**Game Design Document (GDD) — RPG de combate por turnos con scroll lateral automático**
+**Game Design Document (GDD) — turn-based combat RPG with automatic encounters**
 
-M5StickC Plus2 · Pantalla horizontal 240 × 135 px · 8 colores por bioma · Fantasía medieval oscura
+M5StickC Plus2 · Landscape 240 × 135 px · 8 colours per biome · Dark medieval fantasy
 
-> **IDEA CENTRAL**
+> **CORE IDEA**
 >
-> El guerrero avanza solo entre encuentros. El jugador decide cómo atacar y, tras cada victoria, si acepta la recompensa o conserva su equipo. El objetivo es sobrevivir al mayor número posible de enemigos.
+> A lone knight holds his ground while enemies come to him, one at a time. The player decides how to attack and, after every victory, whether to take the reward or keep the current gear. The goal is to survive as many enemies as possible.
 
-| **DOCUMENTO**                         | **ESTADO**                                                 |
-|---------------------------------------|------------------------------------------------------------|
-| Versión 1.3 · 19 de noviembre de 2026 | Rediseño visual (8 colores, biomas), especial, jefes, VAMP |
-| Alcance                               | Decisiones acordadas y parámetros pendientes de equilibrar |
+| **DOCUMENT**                       | **STATUS**                                                      |
+|------------------------------------|-----------------------------------------------------------------|
+| Version 1.4 · 19 November 2026     | Playable on device; full art, biomes, bosses, music and effects |
+| Scope                              | Agreed decisions and parameters still to be balanced            |
 
-Nombre de trabajo: «Stick RPG» (coincide con el repositorio). El título definitivo todavía no está decidido.
+Working title: “Stick RPG” (same as the repository). The final title is not decided yet.
 
-# 1. Visión general
+**Language:** documentation is in English. In-game text is in Spanish (e.g. *Salteador*, *Botín*, *Has caído*); English glosses are given in this document where useful.
 
-Juego de pantalla horizontal, pixel art de **fantasía medieval oscura** y 8 colores por bioma (bosque siniestro, cementerio, castillo). El caballero permanece en su puesto; los enemigos entran caminando desde la derecha ante un fondo de varias capas. La interacción se concentra en el botón A durante el combate y en la decisión de recompensas con A y B.
+# 1. Overview
 
-## 1.1. Bucle principal
-1. Start: pulsar A para comenzar.
-2. Entrada: aparece el escenario del bioma actual con el caballero en guardia a la izquierda.
-3. Encuentro: un enemigo entra caminando desde la derecha. Cada encuentro desplaza las capas del fondo para que el paisaje cambie; al cambiar de bioma hay un fundido con su nombre.
-4. Combate: enfrentamiento por turnos. El héroe siempre comienza.
-5. Victoria: el héroe recupera un porcentaje de su vida máxima y el enemigo deja exactamente una recompensa; el jugador decide qué hacer con ella.
-6. Continuación: entra el siguiente enemigo.
-7. Derrota: pantalla Game Over con estadísticas de la partida, récord y posibilidad de reiniciar.
+Landscape game with **dark medieval fantasy** pixel art and 8 colours per biome (sinister forest, graveyard, castle). The knight stays at his post on the left; enemies walk in from the right in front of a multi-layer parallax background. Interaction is focused on button A during combat and on reward decisions with A and B.
 
-> **ESTRUCTURA DE LA PARTIDA**
+## 1.1. Main loop
+
+1. **Title**: press A to start.
+2. **Biome intro**: the current biome’s scenery appears with the knight on guard on the left, and a chapter card with the biome name.
+3. **Encounter**: an enemy walks in from the right. Each encounter shifts the background layers so the scenery changes; changing biome triggers a palette fade and a new chapter card.
+4. **Combat**: turn-based. The hero always acts first.
+5. **Victory**: the enemy dissolves, the hero recovers a percentage of max HP, and exactly one reward drops; the player decides what to do with it.
+6. **Continue**: the next enemy walks in.
+7. **Defeat**: “Has caído” (*You have fallen*) screen with run stats, record and restart.
+
+> **RUN STRUCTURE**
 >
-> El juego se repite en un bucle de encuentros cada vez más difíciles. El scroll es una transición visual; no hay plataformas, saltos ni esquiva manual. La vida del héroe **se conserva entre combates**: solo se recupera con la curación por victoria y con pociones.
+> An endless loop of increasingly harder encounters. There are no platforms, jumps or manual dodging. **Hero HP carries over between fights**: it is only restored by the victory heal and by potions.
 
-# 2. Dispositivo y restricciones
+# 2. Device and constraints
 
-| **Aspecto**        | **Regla**                                                                 |
-|--------------------|---------------------------------------------------------------------------|
-| Hardware objetivo  | M5StickC Plus2 (ESP32-PICO-V3-02, pantalla ST7789V2, zumbador, batería)   |
-| Orientación        | Horizontal (240 × 135 píxeles)                                            |
-| Color              | 8 colores simultáneos; la paleta cambia con el bioma (§8.2)               |
-| Estética           | Pixel art, sprites y tipografía de alta legibilidad                       |
-| Movimiento         | Avance del personaje y scroll automáticos; sin salto                      |
-| Entrada de usuario | Botón A, botón B y botón de encendido (PWR); sin controles externos       |
-| Sonido             | Efectos simples mediante el zumbador integrado                            |
-| Persistencia       | Récord y ajustes guardados en memoria no volátil (NVS)                    |
-| Estructura         | Un enemigo por encuentro, combates por turnos, recompensa al ganar        |
+| **Aspect**     | **Rule**                                                                   |
+|----------------|----------------------------------------------------------------------------|
+| Target         | M5StickC Plus2 (ESP32-PICO-V3-02, ST7789V2 display, buzzer, battery)       |
+| Orientation    | Landscape (240 × 135 pixels)                                               |
+| Colour         | 8 simultaneous colours; the palette changes with the biome (§8.2)          |
+| Look           | Pixel art, highly legible sprites and typography                           |
+| Movement       | No player movement; enemies walk in automatically                          |
+| Input          | Button A, button B and power button (PWR); no external controls            |
+| Sound          | Built-in buzzer: effects and short jingles                                 |
+| Persistence    | Record and settings stored in non-volatile memory (NVS)                    |
+| Structure      | One enemy per encounter, turn-based combat, one reward per victory         |
 
-# 3. Estados y controles
+# 3. States and controls
 
-| **Estado**             | **Botón A**                                                                 | **Botón B**                         |
-|------------------------|-----------------------------------------------------------------------------|-------------------------------------|
-| Start                  | Comenzar                                                                    | Activar / silenciar sonido          |
-| Carrera / scroll       | Sin acción                                                                  | Sin acción                          |
-| Turno del héroe        | Toque: ataque normal. Mantener: carga; soltar: ataque cargado (ver §4.3).   | Abrir panel de estadísticas         |
-| Panel de estadísticas  | Sin acción                                                                  | Cerrar panel                        |
-| Turno del enemigo      | Sin acción                                                                  | Sin acción                          |
-| Recompensa de equipo   | Confirmar la opción resaltada                                               | Alternar CONSERVAR / EQUIPAR        |
-| Recompensa de poción   | Confirmar la opción resaltada                                               | Alternar RECUPERAR / VIDA MÁX.      |
-| Game Over              | Regresar a Start / reiniciar                                                | Sin acción                          |
+| **State**          | **Button A**                                                              | **Button B**                       |
+|--------------------|---------------------------------------------------------------------------|------------------------------------|
+| Title              | Start                                                                     | Sound on / off                     |
+| Biome intro        | Skip (after a short delay)                                                | —                                  |
+| Enemy walking in   | —                                                                         | —                                  |
+| Hero turn          | Tap: normal attack. Hold: charge the special (when ready, §4.3).          | Open the stats screen              |
+| Stats screen       | —                                                                         | Close                              |
+| Enemy turn         | —                                                                         | —                                  |
+| Gear reward        | Confirm the highlighted panel                                             | Switch panel (keep / equip)        |
+| Potion reward      | Confirm the highlighted panel                                             | Switch panel (restore / max HP)    |
+| Defeat             | Back to title                                                             | —                                  |
 
-El turno extra es un turno del héroe normal: se controla igual.
+An extra turn is a normal hero turn and is controlled the same way. While A is held, B does nothing.
 
-**Botón PWR** (cualquier estado): pulsación corta = pausa / reanudar. Pulsación larga = apagado del dispositivo (comportamiento del hardware). En pausa, la pantalla baja el brillo tras unos segundos sin actividad.
+**PWR button** (any state): short press = pause / resume. Hold 2 s = power off. While paused, the screen dims after a few seconds of inactivity.
 
-# 4. Reglas del combate
+# 4. Combat rules
 
-## 4.1. Secuencia de un enfrentamiento
+## 4.1. Encounter sequence
 
-- El héroe abre siempre el combate.
-- El jugador ataca con A (normal o cargado). El golpe puede acertar o fallar.
-- Si acierta, se calcula el daño; puede activarse un crítico y aumentar el daño.
-- Tras resolver la acción del héroe, se comprueba el turno extra.
-- Si hay turno extra, se salta el turno del enemigo y el héroe vuelve a atacar. Si no, ataca el enemigo.
-- El turno enemigo se resuelve automáticamente con las mismas reglas: **el enemigo también puede fallar y hacer críticos**. Si ambos siguen vivos, el control vuelve al héroe.
-- El combate termina en cuanto la vida de uno de los dos llega a cero.
+- The hero always opens the fight.
+- The player attacks with A (normal or special). The hit may land or miss.
+- On a hit, damage is computed; a critical may trigger and increase it.
+- After the hero’s action, the extra-turn check happens.
+- On an extra turn the enemy’s turn is skipped and the hero attacks again; otherwise the enemy acts.
+- The enemy turn resolves automatically with the same rules: **enemies can also miss and crit**. If both are alive, control returns to the hero.
+- The fight ends as soon as either HP reaches zero.
 
-## 4.2. Daño, defensa, fallo y crítico
+## 4.2. Damage, defence, misses and criticals
 
-Fórmula proporcional (estable en una partida sin fin, porque el resultado depende de la proporción entre ataque y defensa y no de su diferencia):
-
-```
-daño_base = ATK² / (ATK + DEF)
-daño      = redondear(daño_base × multiplicador_carga × multiplicador_crítico)
-daño      = máx(daño, 1)          // solo en impactos acertados
-```
-
-- Con ATK = DEF, el golpe hace la mitad del ATK; si la DEF es muy alta, el daño baja de forma gradual, sin llegar a anularse.
-- Los golpes fallidos hacen 0 de daño.
-- Multiplicador crítico = 1 + CRIT DMG (por ejemplo, +50 % → ×1,5).
-- Orden de resolución: ¿acierta? → daño base → × carga → × crítico → redondeo → mínimo 1.
-
-## 4.3. Ataque normal y ataque especial (cargado)
-
-**El ataque cargado es especial, no constante:** solo se puede usar **a partir del 3.er golpe y cada 3 golpes** (`ESPECIAL_CADA` = 3).
-
-- Cada ataque normal suma una runa (3 runas en el HUD); los fallos también cuentan.
-- Las runas **no se reinician entre combates**.
-- Con las 3 runas encendidas, mantener A carga el especial. Al soltarlo se gastan las runas.
-- Sin runas suficientes, A ataca **al pulsar**, sin esperar al umbral.
-- Con el especial listo, un toque corto sigue siendo un ataque normal y no gasta las runas.
-- **Las runas solo se gastan al lanzar el especial**, así se puede reservar. Protecciones: umbral de 350 ms; si se suelta A en los primeros 150 ms de carga cuenta como ataque normal. Mientras se mantiene A, B no hace nada.
-
-
-La pulsación se interpreta con **un único umbral de tiempo** (`T_umbral`, 350 ms):
-
-| **Acción**                              | **Comportamiento**                                                                         |
-|-----------------------------------------|--------------------------------------------------------------------------------------------|
-| Pulsar y soltar antes de `T_umbral`     | Ataque normal (multiplicador ×1). Sale al soltar.                                          |
-| Mantener más de `T_umbral`              | Aparece la barra de carga y empieza a llenarse.                                            |
-| Barra llena sin soltar                  | La barra **vuelve a cero y empieza a llenarse otra vez** (ciclo continuo).                 |
-| Soltar A                                | Ataque cargado; su multiplicador depende del llenado de la barra en el momento de soltar.  |
-| Coste                                   | Cualquier ataque, normal o cargado, ocupa una única acción del héroe.                      |
-
-Multiplicador del ataque cargado según el llenado `f` (0–100 %):
+Proportional formula (stable in an endless run, because the result depends on the ratio between attack and defence, not their difference):
 
 ```
-multiplicador_carga = CARGA_MIN + (CARGA_MAX − CARGA_MIN) × f
-si f ≥ ZONA_PERFECTA: multiplicador_carga = CARGA_PERFECTA
+base_damage = ATK² / (ATK + DEF)
+damage      = round(base_damage × charge_multiplier × crit_multiplier)
+damage      = max(damage, 1)          // only on hits
 ```
 
-Valores iniciales: `CARGA_MIN` = ×0,6, `CARGA_MAX` = ×2,4, `ZONA_PERFECTA` = 92 %, `CARGA_PERFECTA` = ×3,2. Son más altos que en la v1.2 porque el especial ahora sale cada 3 golpes.
+- With ATK = DEF a hit deals half the ATK; very high DEF reduces damage gradually without ever nullifying it.
+- Misses deal 0 damage.
+- Crit multiplier = 1 + CRIT DMG (e.g. +50 % → ×1.5).
+- Resolution order: hit? → base damage → × charge → × crit → round → minimum 1.
 
-Así, cargar es una apuesta de timing: si se suelta en el momento justo, el golpe es mucho más fuerte que uno normal; si se suelta tarde (la barra ya se ha reiniciado), puede hacer menos daño que un ataque normal. La zona perfecta se marca en la barra y tiene un destello y un sonido propios.
+## 4.3. Normal attack and special (charged) attack
 
-## 4.4. Turno extra
+**The charged attack is special, not constant:** it can only be used **from the 3rd hit onward and every 3 hits** (`ESPECIAL_CADA` = 3).
 
-La probabilidad de turno extra (EXTRA %) sale de las estadísticas del héroe y sus objetos. Al activarse, el enemigo pierde su turno y el héroe ataca de nuevo, sin pulsar nada especial. Es automático.
+- Every normal attack lights one rune (3 runes in the HUD); misses also count.
+- Runes are **not reset between fights**.
+- With 3 runes lit, holding A charges the special; releasing it fires it and spends the runes.
+- Without enough runes, A attacks **on press**, without waiting for the threshold.
+- With the special ready, a short tap is still a normal attack and does not spend the runes.
+- **Runes are only spent when the special is actually fired**, so it can be saved for the right moment. Safeguards: 350 ms hold threshold; releasing A within the first 150 ms of charging counts as a normal attack.
 
-- Los turnos extra se pueden encadenar, pero **cada turno extra consecutivo reduce a la mitad la probabilidad del siguiente** dentro de la misma secuencia.
-- La probabilidad base está limitada por un tope (ver §5).
-- Un ataque fallido también puede activar turno extra (regla simple: la comprobación ocurre siempre). Puede cambiarse durante el balance.
+Press handling uses a **single time threshold** (`T_UMBRAL_MS`, 350 ms):
 
-## 4.5. Golpe fuerte anunciado
+| **Action**                          | **Behaviour**                                                                   |
+|-------------------------------------|---------------------------------------------------------------------------------|
+| Press and release before threshold  | Normal attack (×1). Fires on release.                                           |
+| Hold past the threshold             | The charge bar appears across the top of the screen and starts filling.         |
+| Full bar while still holding        | The bar **wraps back to zero and fills again** (continuous cycle).              |
+| Release A                           | Special attack; its multiplier depends on the bar fill at release time.         |
+| Cost                                | Any attack, normal or special, takes a single hero action.                      |
 
-En su turno, el enemigo puede **prepararse** en lugar de atacar. Ese turno no hace daño, pero aparece un «!» naranja parpadeando sobre él y el texto «¡SE PREPARA!». Su siguiente acción es un **golpe fuerte** (`GOLPE_FUERTE`, ×2,5), que también puede fallar o ser crítico.
+Special multiplier from the fill `f` (0–100 %):
 
-- El aviso no desaparece con los turnos extra del héroe: el golpe fuerte llega en el siguiente turno real del enemigo.
-- Así hay algo que decidir sin añadir botones: arriesgar una carga perfecta para matarlo antes, o asumir el golpe.
-- Cada tipo de enemigo se prepara con una frecuencia distinta (§7.1).
+```
+charge_multiplier = CARGA_MIN + (CARGA_MAX − CARGA_MIN) × f
+if f ≥ ZONA_PERFECTA: charge_multiplier = CARGA_PERFECTA
+```
 
-# 5. Estadísticas y equipamiento
+Current values: `CARGA_MIN` = ×0.6, `CARGA_MAX` = ×2.4, `ZONA_PERFECTA` = 92 %, `CARGA_PERFECTA` = ×3.2.
 
-El guerrero tiene estadísticas base y bonificadores de las piezas equipadas. Al sustituir un objeto, se retiran sus modificadores y se aplican los del nuevo; las estadísticas visibles se actualizan al instante.
+Charging is a timing gamble: released at the right moment the hit is far stronger than a normal one; released late (after the bar wrapped) it can be weaker than a normal attack. The perfect zone is marked in gold on the bar and has its own flash and sound.
 
-| **Estadística**              | **Función**                                                       | **Tope**   |
-|------------------------------|-------------------------------------------------------------------|------------|
-| Vida (HP actual / máxima)    | Supervivencia. Los objetos no la modifican (ver §6.3).            | —          |
-| Ataque (ATK)                 | Potencia ofensiva.                                                | —          |
-| Defensa (DEF)                | Reduce el daño entrante (fórmula proporcional).                   | —          |
-| Prob. crítica (CRIT %)       | Posibilidad de que un golpe acertado sea crítico.                 | 50 %       |
-| Daño crítico (CRIT DMG)      | Daño extra del crítico.                                           | +150 %     |
-| Turno extra (EXTRA %)        | Probabilidad de saltar el turno enemigo y volver a atacar.        | 35 %       |
-| Suerte (LUCK)                | Mejora la calidad esperable del botín.                            | —          |
-| Vampirismo (VAMP %)          | Cura un % del daño infligido (mínimo 1 si hay VAMP y el golpe acierta). Se ve como «+N» verde sobre el héroe. | 25 % |
-| Precisión / fallo            | Probabilidad base de fallo del héroe y del enemigo.               | Por definir |
+## 4.4. Extra turn
 
-Los topes son valores iniciales y se ajustarán en el balance. Las estadísticas que superen el tope no tienen efecto adicional; el panel lo indica.
+The extra-turn chance (EXTRA %) comes from the hero’s stats and gear. When it triggers, the enemy loses its turn and the hero attacks again. It is automatic.
 
-## 5.1. Ranuras
+- Extra turns can chain, but **each consecutive extra turn halves the chance of the next one** within the same sequence.
+- The base chance is capped (§5).
+- A missed attack can also trigger an extra turn (simple rule: the check always happens). Can be revisited during balancing.
 
-| **Ranura**      | **Estado inicial**                                            |
-|-----------------|---------------------------------------------------------------|
-| Casco           | Pieza básica equipada                                         |
-| Pechera         | Pieza básica equipada                                         |
-| Botas / zapatos | Pieza básica equipada                                         |
-| Espada          | Arma básica equipada                                          |
-| Escudo          | Sin equipar al inicio; ranura disponible para futuros objetos |
+## 4.5. Telegraphed heavy blow
 
-**Cada objeto tiene como máximo 3 estadísticas:** 1 principal y hasta 2 secundarias, sin repetir. Las armas aportan sobre todo estadísticas ofensivas; las armaduras y el escudo, defensa y bonificadores secundarios (crítico, suerte, turno extra o vampirismo). No hay mochila: en cada recompensa se conserva la pieza actual o se sustituye por la nueva.
+On its turn an enemy may **prepare** instead of attacking. That turn deals no damage, but a blinking red “!” appears above it and the text “SE PREPARA!” (*It is preparing!*). Its next action is a **heavy blow** (`GOLPE_FUERTE`, ×2.5), which can also miss or crit.
 
-## 5.2. Panel de estadísticas
+- The warning survives the hero’s extra turns: the heavy blow lands on the enemy’s next real turn.
+- It creates a decision without extra buttons: gamble on a perfect special to kill it first, or take the hit.
+- Each enemy type prepares with a different frequency (§7.1).
 
-Durante el turno del héroe, B abre una placa de **Atributos**: una fila por atributo con nombre completo (Vida, Ataque, Defensa, Crítico, Poder crítico, Turno extra, Suerte, Vampirismo) y su valor alineado a la derecha; en oro con «máx» si ha llegado al tope. El combate queda en pausa; B vuelve.
+# 5. Stats and equipment
 
-# 6. Recompensas y curación
+The knight has base stats plus bonuses from equipped pieces. Swapping an item removes its modifiers and applies the new ones; displayed stats update instantly.
 
-## 6.1. Curación por victoria
+| **Stat**                 | **In-game label**  | **Role**                                                         | **Cap**   |
+|--------------------------|--------------------|------------------------------------------------------------------|-----------|
+| HP (current / max)       | Vida               | Survival. Items never change it (§6.4).                          | —         |
+| Attack (ATK)             | Ataque             | Offensive power.                                                 | —         |
+| Defence (DEF)            | Defensa            | Reduces incoming damage (proportional formula).                  | —         |
+| Crit chance (CRIT %)     | Crítico            | Chance for a landed hit to be critical.                          | 50 %      |
+| Crit damage (CRIT DMG)   | Poder crítico      | Extra damage on a critical.                                      | +150 %    |
+| Extra turn (EXTRA %)     | Turno extra        | Chance to skip the enemy turn and attack again.                  | 35 %      |
+| Luck (LUCK)              | Suerte             | Improves the expected quality of loot.                           | —         |
+| Lifesteal (VAMP %)       | Vampirismo         | Heals a % of damage dealt (min 1 if VAMP > 0 and the hit lands). Shown as a green “+N” over the hero. | 25 % |
+| Accuracy / miss          | —                  | Base miss chance for hero and enemies.                           | TBD       |
 
-Al ganar cada combate, el héroe recupera automáticamente un **porcentaje de su vida máxima** (`CURA_VICTORIA`, valor inicial propuesto: 20 %), sin superar el máximo. Se muestra como un número verde flotante antes de la pantalla de botín.
+Caps are starting values. Stats above their cap have no extra effect; the stats screen shows them in gold with “max”.
 
-## 6.2. Obtención de botín
+## 5.1. Slots
 
-Cada enemigo derrotado deja exactamente 1 recompensa: una pieza de equipo (espada, casco, pechera, botas o escudo) o, con baja probabilidad, una poción. No se acumula una cola de botín. El nivel del enemigo marca la escala general del objeto; la suerte aumenta la probabilidad de obtener mejores estadísticas, pero no la cantidad de objetos.
+| **Slot** (in-game)   | **Initial state**                                  |
+|----------------------|----------------------------------------------------|
+| Helmet (Casco)       | Basic piece equipped                               |
+| Chestplate (Pechera) | Basic piece equipped                               |
+| Boots (Botas)        | Basic piece equipped                               |
+| Sword (Espada)       | Basic weapon equipped                              |
+| Shield (Escudo)      | Empty at start; available for future drops         |
 
-Probabilidad inicial propuesta de poción: 10 % (por balancear). Los jefes nunca dejan poción.
+**Each item has at most 3 stats:** 1 primary and up to 2 secondaries, no repeats. Weapons mostly give offensive stats; armour and shield give defence plus secondary bonuses (crit, luck, extra turn or lifesteal). There is no inventory: every reward is either kept (replacing the current piece) or discarded.
 
-### Rarezas
+## 5.2. Stats screen
 
-| **Rareza** | **Color**           | **Peso base** | **Potencia** | **Secundarias**   |
-|------------|---------------------|---------------|--------------|-------------------|
-| Común      | Claro (acero)       | 70 %          | ×1,0         | 0 o 1 (50 %)      |
-| Rara       | Espectral (bioma)   | 25 %          | ×1,25        | 1 o 2 (40 % dos)  |
-| Épica      | Oro                 | 5 %           | ×1,55        | Siempre 2         |
+During the hero’s turn, B opens a single **Atributos** (*Attributes*) panel: one row per attribute with its full name (Vida, Ataque, Defensa, Crítico, Poder crítico, Turno extra, Suerte, Vampirismo) and its value right-aligned; shown in gold with “max” when capped. Combat is paused; B goes back.
 
-- **LUCK**: cada punto pasa 1 punto de peso de Común a Rara (70 %) y Épica (30 %). Común nunca baja del 10 %. El nombre y el marco del objeto se pintan del color de su rareza, así el efecto de la suerte se ve.
-- **Jefes**: siempre dejan un objeto Raro o Épico.
+# 6. Rewards and healing
 
-### Generación de objetos
+## 6.1. Victory heal
 
-- **Estadística principal**: ATK en la espada y DEF en el resto. Su valor = base × factor de ranura × crecimiento por encuentro × rareza × **variación aleatoria ±25 %**.
-- **Estadísticas secundarias** (según la rareza): CRIT, CRIT DMG, EXTRA, LUCK o VAMP (CRIT DMG solo en armas). Su valor es pequeño y casi fijo; crece poco con el nivel para no romper los topes.
-- **Material** (nombre): cambia cada 6 encuentros (Madera, Hierro, Acero, Plata, Mitril, Rúnico, Astral). Por ejemplo, «Espada de Acero».
-- **¿Puede salir peor?** Sí. Por la variación ±25 % y porque la pieza nueva puede traer otra estadística secundaria (o ninguna), un objeto de más nivel puede ser peor que el actual. La comparación lo enseña con claridad.
+After every won fight the hero automatically recovers a **percentage of max HP** (`CURA_VICTORIA`, 20 %), never above max. Shown as a floating number before the loot screen.
 
-## 6.3. Equipo: comparar y decidir
+## 6.2. Loot
 
-La pantalla de botín enseña lado a lado el objeto equipado y el encontrado (dos columnas de unos 120 px). Con un máximo de 2 estadísticas por objeto, siempre se muestran todos los valores y la diferencia (▲ verde / ▼ roja) en el objeto nuevo.
+Every defeated enemy drops exactly 1 reward: a gear piece (sword, helmet, chestplate, boots or shield) or, rarely, a potion. The encounter level sets the overall item scale; luck improves the odds of better stats, not the number of items.
 
-| **OBJETO ACTUAL**    | **OBJETO NUEVO**         |
-|----------------------|--------------------------|
-| Espada de hierro     | Espada de plata          |
-| ATK +5               | ATK +7 ▲2                |
-| CRIT +3%             | EXTRA +4% (nuevo)        |
-| \[ CONSERVAR \]      | \[ EQUIPAR \]            |
+Potion chance: 10 % (to be balanced). Bosses never drop potions.
 
-Si el objeto nuevo no tiene una estadística que sí tiene el actual, se muestra la pérdida (por ejemplo, `CRIT −3% ▼`). La selección se cambia con B y se confirma con A. Al equipar se descarta el anterior; al conservar se pierde el encontrado.
+### Rarities
 
-## 6.4. Pociones: recuperar o vida máxima
+| **Rarity**        | **Colour**              | **Base weight** | **Power** | **Secondaries**    |
+|-------------------|-------------------------|-----------------|-----------|--------------------|
+| Common (Común)    | Light (steel)           | 70 %            | ×1.0      | 0 or 1 (50 %)      |
+| Rare (Rara)       | Spectral (biome accent) | 25 %            | ×1.25     | 1 or 2 (40 % two)  |
+| Epic (Épica)      | Gold                    | 5 %             | ×1.55     | Always 2           |
 
-Las pociones son raras y nunca se guardan para después. Al obtener una, el jugador elige:
+- **LUCK**: each point moves 1 point of weight from Common to Rare (70 %) and Epic (30 %). Common never drops below 10 %. Item names and the hero’s gear are drawn in the rarity colour, so the effect of luck is visible.
+- **Bosses** always drop a Rare or Epic item.
 
-| **Opción**   | **Efecto**                                                                         |
-|--------------|------------------------------------------------------------------------------------|
-| RECUPERAR    | Restaura la vida **por completo**.                                                 |
-| VIDA MÁX.    | Aumenta la vida máxima de forma permanente (`POCION_HPMAX`, valor inicial +10 %). La vida actual sube en la misma cantidad. |
+### Item generation
 
-Se alterna con B y se confirma con A. La pantalla muestra la vida actual y el resultado de cada opción.
+- **Primary stat**: ATK on the sword, DEF on everything else. Value = base × slot factor × per-encounter growth × rarity × **random ±25 %**.
+- **Secondary stats** (by rarity): CRIT, CRIT DMG, EXTRA, LUCK or VAMP (CRIT DMG on weapons only). Small, almost flat values that grow slowly with level so caps are not broken.
+- **Material** (name): changes every 6 encounters (Madera, Hierro, Acero, Plata, Mitril, Rúnico, Astral — wood, iron, steel, silver, mithril, runic, astral).
+- **Can a drop be worse?** Yes. Because of the ±25 % roll and different (or missing) secondaries, a higher-level item can be worse than the current one. The comparison makes this obvious.
 
-> **EJEMPLO**
+## 6.3. Gear: compare and decide
+
+The loot screen shows two side-by-side panels: **equipped item on the left, new item on the right**.
+
+- Each panel shows the item type large (serif 9 bold) and its rarity below, both in the rarity colour.
+- The **equipped panel shows only its own stats**, as they are.
+- The **new panel** lists its stats and, at the end, any stats that would be lost (“--”). It is the only panel with comparisons: a green ▲ (better) or red ▼ (worse) arrow with the difference next to each value.
+- Stat lists use the 5×7 pixel font with generous line spacing.
+- **The panels are the buttons**: B switches, A confirms. The selected panel has a double gold frame with pulsing corners; the other is dimmed.
+- Equipping discards the old piece; keeping discards the drop.
+
+## 6.4. Potions: restore or max HP
+
+Potions are rare and cannot be stored. On a potion drop the player picks one of two panels (same layout as gear):
+
+| **Option**              | **Effect**                                                                                     |
+|-------------------------|------------------------------------------------------------------------------------------------|
+| Recuperar (*Restore*)   | Fully restores HP.                                                                             |
+| Vida máx. (*Max HP*)    | Permanently raises max HP (`POCION_HPMAX`, +10 %). Current HP rises by the same amount.        |
+
+Each panel shows the resulting HP large and the current HP below.
+
+> **EXAMPLE**
 >
-> Vida 23/50. RECUPERAR → 50/50. VIDA MÁX. → 28/55. Es una decisión entre sobrevivir ahora y ser más resistente después.
+> HP 23/50. Restore → 50/50. Max HP → 28/55. A choice between surviving now and being tougher later.
 
-Como los objetos nunca cambian la vida máxima, la única forma de subirla son estas pociones. Así se evitan casos raros al cambiar de equipo.
+Since items never change max HP, these potions are the only way to raise it, which avoids odd cases when swapping gear.
 
-# 7. Dificultad y progresión
+# 7. Difficulty and progression
 
-Cada nuevo enemigo es un escalón de dificultad. A medida que avanza la partida aumentan su vida, ataque y defensa, y hace falta mejorar el equipo. Las recompensas también escalan con el avance, sin garantizar que cada pieza nueva sea mejor que la actual.
+Each new enemy is a step up in difficulty. Enemy HP, attack and defence grow exponentially with the encounter number (HP ×1.07, ATK ×1.05, DEF ×1.065 per encounter). Rewards scale too, without guaranteeing that every new piece is better. Since the hero only gains max HP through potions, difficulty eventually wins: every run ends.
 
-La progresión se basa en la secuencia de encuentros y el equipamiento. No hay experiencia, oro, tiendas ni niveles propios del héroe en esta versión.
+There is no XP, gold, shop or hero level in this version.
 
-Las estadísticas de los enemigos crecen de forma exponencial con el número de encuentro (HP ×1,07, ATK ×1,05 y DEF ×1,065 por encuentro, valores iniciales). Como el héroe solo sube su vida máxima con pociones, la dificultad acaba superándolo: la partida siempre termina.
+## 7.1. Regular enemies
 
-## 7.1. Enemigos normales
+Picked **at random** among four types on every non-boss encounter.
 
-Aparecen **al azar** entre los cuatro tipos en todos los encuentros que no son de jefe.
+| **Type** (in-game)     | **Profile**                       | **HP** | **ATK** | **DEF** | **CRIT** | **Miss** | **Prepares** |
+|------------------------|-----------------------------------|--------|---------|---------|----------|----------|--------------|
+| Salteador (*Highwayman*) | Balanced                        | ×1.0   | ×1.0    | ×1.0    | 5 %      | 10 %     | 15 %         |
+| Golem                  | Tank                              | ×1.4   | ×0.8    | ×1.7    | 3 %      | 12 %     | 10 %         |
+| Huargo (*Warg*)        | Agile: high crit, low DEF         | ×0.8   | ×0.95   | ×0.6    | 20 %     | 5 %      | 10 %         |
+| Troll                  | Brute: hits hard and telegraphs   | ×1.15  | ×1.25   | ×0.85   | 5 %      | 14 %     | 35 %         |
 
-| **Tipo**  | **Perfil**                    | **HP** | **ATK** | **DEF** | **CRIT** | **Fallo** | **Se prepara** |
-|-----------|-------------------------------|--------|---------|---------|----------|-----------|----------------|
-| Salteador | Equilibrado                   | ×1,0   | ×1,0    | ×1,0    | 5 %      | 10 %      | 15 %           |
-| Golem     | Tanque                        | ×1,4   | ×0,8    | ×1,7    | 3 %      | 12 %      | 10 %           |
-| Huargo    | Ágil: crítico alto, DEF baja  | ×0,8   | ×0,95   | ×0,6    | 20 %     | 5 %       | 10 %           |
-| Troll     | Bruto: pega fuerte y avisa    | ×1,15  | ×1,25   | ×0,85   | 5 %      | 14 %      | 35 %           |
+## 7.2. Bosses
 
-## 7.2. Jefes
+A boss **always** appears every 10 encounters. There are 5 unique bosses with their own larger sprites (up to ~100 px), appearing in order; after the fifth the sequence repeats at higher stats. Their loot is at least Rare. Each boss entrance has a banner and a short jingle.
 
-Un jefe **siempre** cada 10 encuentros. Son 5 jefes únicos, con sprite propio y más grande (hasta unos 96 px), que salen en orden. Tras el quinto se repite la secuencia con las estadísticas del nivel. Su botín es como mínimo Raro.
+| **Encounter** | **Boss** (in-game)                    | **Visual concept**                                | **HP** | **ATK** | **DEF** | **CRIT** | **Miss** | **Prepares** |
+|---------------|---------------------------------------|---------------------------------------------------|--------|---------|---------|----------|----------|--------------|
+| 10            | Rey Ciervo (*Stag King*)              | Forest giant with antlers and a crown of roots    | ×2.0   | ×1.1    | ×1.2    | 8 %      | 10 %     | 20 %         |
+| 20            | Dama Espectral (*Spectral Lady*)      | Floating apparition with a veil and chains        | ×1.5   | ×1.15   | ×0.9    | 25 %     | 4 %      | 20 %         |
+| 30            | Caballero Negro (*Black Knight*)      | Dark mirror of the hero, greatsword, torn cape    | ×1.9   | ×1.15   | ×1.45   | 10 %     | 8 %      | 30 %         |
+| 40            | La Tejedora (*The Weaver*)            | Colossal spider with a pale mask                  | ×1.7   | ×1.2    | ×1.0    | 15 %     | 6 %      | 25 %         |
+| 50            | Rey Liche (*Lich King*)               | Crowned skeleton with a staff of spectral fire    | ×2.2   | ×1.25   | ×1.25   | 12 %     | 6 %      | 35 %         |
 
-| **Encuentro** | **Jefe**         | **Concepto visual**                                   | **HP** | **ATK** | **DEF** | **CRIT** | **Fallo** | **Se prepara** |
-|---------------|------------------|-------------------------------------------------------|--------|---------|---------|----------|-----------|----------------|
-| 10            | Rey Ciervo       | Gigante del bosque con cornamenta y corona de raíces | ×2,0   | ×1,1    | ×1,2    | 8 %      | 10 %      | 20 %           |
-| 20            | Dama Espectral   | Aparición flotante con velo y cadenas                 | ×1,5   | ×1,15   | ×0,9    | 25 %     | 4 %       | 20 %           |
-| 30            | Caballero Negro  | Reflejo oscuro del héroe, gran espada y capa raída    | ×1,9   | ×1,15   | ×1,45   | 10 %     | 8 %       | 30 %           |
-| 40            | La Tejedora      | Araña colosal con rostro pálido                       | ×1,7   | ×1,2    | ×1,0    | 15 %     | 6 %       | 25 %           |
-| 50            | Rey Liche        | Esqueleto coronado con báculo y fuego espectral       | ×2,2   | ×1,25   | ×1,25   | 12 %     | 6 %       | 35 %           |
+## 7.3. Biomes
 
-## 7.3. Biomas
+The biome changes **after every boss**: encounters 1–10 Forest (*El Bosque*), 11–20 Graveyard (*El Cementerio*), 21–30 Castle (*El Castillo*), then it cycles. Each biome has its own 8-colour palette (§8.2) and layered background; the hero, enemies and UI all take the biome palette.
 
-El bioma cambia **después de cada jefe**: encuentros 1–10 Bosque, 11–20 Cementerio, 21–30 Castillo, y vuelta a empezar. Cada bioma tiene su paleta de 8 colores (§8.2) y su fondo por capas. Héroe, enemigos e interfaz toman la paleta del bioma.
+# 8. Screens and presentation
 
-# 8. Pantallas y presentación
+| **Screen**        | **Content**                                                                                                                                   |
+|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| Title             | Hand-drawn logo (gold embossed “STICK”, a sword as underline, “R P G” between diamonds) that drops in and lands with a shake and a flash; a light glint sweeps the letters, sparkles twinkle and embers rise; “Una leyenda oscura”, “- Pulsa A -”, record and sound toggle (B). |
+| Biome intro       | Scenery, chapter card “Capítulo II” and biome name.                                                                                           |
+| Combat            | Hero on the left, enemy on the right, HUD at the bottom, combat messages, floating numbers, full-width charge bar at the top while charging. |
+| Boss intro        | Black band with “- Jefe -” and the boss name in gold.                                                                                         |
+| Stats             | Single “Atributos” panel (§5.2).                                                                                                              |
+| Gear loot         | Two selectable panels (§6.3).                                                                                                                 |
+| Potion loot       | Two selectable panels (§6.4).                                                                                                                 |
+| Pause             | “Pausa” and how to resume (PWR).                                                                                                              |
+| Defeat            | “Has caído”, enemies defeated, highest hit, record (“Nuevo récord!” if beaten) and “A: volver”.                                              |
 
-| **Pantalla**             | **Información imprescindible**                                                                                                      |
-|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| Start                    | Logotipo dibujado («STICK» dorado en relieve, espada como subrayado, «R P G» entre rombos) que cae y aterriza con temblor y destello; reflejo que recorre las letras, destellos y ascuas; «Una leyenda oscura», «Pulsa A», récord y sonido (B). |
-| Entrada / desplazamiento | Guerrero corriendo, escenario con scroll y entrada del enemigo por la derecha.                                                      |
-| Combate                  | Héroe a la izquierda, enemigo a la derecha, HP de ambos, número de encuentro, efectos de golpe/fallo/crítico/turno extra y barra de carga con zona perfecta. |
-| Panel de estadísticas    | Estadísticas completas y equipo actual (ver §5.2).                                                                                  |
-| Botín: equipo            | Dos columnas; actual + CONSERVAR a la izquierda; nuevo + EQUIPAR a la derecha; diferencias marcadas.                                |
-| Botín: poción            | Vida actual, resultado de RECUPERAR y de VIDA MÁX.                                                                                  |
-| Pausa                    | «PAUSA» y cómo reanudar (PWR).                                                                                                      |
-| Game Over                | Enemigos derrotados, récord (y aviso de «¡Nuevo récord!»), golpe más alto de la partida y «A: reiniciar».                           |
+## 8.1. Visual language
 
-## 8.1. Lenguaje visual
+- 8 colours per biome, same role per index in every biome (§8.2). Keep text and HUD contrast high.
+- **Typography**: titles and screens use FreeSerif 9–18 pt (bold/italic); the HUD and stat lists use our own 5×7 pixel font in bold.
+- **HUD** at the bottom (keeps the sky free for tall bosses), as mirrored iron panels:
+  - Hero (left): heart + “CABALLERO”, HP number + bar.
+  - Centre: encounter number in **Roman numerals** and the 3 special runes.
+  - Enemy (right): name + skull (crown for bosses), bar + remaining HP number.
+- **Panels**: iron plates with a black fill, light top edge and gold rivets; segmented HP bars; selections framed in gold.
+- Sprites must be readable at 240 × 135; critical info (HP, selection, charge, crit, miss, extra turn) must be readable at a glance.
+- No scrolling or complex selection during combat: the game waits for A press/release.
 
-- 8 colores por bioma, con el mismo papel en todos. Mantener el contraste del texto y el HUD.
-- Texto: títulos y pantallas en FreeSerif 9–18 pt; HUD en fuente pixel 5×7 en negrita. La placa del enemigo muestra su vida restante (número y barra).
-- Botín: dos placas lado a lado (actual a la izquierda, nueva a la derecha). Cada una muestra el tipo de objeto (serif 9 negrita) y su rareza debajo; la lista de estadísticas va en fuente pixel 5×7 con interlineado amplio. La equipada muestra solo sus estadísticas, tal cual; la nueva muestra las suyas y, al final, las que se perderían («--»), y es la única con comparación: la diferencia con flecha y número en serif negrita (verde ▲ mejora, roja ▼ empeora). Las placas son los propios botones: B cambia, A confirma; la elegida se enmarca en oro y la otra se atenúa.
-- Poción: mismo formato, dos placas seleccionables (Recuperar | Vida máx.) con la vida resultante en grande y la actual debajo.
-- HUD: placas espejo. Héroe: corazón + «CABALLERO», vida y barra. Enemigo: nombre + calavera/corona, barra y vida. Centro: número de encuentro en romanos y runas del especial.
-- Interfaz tematizada, abajo para dejar el cielo libre a los jefes: placas de hierro con remaches dorados, barras segmentadas, número de encuentro en **números romanos**, runas del especial, títulos en serif (FreeSerifBold) y textos en una fuente pixel propia de 5×7.
-- Sprites y animaciones pequeños pero reconocibles a 240 × 135 píxeles.
-- La información crítica (vidas, selección, carga, crítico, fallo y turno extra) debe leerse en segundos.
-- En combate no hay desplazamiento ni selección compleja: el juego espera la pulsación o la liberación de A.
-- Durante las transiciones no hace falta pulsar nada y el héroe corre solo.
+## 8.2. Palettes (8 colours per biome)
 
-## 8.2. Paletas (8 colores por bioma)
+Each index has a fixed role; the biome only changes the hue. Sprites and backgrounds are drawn once and the game swaps the palette when entering another biome. See `docs/STYLE_GUIDE.md` for the full art guide and importable palette files.
 
-Cada índice tiene un papel fijo; el bioma solo cambia el tono. Los sprites y fondos se dibujan una vez y el juego cambia la paleta al entrar en otro bioma.
+| **#** | **Role**   | **Use**                                         | **Forest** | **Graveyard** | **Castle** |
+|-------|------------|-------------------------------------------------|------------|---------------|------------|
+| 0     | Black      | Outlines, panels, near silhouettes              | `#0A0E0D`  | `#0B0A12`     | `#0E0A0A`  |
+| 1     | Dark       | Sky, shadows, bar backgrounds                   | `#1B2925`  | `#221D33`     | `#2A1E1D`  |
+| 2     | Mid        | Mist, chainmail, steel shadow                   | `#3B5247`  | `#433B5C`     | `#52403A`  |
+| 3     | Light      | Steel, stone, Common rarity                     | `#7A9380`  | `#827A9A`     | `#8E7E72`  |
+| 4     | Bright     | Text, moon, highlights                          | `#D4DEC8`  | `#DAD4E6`     | `#E4DACA`  |
+| 5     | Blood      | HP, damage, cape and plume                      | `#9C2E30`  | `#A02C3E`     | `#B8302A`  |
+| 6     | Gold       | Criticals, perfect zone, selection, Epic rarity | `#D6A248`  | `#D8B462`     | `#ECA43A`  |
+| 7     | Spectral   | Biome magic, runes, charge, Rare rarity         | `#9FE05A`  | `#72E4D4`     | `#A472E0`  |
 
-| **#** | **Papel**  | **Uso**                                        | **Bosque** | **Cementerio** | **Castillo** |
-|-------|------------|------------------------------------------------|------------|----------------|--------------|
-| 0     | Negro      | Contornos, paneles, siluetas cercanas          | `#0A0E0D`  | `#0B0A12`      | `#0E0A0A`    |
-| 1     | Oscuro     | Cielo, sombras, fondo de barras                | `#1B2925`  | `#221D33`      | `#2A1E1D`    |
-| 2     | Medio      | Bruma, malla, sombra del acero                 | `#3B5247`  | `#433B5C`      | `#52403A`    |
-| 3     | Claro      | Acero, piedra, rareza Común                    | `#7A9380`  | `#827A9A`      | `#8E7E72`    |
-| 4     | Brillo     | Texto, luna, brillos                           | `#D4DEC8`  | `#DAD4E6`      | `#E4DACA`    |
-| 5     | Sangre     | Vida, daño, capa y penacho                     | `#9C2E30`  | `#A02C3E`      | `#B8302A`    |
-| 6     | Oro        | Crítico, zona perfecta, selección, rareza Épica | `#D6A248`  | `#D8B462`      | `#ECA43A`    |
-| 7     | Espectral  | Magia del bioma, runas, carga, rareza Rara     | `#9FE05A`  | `#72E4D4`      | `#A472E0`    |
+Indices 8–15 are unused; **index 15 is sprite transparency**.
 
-Los índices 8–15 no se usan; el 15 es la transparencia de los sprites.
+## 8.3. Sound and music
 
-## 8.3. Sonido y música
+Built-in buzzer with a non-blocking note sequencer.
 
-Zumbador integrado, con secuenciador de notas que no bloquea el juego.
+| **Moment**        | **Sound**                                                             |
+|-------------------|-----------------------------------------------------------------------|
+| Title screen      | Short jingle: A-minor fanfare (~1.6 s)                                |
+| Boss appears      | Micro jingle: menacing tritone (~0.9 s) plus screen shake             |
+| New biome         | Rising arpeggio with the chapter card                                 |
+| Victory           | Short arpeggio while the enemy dissolves                              |
+| Defeat            | Descending melody                                                     |
+| Combat            | Hit, miss, critical, extra turn, charge, perfect zone, enemy footsteps, heavy-blow warning |
 
-| **Momento**        | **Sonido**                                                    |
-|--------------------|---------------------------------------------------------------|
-| Pantalla de inicio | Jingle corto: fanfarria en La menor (~1,6 s)                  |
-| Aparece un jefe    | Micro jingle: tritono amenazante (~0,9 s) y temblor           |
-| Nuevo bioma        | Arpegio ascendente con el título del capítulo                 |
-| Victoria           | Arpegio breve mientras el enemigo se desvanece                |
-| Derrota            | Melodía descendente                                           |
-| Combate            | Golpe, fallo, crítico, turno extra, carga, zona perfecta, pasos del enemigo, aviso de golpe fuerte |
+Sound can be muted from the title screen (B); the setting is saved.
 
-Se puede silenciar desde el inicio (B); el ajuste se guarda.
+## 8.4. Combat text timing
 
-## 8.6. Efectos y animación
+| **Event**                       | **Duration** |
+|---------------------------------|--------------|
+| Hit / miss                      | 450 ms       |
+| Critical / heavy blow           | 650 ms       |
+| Extra turn                      | 500 ms       |
+| Texts inside a chain            | 300 ms       |
+| Pause before the enemy turn     | 450 ms       |
+| “SE PREPARA!”                   | 700 ms       |
 
-- **Respiración**: héroe y enemigos alternan dos frames en reposo; los fantasmas (Dama Espectral, Rey Liche) flotan.
-- **Entrada**: cada enemigo entra caminando desde la derecha y frena al llegar.
-- **Golpes**: el héroe tarda ~180 ms en descargar el tajo; el golpeado retrocede y parpadea en blanco.
-- **Temblor de pantalla**: fuerte al recibir un crítico, medio con golpe fuerte, crítico propio o carga perfecta; leve en golpes normales.
-- **Destello**: la carga perfecta aclara toda la paleta un instante.
-- **Muerte**: el enemigo se disuelve con trama.
-- **Fundidos** de paleta entre encuentros; al cambiar de bioma, cartela «CAPÍTULO II · El Cementerio».
-- **Jefes**: banda negra con su nombre en oro.
-- **Carga del especial**: la espada se alza con chispas espectrales y la barra aparece arriba, a lo ancho de toda la pantalla.
+All texts from one hit are merged into a single message (e.g. “PERFECTO CRITICO +TURNO”). Combat messages use serif 12 pt when they fit, 9 pt otherwise. Damage appears as a number floating up over the target.
 
-## 8.4. Ritmo de los textos de combate
+## 8.5. Effects and animation
 
-| **Evento**                     | **Duración** |
-|--------------------------------|--------------|
-| Golpe / fallo                  | 450 ms       |
-| Crítico / golpe fuerte         | 650 ms       |
-| Turno extra                    | 500 ms       |
-| Textos dentro de una cadena    | 300 ms       |
-| Pausa antes del turno enemigo  | 450 ms       |
-| «¡SE PREPARA!»                 | 650 ms       |
+- **Breathing**: hero and enemies alternate two idle frames; ghosts (Spectral Lady, Lich King) float.
+- **Entrance**: each enemy walks in from the right and eases to a stop.
+- **Hits**: the hero’s slash lands ~180 ms after the input; the target recoils and flashes white.
+- **Screen shake**: strong when the hero takes a critical, medium on heavy blows, own crits or perfect specials, slight on normal hits.
+- **Flash**: a perfect special briefly brightens the whole palette.
+- **Death**: the enemy dissolves with a dither pattern.
+- **Palette fades** between encounters; chapter card when the biome changes.
+- **Special charge**: the sword is raised with spectral sparks and the bar spans the top of the screen.
 
-Los textos de un mismo golpe se juntan en un solo mensaje (por ejemplo, «PERFECTO CRITICO +TURNO») en lugar de mostrarse uno detrás de otro. El daño aparece como un número que sube sobre el personaje golpeado.
+## 8.6. Persistence
 
-## 8.5. Persistencia
+Stored in NVS: the record (enemies defeated) and the sound setting. The current run is not saved; it is lost on power-off.
 
-Se guardan en la memoria no volátil (NVS): el récord de enemigos derrotados y el ajuste de sonido. La partida en curso no se guarda; al apagar se pierde.
+# 9. Current feature set
 
-# 9. Primera versión jugable (MVP)
+- Title with animated logo, music and sound toggle.
+- Knight with five slots (shield empty at start); gear visible on the sprite and tinted by rarity.
+- Turn-based combat: normal attack, special every 3 hits with a cyclic bar and perfect zone, misses, criticals (enemies too), chained extra turns with halving odds, telegraphed heavy blows, lifesteal.
+- Proportional damage, stat caps, gear recalculation.
+- Victory heal and one reward per fight (gear comparison with up to 3 stats, or potion choice).
+- 4 random regular enemies and 5 unique bosses every 10 encounters; 3 biomes with their own palettes and backgrounds.
+- Stats screen (B), pause (PWR), defeat screen with persistent record.
 
-- Pantalla de Start con récord, entrada corriendo y transición de scroll hasta un enemigo.
-- Un guerrero con las cinco ranuras, escudo inicialmente vacío y equipo básico.
-- Un enemigo funcional y sistema de turnos: ataque normal, ataque cargado con barra cíclica y zona perfecta, fallos, críticos (también del enemigo) y turno extra con reducción por encadenamiento.
-- Fórmula de daño proporcional, topes de estadísticas y recálculo por equipamiento.
-- Curación por victoria y una recompensa por combate: comparación de equipo (máx. 3 estadísticas) o poción RECUPERAR / VIDA MÁX.
-- Panel de estadísticas con B y pausa con PWR.
-- Escalado inicial de dificultad y repetición infinita de encuentros.
-- Game Over con enemigos derrotados, récord persistente y reinicio.
-- Cuatro tipos de enemigo + jefe cada 10, con golpe fuerte anunciado.
-- Rarezas visibles por color.
-- Efectos de sonido básicos.
+# 10. Balance parameters
 
-# 10. Parámetros pendientes de balance
+| **Parameter**   | **Still to tune**                                                                                  |
+|-----------------|----------------------------------------------------------------------------------------------------|
+| Attacks         | `T_UMBRAL_MS`, charge cycle length, `CARGA_MIN`, `CARGA_MAX`, `ZONA_PERFECTA`, `CARGA_PERFECTA`.   |
+| Accuracy        | Base miss chance (hero and enemies), whether charging affects it, whether any item improves it.    |
+| Criticals       | Base CRIT % and CRIT DMG; validate caps (50 % / +150 %).                                           |
+| Extra turn      | Base chance; validate cap (35 %) and chain halving.                                                |
+| Enemies         | Starting stats, growth curve, miss/crit chances.                                                   |
+| Loot            | Category odds, potion chance, quality formula, exact LUCK effect.                                  |
+| Healing         | `CURA_VICTORIA` and `POCION_HPMAX`.                                                                |
+| Hero            | Starting stats and basic gear.                                                                     |
+| Heavy blow      | Multiplier (×2.5) and per-type frequency.                                                          |
 
-| **Parámetro**  | **Pendiente de fijar**                                                                                        |
-|----------------|---------------------------------------------------------------------------------------------------------------|
-| Ataques        | `T_umbral`, duración del ciclo de carga, `CARGA_MIN`, `CARGA_MAX`, `ZONA_PERFECTA`, `CARGA_PERFECTA`.        |
-| Precisión      | Probabilidad base de fallo (héroe y enemigo), si la carga la modifica y si algún objeto la mejora.            |
-| Críticos       | CRIT % y CRIT DMG base; validar topes (50 % / +150 %).                                                        |
-| Turno extra    | Probabilidad base; validar tope (35 %) y la reducción a la mitad por encadenamiento.                          |
-| Enemigos       | Estadísticas iniciales, curva de crecimiento, probabilidad de fallo/crítico, variedad y tipos visuales.       |
-| Botín          | Probabilidades por categoría, probabilidad de poción, fórmula de calidad, efecto exacto de LUCK.             |
-| Curación       | `CURA_VICTORIA` y `POCION_HPMAX`.                                                                             |
-| Personaje      | Estadísticas iniciales y propiedades del equipo básico.                                                       |
-| Transiciones   | Duración de la carrera y del scroll.                                                                          |
-| Golpe fuerte   | Multiplicador (×2,5) y frecuencia por tipo.                                                                   |
+All values live in `src/core/balance.h`. The simulator (`make sim`) plays thousands of runs with a bot player to tune them.
 
-Todos los valores viven en `src/core/balance.h`. El simulador (`make sim`) juega miles de partidas con un jugador automático para ajustarlos.
+**Current simulator results** (5000 runs; `skill` = probability of releasing in the perfect zone):
 
-**Primera pasada del simulador** (5000 partidas, `skill` = probabilidad de soltar en la zona perfecta):
+| **Player**                    | **Mean** | **p10** | **Median** | **p90** |
+|-------------------------------|----------|---------|------------|---------|
+| Normal attacks only           | 16.5     | 9       | 17         | 22      |
+| Special without timing (0.0)  | 18.2     | 11      | 19         | 25      |
+| Special, skill 0.5            | 20.8     | 14      | 20         | 29      |
+| Special, skill 0.9            | 23.3     | 17      | 23         | 29      |
 
-| **Jugador**                  | **Media** | **p10** | **Mediana** | **p90** |
-|------------------------------|-----------|---------|-------------|---------|
-| Solo ataque normal           | 13,9      | 9       | 14          | 19      |
-| Carga sin timing (skill 0)   | 14,9      | 9       | 15          | 19      |
-| Carga con skill 0,5          | 20,8      | 16      | 20          | 27      |
-| Carga con skill 0,9          | 24,9      | 19      | 25          | 29      |
+Skill pays off while charging without timing barely beats normal attacks. Around 35 % of runs end at a boss; this may need review.
 
-Se cumple lo buscado: cargar sin timing apenas mejora el ataque normal, y la habilidad sí se nota. Las muertes ante un jefe rondan el 32 %; habrá que revisarlo.
+# 11. Sprites and graphics
 
-# 11. Sprites y gráficos
+See **`docs/STYLE_GUIDE.md`** for the full art guide (palettes, sizes, anchors, layers, animation tags, shading rules and how to deliver new art).
 
-## 11.1. Dirección de arte
+## 11.1. Art direction
 
-- Fantasía medieval oscura: bosque siniestro de árboles muertos bajo una luna pálida, cementerio y castillo.
-- Personajes de **~64 px** (jefes hasta ~96 px), vista lateral, contorno negro, luz desde arriba a la izquierda con 3 tonos por material.
-- El héroe no camina: está en guardia a la izquierda. Los enemigos **entran caminando** desde la derecha.
+- Dark medieval fantasy: a sinister forest of dead trees under a pale moon, a graveyard, a castle hall.
+- Characters **~64 px** tall (bosses up to ~100 px), side view, black outline, light from the top-left with 3 tones per material.
+- The hero does not walk: he stands guard on the left. Enemies **walk in** from the right.
 
-## 11.2. Fondo por capas (parallax)
+## 11.2. Layered background (parallax)
 
-| **Capa**  | **Contenido (bosque)**                          | **Movimiento**                      |
-|-----------|-------------------------------------------------|-------------------------------------|
-| Cielo     | Degradado tramado, luna, estrellas, bruma        | Fijo                                |
-| Lejos     | Línea de pinos                                   | Desplazamiento pequeño por encuentro |
-| Nubes     | Procedurales (ruido periódico), 2 capas, nuevas en cada bioma; no en interiores | Deriva lenta continua (2 velocidades) |
-| Niebla    | Jirones tramados                                 | Estática                            |
-| Medio     | Árboles muertos retorcidos con luz de luna       | Desplazamiento medio                |
-| Suelo     | Tierra, piedras, matas                           | Desplazamiento grande               |
-| *Personajes* |                                               |                                     |
-| Frente    | Helechos negros en los bordes                    | El mayor desplazamiento             |
+| **Layer**    | **Content (forest)**                                     | **Movement**                                  |
+|--------------|----------------------------------------------------------|-----------------------------------------------|
+| Sky          | Dithered gradient, moon, stars, mist                     | Fixed                                         |
+| Clouds       | Procedural (periodic noise), 2 layers, new per biome; none indoors | Slow continuous drift (2 speeds)   |
+| Far          | Pine line                                                | Small shift per encounter                     |
+| Fog          | Dithered wisps                                           | Static                                        |
+| Mid          | Twisted dead trees with moonlight rim                    | Medium shift per encounter                    |
+| Ground       | Soil, stones, tufts                                      | Large shift per encounter                     |
+| *Characters* |                                                          |                                               |
+| Front        | Black ferns at the edges                                 | Largest shift                                 |
 
-Todas las capas miden 240 px de ancho y se repiten en horizontal.
+All layers are 240 px wide and tile horizontally.
 
-## 11.3. Héroe
+## 11.3. Hero
 
-Caballero de 80 × 72 px (pies en (30, 71)). Animaciones: `idle` (2), `attack` (3: preparación, tajo, remate), `charge` (espada en alto mientras se carga el especial) y `hit` (1).
+Knight on an 80 × 72 px canvas (feet at (30, 71)). Animations: `idle` (2), `attack` (3: wind-up, slash, follow-through), `charge` (sword raised while charging) and `hit` (1).
 
-| **Capa** (de abajo arriba) | **Se dibuja si…**   | **Recoloreado**      |
-|----------------------------|---------------------|----------------------|
-| cuerpo (capa, malla)       | siempre             | —                    |
-| botas (grebas)             | hay botas           | Rareza de las botas  |
-| pechera                    | hay pechera         | Rareza de la pechera |
-| casco                      | hay casco           | Rareza del casco     |
-| escudo                     | hay escudo          | Rareza del escudo    |
-| brazo (brazo + espada)     | siempre             | Rareza de la espada  |
+| **Layer** (bottom to top)  | **Drawn when…**    | **Recolour**          |
+|----------------------------|--------------------|-----------------------|
+| cuerpo (cape, mail)        | always             | —                     |
+| botas (greaves)            | boots equipped     | Boots rarity          |
+| pechera                    | chestplate equipped| Chestplate rarity     |
+| casco                      | helmet equipped    | Helmet rarity         |
+| escudo                     | shield equipped    | Shield rarity         |
+| brazo (arm + sword)        | always             | Sword rarity          |
 
-El equipo usa los tonos Medio, Claro y Brillo. Según la rareza, el Claro pasa a Espectral (Rara) u Oro (Épica).
+Gear uses the Mid, Light and Bright tones; by rarity, Light becomes Spectral (Rare) or Gold (Epic).
 
-## 11.4. Flujo de trabajo
+## 11.4. Pipeline
 
-1. `tools/art/*.py` generan los sprites y fondos (rasterizador propio con sombreado y contornos) y la captura simulada `tools/art/mock.py`.
-2. El resultado se vuelca a `assets/sprites/*.aseprite` (fuente editable a mano) y `make sprites` lo exporta a `src/gfx/*_gfx.h` (4 bpp).
-3. El firmware dibuja escribiendo directamente en el lienzo de 4 bpp, para mover varias capas de 240 px a 30 fps.
+1. `tools/art/*.py` generate the sprites, backgrounds and title logo (custom rasteriser with shading and outlines), plus a PC mock-up (`tools/art/mock.py`).
+2. Output is written to `assets/sprites/*.aseprite` (hand-editable source); `make sprites` exports them to `src/gfx/*_gfx.h` (4 bpp).
+3. The firmware draws directly into the 4 bpp frame buffer to move several 240 px layers at 30 fps.
 
-## 11.5. Estado
+`make art` regenerates everything from the scripts and **overwrites hand edits** in the `.aseprite` files. After editing an `.aseprite` by hand, run only `make sprites`.
 
-- Hecho: héroe, 4 enemigos, 5 jefes, fondos de los 3 biomas, interfaz completa (combate, botín, poción, estadísticas, inicio, capítulo, jefe, pausa, derrota) e integración en el firmware.
-- Siguiente: probar en el dispositivo y pulir.
+# 12. Technical structure
 
-# 12. Estructura técnica
-
-| **Ruta**                | **Contenido**                                                      |
-|-------------------------|--------------------------------------------------------------------|
-| `src/core/`             | Reglas del juego en C++ puro, sin Arduino (combate, botín, enemigos) |
-| `src/core/balance.h`    | Todos los parámetros de balance                                     |
-| `src/main.cpp`          | Firmware: estados, entrada, render 4 bpp, sonido, NVS              |
-| `src/palette.h`         | Paletas de 8 colores por bioma                                      |
-| `tools/art/`            | Generadores de sprites, fondos, fuente y captura simulada           |
-| `src/gfx/`              | Dibujo de sprites (`sprite.h`) y cabeceras exportadas (`*_gfx.h`)   |
-| `assets/sprites/`       | Fuentes `.aseprite`                                                 |
-| `tools/sprites/`        | Exportador a C y generador del héroe                                |
-| `tools/sim/`            | Simulador de balance para PC                                        |
-| `tools/test/`           | Pruebas de la lógica                                                |
+| **Path**                | **Content**                                                            |
+|-------------------------|------------------------------------------------------------------------|
+| `src/core/`             | Game rules in plain C++, no Arduino (combat, loot, enemies)            |
+| `src/core/balance.h`    | All balance parameters                                                 |
+| `src/main.cpp`          | Firmware: states, input, rendering, UI, effects                        |
+| `src/audio.*`           | Buzzer sequencer, jingles and effects                                  |
+| `src/clouds.*`          | Procedural clouds                                                      |
+| `src/palette.h`         | Palette roles (indices)                                                |
+| `src/gfx/`              | 4 bpp drawing (`canvas4.h`), sprite types, exported headers (`*_gfx.h`) |
+| `assets/sprites/`       | `.aseprite` sources                                                    |
+| `tools/art/`            | Art generators, palettes, pixel font, mock-up                          |
+| `tools/sprites/`        | Aseprite scripts: assemble and export to C                             |
+| `tools/sim/`            | PC balance simulator                                                   |
+| `tools/test/`           | Logic tests                                                            |
+| `docs/`                 | Style guide, palettes and mock-ups                                     |
 
 - Firmware: `pio run -t upload` (PlatformIO + M5Unified).
-- PC: `make test` y `make sim ARGS="--skill 0.7"`.
-- Sprites: `make sprites` (necesita Aseprite; ruta configurable con `ASEPRITE=`).
+- PC: `make test` and `make sim ARGS="--skill 0.7"`.
+- Art: `make sprites` (needs Aseprite; path configurable with `ASEPRITE=`), `make art` to regenerate from scripts.
 
-> **PRINCIPIO DE DISEÑO**
+> **DESIGN PRINCIPLE**
 >
-> Mantener los sistemas simples y las decisiones significativas: cuándo soltar el ataque cargado, cómo aprovechar los turnos extra, qué equipamiento conservar y si curarse ahora o crecer a largo plazo. Cualquier nueva mecánica debe justificar su coste en pantalla, controles y claridad.
+> Keep systems simple and decisions meaningful: when to release the special, how to use extra turns, which gear to keep, and whether to heal now or grow stronger later. Any new mechanic must justify its cost in screen space, controls and clarity.

@@ -1,0 +1,20 @@
+GIMP Palette
+Name: Stick RPG - graveyard
+Columns: 8
+#
+ 11  10  18	00 Black
+ 34  29  51	01 Dark
+ 67  59  92	02 Mid
+130 122 154	03 Light
+218 212 230	04 Bright
+160  44  62	05 Blood
+216 180  98	06 Gold
+114 228 212	07 Spectral
+ 64  64  64	08 unused
+ 64  64  64	09 unused
+ 64  64  64	10 unused
+ 64  64  64	11 unused
+ 64  64  64	12 unused
+ 64  64  64	13 unused
+ 64  64  64	14 unused
+255   0 255	15 TRANSPARENT (key)

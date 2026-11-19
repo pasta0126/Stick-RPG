@@ -1,0 +1,20 @@
+GIMP Palette
+Name: Stick RPG - forest
+Columns: 8
+#
+ 10  14  13	00 Black
+ 27  41  37	01 Dark
+ 59  82  71	02 Mid
+122 147 128	03 Light
+212 222 200	04 Bright
+156  46  48	05 Blood
+214 162  72	06 Gold
+159 224  90	07 Spectral
+ 64  64  64	08 unused
+ 64  64  64	09 unused
+ 64  64  64	10 unused
+ 64  64  64	11 unused
+ 64  64  64	12 unused
+ 64  64  64	13 unused
+ 64  64  64	14 unused
+255   0 255	15 TRANSPARENT (key)
