@@ -185,10 +185,17 @@ int healVictory(Hero& h) {
   return h.hp - before;
 }
 
+int potionRecoverGain(const Hero& h) {
+  int falta = h.hpMax - h.hp;
+  if (falta <= 0) return 0;
+  int g = roundi(falta * bal::POCION_RECUPERA / 100.0f);
+  return g < 1 ? 1 : g;
+}
+
 int potionRecover(Hero& h) {
-  int before = h.hp;
-  h.hp = h.hpMax;
-  return h.hp - before;
+  int g = potionRecoverGain(h);
+  h.hp += g;
+  return g;
 }
 
 int potionMaxGain(const Hero& h) {
@@ -198,8 +205,7 @@ int potionMaxGain(const Hero& h) {
 
 int potionMaxHp(Hero& h) {
   int g = potionMaxGain(h);
-  h.hpMax += g;
-  h.hp += g;
+  h.hpMax += g;  // solo sube el máximo; la vida actual no cambia
   return g;
 }
 

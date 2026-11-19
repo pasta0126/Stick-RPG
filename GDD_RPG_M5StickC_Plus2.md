@@ -186,7 +186,7 @@ After every won fight the hero automatically recovers a **percentage of max HP**
 
 Every defeated enemy drops exactly 1 reward: a gear piece (sword, helmet, chestplate, boots or shield) or, rarely, a potion. The encounter level sets the overall item scale; luck improves the odds of better stats, not the number of items.
 
-Potion chance: 10 % (to be balanced). Bosses never drop potions.
+Potion chance: 25 % (to be balanced). Bosses never drop potions.
 
 ### Rarities
 
@@ -219,18 +219,18 @@ The loot screen shows two side-by-side panels: **equipped item on the left, new 
 
 ## 6.4. Potions: restore or max HP
 
-Potions are rare and cannot be stored. On a potion drop the player picks one of two panels (same layout as gear):
+Potions are fairly common (25 %) and cannot be stored. On a potion drop the player picks one of two panels (same layout as gear):
 
 | **Option**              | **Effect**                                                                                     |
 |-------------------------|------------------------------------------------------------------------------------------------|
-| Recuperar (*Restore*)   | Fully restores HP.                                                                             |
-| Vida máx. (*Max HP*)    | Permanently raises max HP (`POCION_HPMAX`, +10 %). Current HP rises by the same amount.        |
+| Recuperar (*Restore*)   | Restores 50 % of the missing HP (`POCION_RECUPERA`).                                           |
+| Vida máx. (*Max HP*)    | Permanently raises max HP (`POCION_HPMAX`, +20 %). Current HP does not change.                 |
 
 Each panel shows the resulting HP large and the current HP below.
 
 > **EXAMPLE**
 >
-> HP 23/50. Restore → 50/50. Max HP → 28/55. A choice between surviving now and being tougher later.
+> HP 23/50. Restore → 37/50 (half of the 27 missing, rounded). Max HP → 23/60. A choice between surviving now and being tougher later.
 
 Since items never change max HP, these potions are the only way to raise it, which avoids odd cases when swapping gear.
 

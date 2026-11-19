@@ -927,12 +927,14 @@ void potionColumn(const char* title, const char* l1, const char* l2,
 void drawLootPotion() {
   drawSceneNoEnemy();
   c4.shade(0, 0, W, H, pal::NEGRO, 11);
+  int r = potionRecoverGain(hero);
   int g = potionMaxGain(hero);
-  char l1[24];
+  char l0[24], l1[24];
+  std::snprintf(l0, sizeof(l0), "+%d de vida", r);
   std::snprintf(l1, sizeof(l1), "+%d de vida max.", g);
-  potionColumn("Recuperar", "Restaura toda", "la vida", hero.hpMax, hero.hpMax,
+  potionColumn("Recuperar", l0, "50% de lo perdido", hero.hp + r, hero.hpMax,
                3, 117, sel == 0);
-  potionColumn("Vida max.", l1, "para siempre", hero.hp + g, hero.hpMax + g,
+  potionColumn("Vida max.", l1, "para siempre", hero.hp, hero.hpMax + g,
                122, 236, sel == 1);
 }
 

@@ -76,9 +76,11 @@ static void testHealing() {
 
   h.hp = 23; h.hpMax = 50;
   potionMaxHp(h);
-  CHECK(h.hp == 28 && h.hpMax == 55);      // ejemplo del GDD §6.4
+  CHECK(h.hp == 23 && h.hpMax == 60);      // ejemplo del GDD §6.4
   potionRecover(h);
-  CHECK(h.hp == 55);
+  CHECK(h.hp == 42);                       // +50 % de los 37 que faltan
+  h.hp = h.hpMax;
+  CHECK(potionRecover(h) == 0);
 }
 
 static void testExtraChain() {

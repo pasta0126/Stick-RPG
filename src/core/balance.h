@@ -37,8 +37,9 @@ constexpr int HEROE_FALLO   = 8;
 
 // --- Curación (§6) ------------------------------------------------------------
 constexpr int CURA_VICTORIA  = 20;  // % de vida máx.
-constexpr int POCION_HPMAX   = 10;  // % de vida máx.
-constexpr int PROB_POCION    = 10;  // % del botín
+constexpr int POCION_RECUPERA = 50;  // % de la vida que falta
+constexpr int POCION_HPMAX   = 20;  // % de vida máx. (no cura)
+constexpr int PROB_POCION    = 25;  // % del botín
 
 // --- Enemigos (§7) ------------------------------------------------------------
 constexpr int   ENEMIGO_HP      = 22;
