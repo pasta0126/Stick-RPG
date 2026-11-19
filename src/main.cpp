@@ -866,18 +866,19 @@ void drawLootItem() {
   const Item& cur = hero.equip[static_cast<int>(loot.item.slot)];
   const Item& nue = loot.item;
 
-  // Filas comunes a ambas placas para que queden alineadas.
-  Stat list[2 * MAX_MODS];
-  int n = 0;
-  auto add = [&](Stat s) {
-    for (int i = 0; i < n; ++i) if (list[i] == s) return;
-    if (n < 2 * MAX_MODS) list[n++] = s;
-  };
-  for (int i = 0; i < nue.nMods; ++i) add(nue.mods[i].stat);
-  for (int i = 0; cur.present && i < cur.nMods; ++i) add(cur.mods[i].stat);
+  // Equipado: tal cual, solo sus estadísticas.
+  Stat curList[MAX_MODS];
+  int nc = 0;
+  for (int i = 0; cur.present && i < cur.nMods; ++i) curList[nc++] = cur.mods[i].stat;
+  // Nuevo: sus estadísticas comparadas y, al final, las que se perderían.
+  Stat newList[2 * MAX_MODS];
+  int nn = 0;
+  for (int i = 0; i < nue.nMods; ++i) newList[nn++] = nue.mods[i].stat;
+  for (int i = 0; i < nc; ++i)
+    if (nue.get(curList[i]) == 0) newList[nn++] = curList[i];
 
-  lootColumn(cur, nullptr, 3, 117, list, n, sel == 0, false);
-  lootColumn(nue, &cur, 122, 236, list, n, sel == 1, true);
+  lootColumn(cur, nullptr, 3, 117, curList, nc, sel == 0, false);
+  lootColumn(nue, &cur, 122, 236, newList, nn, sel == 1, true);
 }
 
 void potionColumn(const char* title, const char* l1, const char* l2,
