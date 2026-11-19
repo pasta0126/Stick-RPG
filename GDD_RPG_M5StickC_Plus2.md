@@ -99,7 +99,7 @@ daño      = máx(daño, 1)          // solo en impactos acertados
 - Con las 3 runas encendidas, mantener A carga el especial. Al soltarlo se gastan las runas.
 - Sin runas suficientes, A ataca **al pulsar**, sin esperar al umbral.
 - Con el especial listo, un toque corto sigue siendo un ataque normal y no gasta las runas.
-- **Las runas solo se gastan al lanzar el especial**, así se puede reservar. Protecciones: umbral de 350 ms; si se suelta A en los primeros 150 ms de carga cuenta como ataque normal; **B durante la carga la cancela** sin atacar.
+- **Las runas solo se gastan al lanzar el especial**, así se puede reservar. Protecciones: umbral de 350 ms; si se suelta A en los primeros 150 ms de carga cuenta como ataque normal. Mientras se mantiene A, B no hace nada.
 
 
 La pulsación se interpreta con **un único umbral de tiempo** (`T_umbral`, 350 ms):

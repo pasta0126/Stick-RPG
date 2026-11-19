@@ -401,17 +401,10 @@ void updateFade() {
 }
 
 void updateHeroTurn() {
-  // B con A pulsado (cargando o a punto de cargar) cancela sin atacar: las
-  // runas se conservan y el turno sigue siendo del héroe.
-  if (aArmed && M5.BtnB.wasPressed()) {
-    aArmed = charging = inPerfect = false;
-    audio::sfx(260, 80, true);
-    floatText("CANCELADO", pal::CLARO, HERO_FX, FEET_Y - 82);
-    return;
-  }
-  if (M5.BtnB.wasPressed()) {
+  // B abre/cierra las estadísticas; con A pulsado no hace nada (el ataque
+  // sale al soltar A).
+  if (!aArmed && M5.BtnB.wasPressed()) {
     statsOpen = !statsOpen;
-    aArmed = charging = false;
     audio::sfx(770, 30);
     return;
   }
