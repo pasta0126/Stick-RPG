@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include "audio.h"
+#include "clouds.h"
 #include "core/balance.h"
 #include "core/combat.h"
 #include "core/progression.h"
@@ -211,11 +212,13 @@ void fadeMid() {
       startEncounter();
       int b = static_cast<int>(biomaDe(nivel));
       fadeNext = b != curBiome ? St::BIOME_INTRO : St::ENEMY_ENTER;
+      if (b != curBiome) clouds::generate(esp_random());
       curBiome = b;
       break;
     }
     case FadeAct::TO_TITLE:
       curBiome = 0;
+      clouds::generate(esp_random());
       hero = makeHero();
       resetTimers();
       fadeNext = St::TITLE;
@@ -562,16 +565,31 @@ void bar(int x0, int y0, int w, int h, int v, int max, uint8_t color) {
   }
 }
 
-void serif(const lgfx::IFont* font, const char* s, int x, int y, uint8_t color,
-           uint8_t outline = pal::NEGRO) {
+// Texto con fuente Serif (GFX). Fuera de los paneles lleva contorno negro.
+enum Out : uint8_t { NONE, SHADOW, FULL };
+const lgfx::IFont* const S9 = &fonts::FreeSerif9pt7b;
+const lgfx::IFont* const I9 = &fonts::FreeSerifItalic9pt7b;
+const lgfx::IFont* const B9 = &fonts::FreeSerifBold9pt7b;
+const lgfx::IFont* const B12 = &fonts::FreeSerifBold12pt7b;
+const lgfx::IFont* const B18 = &fonts::FreeSerifBold18pt7b;
+
+void txt(const lgfx::IFont* font, const char* s, int x, int y, uint8_t color,
+         uint8_t datum = middle_center, Out out = FULL) {
   cv.setFont(font);
-  cv.setTextDatum(middle_center);
-  cv.setTextColor(outline);
-  for (int dy = -1; dy <= 1; ++dy)
-    for (int dx = -1; dx <= 1; ++dx)
-      if (dx || dy) cv.drawString(s, x + dx, y + dy);
+  cv.setTextDatum(datum);
+  if (out != NONE) {
+    cv.setTextColor(pal::NEGRO);
+    for (int dy = -1; dy <= 1; ++dy)
+      for (int dx = -1; dx <= 1; ++dx)
+        if ((dx || dy) && (out == FULL || (dx == 1 && dy == 1)))
+          cv.drawString(s, x + dx, y + dy);
+  }
   cv.setTextColor(color);
   cv.drawString(s, x, y);
+}
+
+void serif(const lgfx::IFont* font, const char* s, int x, int y, uint8_t color) {
+  txt(font, s, x, y, color);
 }
 
 Remap rarityRemap(const Item& it) {
@@ -667,42 +685,48 @@ void drawEnemy(int dissolve = 0) {
 void drawBackground(int fromLayer, int toLayer) {
   const gfx::Sheet& bg = *gfx::kBiomeBg[curBiome];
   for (int l = fromLayer; l < toLayer; ++l) {
-    int off = gfx::kParallax[l] * nivel;
-    if (l == 2) off += static_cast<int>(gt / 90);  // la niebla deriva sola
-    c4.blitWrap(bg, l, off);
+    c4.blitWrap(bg, l, gfx::kParallax[l] * nivel);
+    // Nubes procedurales entre el cielo y la capa lejana (no en interiores).
+    if (l == 0 && curBiome != static_cast<int>(Bioma::CASTILLO))
+      clouds::draw(c4, gt);
   }
 }
 
 void drawHud() {
   char buf[24];
-  // Héroe.
-  panel(1, 114, 98, 134);
-  icon(HEART, 6, 5, 118, '#', pal::NEGRO, 'r', pal::SANGRE);
+  // Héroe: corazón, vida y runas del especial; barra debajo.
+  panel(1, 112, 98, 134);
+  icon(HEART, 6, 6, 116, '#', pal::NEGRO, 'r', pal::SANGRE);
   std::snprintf(buf, sizeof(buf), "%d/%d", hero.hp, hero.hpMax);
-  c4.label(buf, 15, 118, pal::BRILLO, pal::NEGRO);
+  c4.label(buf, 16, 116, pal::BRILLO, pal::NEGRO);
   bool ready = hero.especialListo();
   for (int i = 0; i < bal::ESPECIAL_CADA; ++i) {
     bool on = i < hero.golpesEspecial;
     bool blink = ready && (gt / 250) % 2 == 0;
-    icon(RUNE, 7, 66 + i * 10, 117, '#', on ? pal::MEDIO : pal::OSCURO, 'o',
+    icon(RUNE, 7, 66 + i * 10, 115, '#', on ? pal::MEDIO : pal::OSCURO, 'o',
          on ? (blink ? pal::BRILLO : pal::ESPECTRAL) : pal::NEGRO);
   }
-  bar(4, 127, 92, 5, hero.hp, hero.hpMax, pal::SANGRE);
+  bar(4, 125, 92, 6, hero.hp, hero.hpMax, pal::SANGRE);
 
   // Encuentro en números romanos.
-  panel(100, 116, 135, 132);
+  panel(100, 114, 135, 132);
   roman(nivel, buf);
-  c4.label(buf, 118, 121, isBossLevel(nivel) ? pal::SANGRE : pal::ORO,
+  c4.label(buf, 118, 120, isBossLevel(nivel) ? pal::SANGRE : pal::ORO,
            pal::NEGRO, 1);
 
-  // Enemigo.
-  panel(137, 114, 238, 134);
+  // Enemigo: nombre arriba; barra y vida restante debajo.
+  panel(137, 112, 238, 134);
   bool boss = isBoss(enemy.type);
-  if (boss) icon(CROWN, 5, 228, 119, 'o', pal::ORO, '#', pal::SANGRE);
-  else icon(SKULL, 6, 228, 118, '#', pal::NEGRO, 'c', pal::CLARO);
-  c4.label(enemyName(enemy.type), 224, 118, boss ? pal::ORO : pal::BRILLO,
-           pal::NEGRO, 2);
-  bar(140, 127, 96, 5, enemy.hp, enemy.hpMax, pal::SANGRE);
+  if (boss) icon(CROWN, 5, 228, 117, 'o', pal::ORO, '#', pal::SANGRE);
+  else icon(SKULL, 6, 228, 116, '#', pal::NEGRO, 'c', pal::CLARO);
+  const char* name = enemyName(enemy.type);
+  bool fits = gfx::Canvas4::textWidth(name, 1, true) <= 84;
+  c4.label(name, 224, 116, boss ? pal::ORO : pal::BRILLO, pal::NEGRO, 2, 1,
+           false, fits);
+  std::snprintf(buf, sizeof(buf), "%d/%d", enemy.hp, enemy.hpMax);
+  int nw = gfx::Canvas4::textWidth(buf, 1, true);
+  c4.label(buf, 235, 125, pal::BRILLO, pal::NEGRO, 2);
+  bar(140, 125, 235 - nw - 143, 6, enemy.hp, enemy.hpMax, pal::SANGRE);
 }
 
 void drawChargeBar() {
@@ -720,54 +744,51 @@ void drawFloaters() {
   for (const Floater& f : floaters) {
     if (!f.on) continue;
     int dy = static_cast<int>(since(f.t0) / 22);
-    c4.label(f.text, f.x, f.y - dy, f.color, pal::NEGRO, 1, 2, true);
+    c4.label(f.text, f.x, f.y - dy, f.color, pal::NEGRO, 1, 2, true, false);
   }
 }
 
 void drawStatsPanel() {
-  panel(8, 8, 231, 110);
-  serif(&fonts::FreeSerifBold9pt7b, "Caballero", 64, 20, pal::ORO);
-  c4.label("B: CERRAR", 225, 14, pal::MEDIO, pal::NEGRO, 2);
+  panel(4, 4, 235, 109);
+  txt(B9, "Caballero", 12, 15, pal::ORO, middle_left, NONE);
+  c4.label("B: CERRAR", 228, 12, pal::MEDIO, pal::NEGRO, 2, 1, false, false);
   char buf[28];
-  int y = 32;
-  std::snprintf(buf, sizeof(buf), "VIDA %d/%d", hero.hp, hero.hpMax);
-  c4.label(buf, 16, y, pal::SANGRE, pal::NEGRO);
+  std::snprintf(buf, sizeof(buf), "Vida %d/%d", hero.hp, hero.hpMax);
+  txt(B9, buf, 12, 32, pal::SANGRE, middle_left, NONE);
+  // Estadísticas en dos columnas (ATK..VAMP sin la vida).
   for (int i = 0; i < STAT_COUNT; ++i) {
     Stat s = static_cast<Stat>(i);
-    y += 10;
+    int col = i / 4, row = i % 4;
     bool capped = hero.raw(s) > hero.eff(s);
     std::snprintf(buf, sizeof(buf), "%s %d%s", statName(s), hero.eff(s),
                   statIsPercent(s) ? "%" : "");
-    c4.label(buf, 16, y, capped ? pal::ORO : pal::BRILLO, pal::NEGRO);
-    if (capped) c4.label("TOPE", 88, y, pal::ORO, pal::NEGRO);
+    txt(S9, buf, 12 + col * 58, 49 + row * 14, capped ? pal::ORO : pal::BRILLO,
+        middle_left, NONE);
   }
-  c4.label("EQUIPO", 124, 32, pal::MEDIO, pal::NEGRO);
+  for (int y = 24; y < 104; ++y)
+    if (y % 2) c4.pset(124, y, pal::MEDIO);
   for (int i = 0; i < SLOT_COUNT; ++i) {
     itemName(hero.equip[i], buf, sizeof(buf));
-    c4.label(buf, 124, 44 + i * 12,
-             hero.equip[i].present ? rarityColor(hero.equip[i].rareza)
-                                   : pal::MEDIO,
-             pal::NEGRO);
+    txt(S9, buf, 130, 32 + i * 16,
+        hero.equip[i].present ? rarityColor(hero.equip[i].rareza) : pal::MEDIO,
+        middle_left, NONE);
   }
-}
-
-void fmtStat(char* buf, int len, Stat s, int v) {
-  std::snprintf(buf, len, "%s %+d%s", statName(s), v, statIsPercent(s) ? "%" : "");
 }
 
 void button(const char* label, int cx, int y, bool selected) {
-  int w = gfx::Canvas4::textWidth(label) + 14;
+  cv.setFont(B9);
+  int w = cv.textWidth(label) + 18;
   int x0 = cx - w / 2;
   if (selected) {
-    panel(x0, y, x0 + w, y + 13);
-    c4.frame(x0, y, w + 1, 14, pal::ORO);
-    c4.label(">", x0 + 3, y + 3, pal::ORO, pal::NEGRO);
+    panel(x0, y, x0 + w, y + 16);
+    c4.frame(x0, y, w + 1, 17, pal::ORO);
+    c4.label(">", x0 + 4, y + 5, pal::ORO, pal::NEGRO);
   } else {
-    c4.rect(x0, y, w + 1, 14, pal::NEGRO);
-    c4.frame(x0, y, w + 1, 14, pal::OSCURO);
+    c4.rect(x0, y, w + 1, 17, pal::NEGRO);
+    c4.frame(x0, y, w + 1, 17, pal::OSCURO);
   }
-  c4.label(label, cx + 2, y + 3, selected ? pal::BRILLO : pal::MEDIO,
-           pal::NEGRO, 1);
+  txt(B9, label, cx + 3, y + 8, selected ? pal::BRILLO : pal::MEDIO,
+      middle_center, NONE);
 }
 
 void drawSceneNoEnemy() {
@@ -776,119 +797,131 @@ void drawSceneNoEnemy() {
   drawBackground(gfx::BG_LAYER_PERSONAJES, 6);
 }
 
+// Flecha arriba/abajo de 7 px de ancho.
+void arrow(int x, int y, bool up, uint8_t c) {
+  for (int k = 0; k < 4; ++k)
+    for (int j = -k; j <= k; ++j) c4.pset(x + 3 + j, up ? y + k : y + 3 - k, c);
+}
+
 void drawLootItem() {
   drawSceneNoEnemy();
   c4.shade(0, 0, W, H, pal::NEGRO, 11);
   const Item& cur = hero.equip[static_cast<int>(loot.item.slot)];
   const Item& nue = loot.item;
-  char buf[28];
-  panel(4, 4, 235, 130);
-  serif(&fonts::FreeSerifBold9pt7b, "Botin", W / 2, 15, pal::ORO);
-  c4.label(rarezaName(nue.rareza), 229, 10, rarityColor(nue.rareza),
-           pal::NEGRO, 2);
-  for (int y = 26; y < 106; ++y)
-    if (y % 2) c4.pset(W / 2, y, pal::MEDIO);
-  c4.label("ACTUAL", 12, 28, pal::MEDIO, pal::NEGRO);
-  c4.label("NUEVO", W / 2 + 8, 28, pal::MEDIO, pal::NEGRO);
-  itemName(cur, buf, sizeof(buf));
-  c4.label(buf, 12, 39, cur.present ? rarityColor(cur.rareza) : pal::MEDIO,
-           pal::NEGRO);
-  itemName(nue, buf, sizeof(buf));
-  c4.label(buf, W / 2 + 8, 39, rarityColor(nue.rareza), pal::NEGRO);
+  char buf[40], name[28];
+  panel(2, 2, 237, 132);
+  txt(B9, "Botin", 12, 12, pal::ORO, middle_left, NONE);
+  txt(B9, rarezaName(nue.rareza), 228, 12, rarityColor(nue.rareza),
+      middle_right, NONE);
+  itemName(nue, name, sizeof(name));
+  txt(B12, name, W / 2, 29, rarityColor(nue.rareza), middle_center, NONE);
+  if (cur.present) {
+    itemName(cur, name, sizeof(name));
+    std::snprintf(buf, sizeof(buf), "Sustituye a %s", name);
+  } else {
+    std::snprintf(buf, sizeof(buf), "Ranura vacia");
+  }
+  txt(S9, buf, W / 2, 45, pal::MEDIO, middle_center, NONE);
+  for (int x = 12; x < 228; ++x)
+    if (x % 2) c4.pset(x, 53, pal::MEDIO);
 
+  // Una fila por estadística: valor del objeto nuevo y diferencia.
   Stat list[2 * MAX_MODS];
   int n = 0;
   auto add = [&](Stat s) {
     for (int i = 0; i < n; ++i) if (list[i] == s) return;
     if (n < 2 * MAX_MODS) list[n++] = s;
   };
-  for (int i = 0; cur.present && i < cur.nMods; ++i) add(cur.mods[i].stat);
   for (int i = 0; i < nue.nMods; ++i) add(nue.mods[i].stat);
-
+  for (int i = 0; cur.present && i < cur.nMods; ++i) add(cur.mods[i].stat);
+  int step = n > 5 ? 9 : 11;
   for (int i = 0; i < n; ++i) {
     Stat s = list[i];
-    int y = 52 + i * 9;
+    int y = 61 + i * step;
     int a = cur.present ? cur.get(s) : 0, b = nue.get(s);
-    if (a) { fmtStat(buf, sizeof(buf), s, a); c4.label(buf, 12, y, pal::BRILLO, pal::NEGRO); }
-    else c4.label("-", 12, y, pal::MEDIO, pal::NEGRO);
-    if (b) { fmtStat(buf, sizeof(buf), s, b); c4.label(buf, W / 2 + 8, y, pal::BRILLO, pal::NEGRO); }
-    else { std::snprintf(buf, sizeof(buf), "%s --", statName(s)); c4.label(buf, W / 2 + 8, y, pal::MEDIO, pal::NEGRO); }
+    txt(S9, statName(s), 40, y, pal::CLARO, middle_left, NONE);
+    if (b) {
+      std::snprintf(buf, sizeof(buf), "%+d%s", b, statIsPercent(s) ? "%" : "");
+      txt(B9, buf, 140, y, pal::BRILLO, middle_right, NONE);
+    } else {
+      txt(S9, "--", 140, y, pal::MEDIO, middle_right, NONE);
+    }
     int d = b - a;
     if (d) {
-      int ax = 206;
       uint8_t col = d > 0 ? pal::ESPECTRAL : pal::SANGRE;
-      for (int k = 0; k < 4; ++k)
-        for (int j = -k; j <= k; ++j)
-          c4.pset(ax + 3 + j, d > 0 ? y + 1 + k : y + 4 - k, col);
+      arrow(160, y - 2, d > 0, col);
       std::snprintf(buf, sizeof(buf), "%d", d > 0 ? d : -d);
-      c4.label(buf, ax + 10, y, col, pal::NEGRO);
+      txt(B9, buf, 172, y, col, middle_left, NONE);
+    } else {
+      txt(S9, "=", 162, y, pal::MEDIO, middle_left, NONE);
     }
   }
-  button("CONSERVAR", W / 4 + 4, 110, sel == 0);
-  button("EQUIPAR", W * 3 / 4 - 4, 110, sel == 1);
+  button("Conservar", W / 4 + 4, 113, sel == 0);
+  button("Equipar", W * 3 / 4 - 4, 113, sel == 1);
 }
 
 void drawLootPotion() {
   drawSceneNoEnemy();
   c4.shade(0, 0, W, H, pal::NEGRO, 11);
   char buf[28];
-  panel(14, 10, 225, 126);
-  serif(&fonts::FreeSerifBold9pt7b, "Pocion", W / 2, 23, pal::ORO);
-  std::snprintf(buf, sizeof(buf), "VIDA %d/%d", hero.hp, hero.hpMax);
-  c4.label(buf, W / 2, 36, pal::SANGRE, pal::NEGRO, 1);
+  panel(2, 2, 237, 132);
+  txt(B12, "Pocion", W / 2, 16, pal::ORO, middle_center, NONE);
+  std::snprintf(buf, sizeof(buf), "Vida %d/%d", hero.hp, hero.hpMax);
+  txt(B9, buf, W / 2, 36, pal::SANGRE, middle_center, NONE);
   int g = potionMaxGain(hero);
-  c4.label("RESTAURA TODA", W / 4 + 6, 54, pal::CLARO, pal::NEGRO, 1);
-  c4.label("LA VIDA", W / 4 + 6, 64, pal::CLARO, pal::NEGRO, 1);
+  int lx = W / 4 + 4, rx = W * 3 / 4 - 4;
+  txt(S9, "Restaura toda", lx, 56, pal::CLARO, middle_center, NONE);
+  txt(S9, "la vida", lx, 70, pal::CLARO, middle_center, NONE);
   std::snprintf(buf, sizeof(buf), "%d/%d", hero.hpMax, hero.hpMax);
-  c4.label(buf, W / 4 + 6, 78, pal::ESPECTRAL, pal::NEGRO, 1);
-  std::snprintf(buf, sizeof(buf), "+%d VIDA MAX.", g);
-  c4.label(buf, W * 3 / 4 - 6, 54, pal::CLARO, pal::NEGRO, 1);
-  c4.label("PERMANENTE", W * 3 / 4 - 6, 64, pal::CLARO, pal::NEGRO, 1);
+  txt(B9, buf, lx, 88, pal::ESPECTRAL, middle_center, NONE);
+  std::snprintf(buf, sizeof(buf), "+%d vida max.", g);
+  txt(S9, buf, rx, 56, pal::CLARO, middle_center, NONE);
+  txt(S9, "permanente", rx, 70, pal::CLARO, middle_center, NONE);
   std::snprintf(buf, sizeof(buf), "%d/%d", hero.hp + g, hero.hpMax + g);
-  c4.label(buf, W * 3 / 4 - 6, 78, pal::ESPECTRAL, pal::NEGRO, 1);
-  button("RECUPERAR", W / 4 + 6, 100, sel == 0);
-  button("VIDA MAX", W * 3 / 4 - 6, 100, sel == 1);
+  txt(B9, buf, rx, 88, pal::ESPECTRAL, middle_center, NONE);
+  for (int y = 50; y < 96; ++y)
+    if (y % 2) c4.pset(W / 2, y, pal::MEDIO);
+  button("Recuperar", lx, 109, sel == 0);
+  button("Vida max.", rx, 109, sel == 1);
 }
 
 void drawTitle() {
   drawSceneNoEnemy();
-  c4.shade(100, 18, 138, 94, pal::NEGRO, 7);
-  serif(&fonts::FreeSerifBold18pt7b, "Stick RPG", 168, 40, pal::ORO);
-  c4.label("UNA LEYENDA OSCURA", 168, 58, pal::CLARO, pal::NEGRO, 1);
-  if ((gt / 500) % 2 == 0)
-    c4.label("PULSA A", 168, 78, pal::BRILLO, pal::NEGRO, 1);
+  c4.shade(98, 14, 140, 100, pal::NEGRO, 8);
+  txt(B18, "Stick RPG", 168, 36, pal::ORO);
+  txt(I9, "Una leyenda oscura", 168, 58, pal::CLARO);
+  if ((gt / 500) % 2 == 0) txt(B9, "Pulsa A", 168, 80, pal::BRILLO);
   char buf[24];
-  std::snprintf(buf, sizeof(buf), "RECORD %u", static_cast<unsigned>(record));
-  c4.label(buf, 168, 94, pal::ESPECTRAL, pal::NEGRO, 1);
-  c4.label(audio::enabled() ? "B: SONIDO SI" : "B: SONIDO NO", 236, 126,
-           pal::MEDIO, pal::NEGRO, 2);
+  std::snprintf(buf, sizeof(buf), "Record: %u", static_cast<unsigned>(record));
+  txt(S9, buf, 168, 98, pal::ESPECTRAL);
+  txt(S9, audio::enabled() ? "B: sonido si" : "B: sonido no", 236, 126,
+      pal::MEDIO, middle_right);
 }
 
 void drawBiomeIntro() {
   drawSceneNoEnemy();
   float u = clamp01(since(stT) / 400.0f);
-  c4.shade(0, 32, W, 46, pal::NEGRO, static_cast<int>(12 * u));
+  c4.shade(0, 30, W, 50, pal::NEGRO, static_cast<int>(12 * u));
   if (u >= 1) {
     char num[16], cap[28];
     roman((nivel - 1) / bal::JEFE_CADA + 1, num);
-    std::snprintf(cap, sizeof(cap), "CAPITULO %s", num);
-    c4.label(cap, W / 2, 39, pal::MEDIO, pal::NEGRO, 1);
-    serif(&fonts::FreeSerifBold12pt7b, biomaName(biomaDe(nivel)), W / 2, 60,
-          pal::ESPECTRAL);
+    std::snprintf(cap, sizeof(cap), "Capitulo %s", num);
+    txt(I9, cap, W / 2, 41, pal::MEDIO);
+    txt(B12, biomaName(biomaDe(nivel)), W / 2, 62, pal::ESPECTRAL);
   }
 }
 
 void drawBossBanner() {
   float u = clamp01(since(stT) / 300.0f);
-  int hh = static_cast<int>(18 * u);
+  int hh = static_cast<int>(20 * u);
   c4.shade(0, 52 - hh, W, hh * 2, pal::NEGRO, 12);
   for (int x = 0; x < W; ++x) {
     c4.pset(x, 52 - hh, pal::SANGRE);
     c4.pset(x, 51 + hh, pal::SANGRE);
   }
   if (u >= 1) {
-    c4.label("- JEFE -", W / 2, 37, pal::SANGRE, pal::NEGRO, 1);
-    serif(&fonts::FreeSerifBold12pt7b, enemyName(enemy.type), W / 2, 56, pal::ORO);
+    txt(I9, "- Jefe -", W / 2, 40, pal::SANGRE);
+    txt(B12, enemyName(enemy.type), W / 2, 59, pal::ORO);
   }
 }
 
@@ -897,17 +930,17 @@ void drawGameOver() {
   float u = clamp01(since(stT) / 600.0f);
   c4.shade(0, 0, W, H, pal::NEGRO, static_cast<int>(12 * u));
   if (u < 1) return;
-  serif(&fonts::FreeSerifBold18pt7b, "Has caido", W / 2, 28, pal::SANGRE);
-  char buf[28];
-  std::snprintf(buf, sizeof(buf), "ENEMIGOS DERROTADOS %d", derrotados);
-  c4.label(buf, W / 2, 54, pal::BRILLO, pal::NEGRO, 1);
-  std::snprintf(buf, sizeof(buf), "GOLPE MAXIMO %d", golpeMax);
-  c4.label(buf, W / 2, 66, pal::CLARO, pal::NEGRO, 1);
-  std::snprintf(buf, sizeof(buf), "RECORD %u", static_cast<unsigned>(record));
-  c4.label(buf, W / 2, 78, pal::ESPECTRAL, pal::NEGRO, 1);
+  txt(B18, "Has caido", W / 2, 26, pal::SANGRE);
+  char buf[32];
+  std::snprintf(buf, sizeof(buf), "Enemigos derrotados: %d", derrotados);
+  txt(S9, buf, W / 2, 52, pal::BRILLO);
+  std::snprintf(buf, sizeof(buf), "Golpe maximo: %d", golpeMax);
+  txt(S9, buf, W / 2, 67, pal::CLARO);
+  std::snprintf(buf, sizeof(buf), "Record: %u", static_cast<unsigned>(record));
+  txt(S9, buf, W / 2, 82, pal::ESPECTRAL);
   if (nuevoRecord && (gt / 300) % 2 == 0)
-    c4.label("NUEVO RECORD!", W / 2, 92, pal::ORO, pal::NEGRO, 1);
-  c4.label("A: VOLVER", W / 2, 116, pal::MEDIO, pal::NEGRO, 1);
+    txt(B9, "Nuevo record!", W / 2, 98, pal::ORO);
+  txt(S9, "A: volver", W / 2, 120, pal::MEDIO);
 }
 
 void drawCombat(St view) {
@@ -923,7 +956,10 @@ void drawCombat(St view) {
   drawBackground(gfx::BG_LAYER_PERSONAJES, 6);
   drawHud();
   if (view == St::SHOW && msg[0])
-    serif(&fonts::FreeSerifBold9pt7b, msg, W / 2, 50, msgColor);
+{
+    cv.setFont(B12);
+    txt(cv.textWidth(msg) <= W - 12 ? B12 : B9, msg, W / 2, 50, msgColor);
+  }
   if (view == St::HERO_TURN) {
     if (charging) drawChargeBar();
     if (statsOpen) drawStatsPanel();
@@ -954,8 +990,8 @@ void render() {
   }
   if (paused) {
     panel(70, 44, 169, 90);
-    serif(&fonts::FreeSerifBold12pt7b, "Pausa", W / 2, 60, pal::ORO);
-    c4.label("PWR: SEGUIR", W / 2, 76, pal::MEDIO, pal::NEGRO, 1);
+    txt(B12, "Pausa", W / 2, 60, pal::ORO, middle_center, NONE);
+    txt(S9, "PWR: seguir", W / 2, 78, pal::MEDIO, middle_center, NONE);
   }
 
   // Temblor de pantalla.
@@ -1014,6 +1050,7 @@ void setup() {
 
   rng.reseed((static_cast<uint64_t>(esp_random()) << 32) | esp_random());
   hero = makeHero();
+  clouds::generate(esp_random());
   resetTimers();
   setState(St::TITLE);
 }

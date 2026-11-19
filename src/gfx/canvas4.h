@@ -95,14 +95,16 @@ class Canvas4 {
     }
   }
 
-  // Capa de fondo de pantalla completa repetida en horizontal.
-  void blitWrap(const Sheet& s, int layer, int xoff) {
+  // Capa repetida en horizontal (fondos, nubes). y0: fila de pantalla.
+  void blitWrapAt(const Sheet& s, int layer, int xoff, int y0) {
     const uint8_t* p = s.cel(layer, 0);
     const uint8_t key2 = static_cast<uint8_t>((s.key << 4) | s.key);
     int sw = s.w;
     xoff %= sw;
     if (xoff < 0) xoff += sw;
-    for (int y = 0; y < s.h && y < h_; ++y) {
+    for (int y = 0; y < s.h; ++y) {
+      int py = y0 + y;
+      if (py < 0 || py >= h_) continue;
       const uint8_t* row = p + y * (sw / 2);
       for (int x = 0; x < w_; ++x) {
         int sx = (x + xoff) % sw;
@@ -112,9 +114,13 @@ class Canvas4 {
           continue;
         }
         uint8_t c = (sx & 1) ? (b & 0x0F) : (b >> 4);
-        if (c != s.key) pset(x, y, c);
+        if (c != s.key) pset(x, py, c);
       }
     }
+  }
+
+  void blitWrap(const Sheet& s, int layer, int xoff) {
+    blitWrapAt(s, layer, xoff, 0);
   }
 
   // --------------------------------------------------------- texto 5x7
@@ -125,39 +131,42 @@ class Canvas4 {
     return kFont5[c - 32];
   }
 
-  static int textWidth(const char* s, int scale = 1) {
+  // bold: cada trazo se engrosa 1 px a la derecha (más legible).
+  static int textWidth(const char* s, int scale = 1, bool bold = false) {
     int w = 0;
-    for (; *s; ++s) w += (glyph(*s).w + 1) * scale;
+    for (; *s; ++s) w += (glyph(*s).w + 1 + (bold ? 1 : 0)) * scale;
     return w > 0 ? w - scale : 0;
   }
 
-  void text(const char* s, int x, int y, uint8_t color, int scale = 1) {
+  void text(const char* s, int x, int y, uint8_t color, int scale = 1,
+            bool bold = false) {
     for (; *s; ++s) {
       const Glyph5& g = glyph(*s);
       for (int j = 0; j < 7; ++j)
         for (int i = 0; i < g.w; ++i)
           if (g.rows[j] & (0x80 >> i))
             for (int sy = 0; sy < scale; ++sy)
-              for (int sx = 0; sx < scale; ++sx)
+              for (int sx = 0; sx < scale * (bold ? 2 : 1); ++sx)
                 pset(x + i * scale + sx, y + j * scale + sy, color);
-      x += (g.w + 1) * scale;
+      x += (g.w + 1 + (bold ? 1 : 0)) * scale;
     }
   }
 
   // align: 0 izquierda, 1 centro, 2 derecha. outline: contorno de 1 px.
   void label(const char* s, int x, int y, uint8_t color, uint8_t outline,
-             int align = 0, int scale = 1, bool fullOutline = false) {
-    int w = textWidth(s, scale);
+             int align = 0, int scale = 1, bool fullOutline = false,
+             bool bold = true) {
+    int w = textWidth(s, scale, bold);
     if (align == 1) x -= w / 2;
     else if (align == 2) x -= w;
     if (fullOutline) {
       for (int dy = -1; dy <= 1; ++dy)
         for (int dx = -1; dx <= 1; ++dx)
-          if (dx || dy) text(s, x + dx, y + dy, outline, scale);
+          if (dx || dy) text(s, x + dx, y + dy, outline, scale, bold);
     } else {
-      text(s, x + 1, y + 1, outline, scale);
+      text(s, x + 1, y + 1, outline, scale, bold);
     }
-    text(s, x, y, color, scale);
+    text(s, x, y, color, scale, bold);
   }
 
  private:

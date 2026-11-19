@@ -283,6 +283,8 @@ El bioma cambia **después de cada jefe**: encuentros 1–10 Bosque, 11–20 Cem
 ## 8.1. Lenguaje visual
 
 - 8 colores por bioma, con el mismo papel en todos. Mantener el contraste del texto y el HUD.
+- Texto: títulos y pantallas en FreeSerif 9–18 pt; HUD en fuente pixel 5×7 en negrita. La placa del enemigo muestra su vida restante (número y barra).
+- Botín: se muestra el objeto nuevo con su rareza, a quién sustituye y, por estadística, su valor y la diferencia (▲/▼) con el actual.
 - Interfaz tematizada, abajo para dejar el cielo libre a los jefes: placas de hierro con remaches dorados, barras segmentadas, número de encuentro en **números romanos**, runas del especial, títulos en serif (FreeSerifBold) y textos en una fuente pixel propia de 5×7.
 - Sprites y animaciones pequeños pero reconocibles a 240 × 135 píxeles.
 - La información crítica (vidas, selección, carga, crítico, fallo y turno extra) debe leerse en segundos.
@@ -406,7 +408,8 @@ Se cumple lo buscado: cargar sin timing apenas mejora el ataque normal, y la hab
 |-----------|-------------------------------------------------|-------------------------------------|
 | Cielo     | Degradado tramado, luna, estrellas, bruma        | Fijo                                |
 | Lejos     | Línea de pinos                                   | Desplazamiento pequeño por encuentro |
-| Niebla    | Jirones tramados                                 | Deriva lenta continua               |
+| Nubes     | Procedurales (ruido periódico), 2 capas, nuevas en cada bioma; no en interiores | Deriva lenta continua (2 velocidades) |
+| Niebla    | Jirones tramados                                 | Estática                            |
 | Medio     | Árboles muertos retorcidos con luz de luna       | Desplazamiento medio                |
 | Suelo     | Tierra, piedras, matas                           | Desplazamiento grande               |
 | *Personajes* |                                               |                                     |
