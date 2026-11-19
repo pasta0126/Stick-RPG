@@ -347,7 +347,11 @@ PALETA ESTRICTA (solo estos colores):
 
 ---
 
-## Fondos de los biomas (por capas)
+## Fondos de los biomas: formato usado (5 franjas en una imagen)
+
+Al final se pidió **una imagen vertical por bioma con las 5 capas apiladas en franjas**, para que el estilo sea coherente: cielo (38 %), lejos (17 %), plano medio (26 %), suelo (8 %) y primer plano (11 %). Cada franja es una tira panorámica que se repite, con magenta en las franjas 2, 3 y 5. Se generaron en la conversación de ChatGPT del proyecto, el Bosque primero y los otros dos con "el mismo formato y estilo". Se guardan como `assets/ai/bg_bosque.png`, `bg_cementerio.png` y `bg_castillo.png`.
+
+## Fondos de los biomas (por capas, método anterior)
 
 Cada fondo tiene capas que se desplazan a distinta velocidad (parallax) y **se repiten en horizontal**. Se hace en **una conversación por bioma**: primero la escena completa como referencia y después cada capa por separado, calcando esa escena.
 
