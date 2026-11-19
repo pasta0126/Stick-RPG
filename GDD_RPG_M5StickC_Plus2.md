@@ -284,7 +284,8 @@ El bioma cambia **después de cada jefe**: encuentros 1–10 Bosque, 11–20 Cem
 
 - 8 colores por bioma, con el mismo papel en todos. Mantener el contraste del texto y el HUD.
 - Texto: títulos y pantallas en FreeSerif 9–18 pt; HUD en fuente pixel 5×7 en negrita. La placa del enemigo muestra su vida restante (número y barra).
-- Botín: dos placas lado a lado (actual a la izquierda, nueva a la derecha). Cada una muestra el tipo de objeto en grande y su rareza debajo, y las filas de estadísticas alineadas; la nueva añade una etiqueta de color con la diferencia (verde «▲ 2» mejora, roja «▼ 3» empeora). Las placas son los propios botones: B cambia, A confirma; la elegida se enmarca en oro y la otra se atenúa.
+- Botín: dos placas lado a lado (actual a la izquierda, nueva a la derecha). Cada una muestra el tipo de objeto en grande y su rareza debajo, y las filas de estadísticas alineadas; la nueva añade la diferencia con flecha y número en serif negrita (verde ▲ mejora, roja ▼ empeora). Las placas son los propios botones: B cambia, A confirma; la elegida se enmarca en oro y la otra se atenúa.
+- Poción: mismo formato, dos placas seleccionables (Recuperar | Vida máx.) con la vida resultante en grande y la actual debajo.
 - HUD: placas espejo. Héroe: corazón + «CABALLERO», vida y barra. Enemigo: nombre + calavera/corona, barra y vida. Centro: número de encuentro en romanos y runas del especial.
 - Interfaz tematizada, abajo para dejar el cielo libre a los jefes: placas de hierro con remaches dorados, barras segmentadas, número de encuentro en **números romanos**, runas del especial, títulos en serif (FreeSerifBold) y textos en una fuente pixel propia de 5×7.
 - Sprites y animaciones pequeños pero reconocibles a 240 × 135 píxeles.

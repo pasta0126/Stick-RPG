@@ -781,22 +781,6 @@ void drawStatsPanel() {
   }
 }
 
-void button(const char* label, int cx, int y, bool selected) {
-  cv.setFont(B9);
-  int w = cv.textWidth(label) + 18;
-  int x0 = cx - w / 2;
-  if (selected) {
-    panel(x0, y, x0 + w, y + 16);
-    c4.frame(x0, y, w + 1, 17, pal::ORO);
-    c4.label(">", x0 + 4, y + 5, pal::ORO, pal::NEGRO);
-  } else {
-    c4.rect(x0, y, w + 1, 17, pal::NEGRO);
-    c4.frame(x0, y, w + 1, 17, pal::OSCURO);
-  }
-  txt(B9, label, cx + 3, y + 8, selected ? pal::BRILLO : pal::MEDIO,
-      middle_center, NONE);
-}
-
 void drawSceneNoEnemy() {
   drawBackground(0, gfx::BG_LAYER_PERSONAJES);
   drawHero();
@@ -804,20 +788,34 @@ void drawSceneNoEnemy() {
 }
 
 
-// Etiqueta de mejora/empeora: fondo de color, flecha y número en negrita.
-void badge(int x, int y, int d) {
+// Indicador de mejora/empeora: flecha de color y número en serif negrita.
+void delta(int x, int y, int d) {
   bool up = d > 0;
-  uint8_t bgc = up ? pal::ESPECTRAL : pal::SANGRE;
-  uint8_t fg = up ? pal::NEGRO : pal::BRILLO;
+  uint8_t col = up ? pal::ESPECTRAL : pal::SANGRE;
+  for (int k = 0; k < 5; ++k)
+    for (int j = -k; j <= k; ++j)
+      c4.pset(x + 4 + j, up ? y - 2 + k : y + 2 - k, col);
   char num[12];
   std::snprintf(num, sizeof(num), "%d", up ? d : -d);
-  int w = 10 + gfx::Canvas4::textWidth(num, 1, true) + 3;
-  c4.rect(x + 1, y, w - 2, 11, bgc);
-  c4.rect(x, y + 1, w, 9, bgc);
-  for (int k = 0; k < 4; ++k)  // flecha
-    for (int j = -k; j <= k; ++j)
-      c4.pset(x + 5 + j, up ? y + 3 + k : y + 7 - k, fg);
-  c4.text(num, x + 10, y + 2, fg, 1, true);
+  txt(B9, num, x + 11, y, col, middle_left, NONE);
+}
+
+// Marco de una placa seleccionable: oro doble con esquinas que laten, o
+// atenuada si no está elegida.
+void choiceFrame(int x0, int y0, int x1, int y1, bool selected) {
+  if (selected) {
+    c4.frame(x0, y0, x1 - x0 + 1, y1 - y0 + 1, pal::ORO);
+    c4.frame(x0 + 2, y0 + 2, x1 - x0 - 3, y1 - y0 - 3, pal::ORO);
+    if ((gt / 400) % 2 == 0)
+      for (int k = 0; k < 6; ++k) {
+        c4.pset(x0 + 3 + k, y0 + 3, pal::BRILLO);
+        c4.pset(x0 + 3, y0 + 3 + k, pal::BRILLO);
+        c4.pset(x1 - 3 - k, y1 - 3, pal::BRILLO);
+        c4.pset(x1 - 3, y1 - 3 - k, pal::BRILLO);
+      }
+  } else {
+    c4.shade(x0, y0, x1 - x0 + 1, y1 - y0 + 1, pal::NEGRO, 7);
+  }
 }
 
 // Placa de un objeto en la pantalla de botín. La placa es el propio botón:
@@ -844,7 +842,7 @@ void lootColumn(const Item& it, const Item* other, int x0, int x1,
     Stat s = list[i];
     int y = 62 + i * step;
     int v = it.present ? it.get(s) : 0;
-    int vx = isNew ? x1 - 33 : x1 - 8;
+    int vx = isNew ? x1 - 36 : x1 - 8;
     txt(S9, statName(s), x0 + 8, y, pal::CLARO, middle_left, NONE);
     if (v) {
       std::snprintf(buf, sizeof(buf), "%+d%s", v, statIsPercent(s) ? "%" : "");
@@ -855,24 +853,11 @@ void lootColumn(const Item& it, const Item* other, int x0, int x1,
     if (isNew) {
       int a = other && other->present ? other->get(s) : 0;
       int d = v - a;
-      if (d) badge(x1 - 29, y - 5, d);
+      if (d) delta(x1 - 32, y, d);
     }
   }
 
-  if (selected) {
-    c4.frame(x0, y0, x1 - x0 + 1, y1 - y0 + 1, pal::ORO);
-    c4.frame(x0 + 2, y0 + 2, x1 - x0 - 3, y1 - y0 - 3, pal::ORO);
-    // Marcas en las esquinas que laten suavemente.
-    if ((gt / 400) % 2 == 0)
-      for (int k = 0; k < 6; ++k) {
-        c4.pset(x0 + 3 + k, y0 + 3, pal::BRILLO);
-        c4.pset(x0 + 3, y0 + 3 + k, pal::BRILLO);
-        c4.pset(x1 - 3 - k, y1 - 3, pal::BRILLO);
-        c4.pset(x1 - 3, y1 - 3 - k, pal::BRILLO);
-      }
-  } else {
-    c4.shade(x0, y0, x1 - x0 + 1, y1 - y0 + 1, pal::NEGRO, 7);
-  }
+  choiceFrame(x0, y0, x1, y1, selected);
 }
 
 void drawLootItem() {
@@ -895,29 +880,34 @@ void drawLootItem() {
   lootColumn(nue, &cur, 122, 236, list, n, sel == 1, true);
 }
 
+void potionColumn(const char* title, const char* l1, const char* l2,
+                  int hp, int hpMax, int x0, int x1, bool selected) {
+  const int y0 = 3, y1 = 131;
+  panel(x0, y0, x1, y1);
+  int cx = (x0 + x1) / 2;
+  txt(B12, title, cx, 22, pal::ORO, middle_center, NONE);
+  for (int x = x0 + 6; x < x1 - 5; ++x)
+    if (x % 2) c4.pset(x, 36, pal::MEDIO);
+  txt(S9, l1, cx, 52, pal::CLARO, middle_center, NONE);
+  txt(S9, l2, cx, 67, pal::CLARO, middle_center, NONE);
+  char buf[24];
+  std::snprintf(buf, sizeof(buf), "%d/%d", hp, hpMax);
+  txt(B12, buf, cx, 92, pal::ESPECTRAL, middle_center, NONE);
+  std::snprintf(buf, sizeof(buf), "ahora %d/%d", hero.hp, hero.hpMax);
+  txt(I9, buf, cx, 113, pal::MEDIO, middle_center, NONE);
+  choiceFrame(x0, y0, x1, y1, selected);
+}
+
 void drawLootPotion() {
   drawSceneNoEnemy();
   c4.shade(0, 0, W, H, pal::NEGRO, 11);
-  char buf[28];
-  panel(2, 2, 237, 132);
-  txt(B12, "Pocion", W / 2, 16, pal::ORO, middle_center, NONE);
-  std::snprintf(buf, sizeof(buf), "Vida %d/%d", hero.hp, hero.hpMax);
-  txt(B9, buf, W / 2, 36, pal::SANGRE, middle_center, NONE);
   int g = potionMaxGain(hero);
-  int lx = W / 4 + 4, rx = W * 3 / 4 - 4;
-  txt(S9, "Restaura toda", lx, 56, pal::CLARO, middle_center, NONE);
-  txt(S9, "la vida", lx, 70, pal::CLARO, middle_center, NONE);
-  std::snprintf(buf, sizeof(buf), "%d/%d", hero.hpMax, hero.hpMax);
-  txt(B9, buf, lx, 88, pal::ESPECTRAL, middle_center, NONE);
-  std::snprintf(buf, sizeof(buf), "+%d vida max.", g);
-  txt(S9, buf, rx, 56, pal::CLARO, middle_center, NONE);
-  txt(S9, "permanente", rx, 70, pal::CLARO, middle_center, NONE);
-  std::snprintf(buf, sizeof(buf), "%d/%d", hero.hp + g, hero.hpMax + g);
-  txt(B9, buf, rx, 88, pal::ESPECTRAL, middle_center, NONE);
-  for (int y = 50; y < 96; ++y)
-    if (y % 2) c4.pset(W / 2, y, pal::MEDIO);
-  button("Recuperar", lx, 109, sel == 0);
-  button("Vida max.", rx, 109, sel == 1);
+  char l1[24];
+  std::snprintf(l1, sizeof(l1), "+%d de vida max.", g);
+  potionColumn("Recuperar", "Restaura toda", "la vida", hero.hpMax, hero.hpMax,
+               3, 117, sel == 0);
+  potionColumn("Vida max.", l1, "para siempre", hero.hp + g, hero.hpMax + g,
+               122, 236, sel == 1);
 }
 
 // ---- Pantalla de título: logo que cae, reflejo, destellos y ascuas.
