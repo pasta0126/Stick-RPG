@@ -154,6 +154,8 @@ The hero comes from `assets/ai/heroe.png` (7 frames facing right) and `assets/ai
 
 ### Screen placement
 
+- The game draws a 1 px **Light (3)** halo around every character (hero and enemies) at runtime, so they stand out from the background. Do not paint it into the sprites.
+
 - The enemy’s feet stand at screen point **(186, 113)**.
 - The hero’s feet stand at **(50, 113)**.
 - The HUD covers **y ≥ 112**.

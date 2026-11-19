@@ -629,6 +629,18 @@ uint8_t rarityColor(Rareza r) {
   }
 }
 
+// Borde de 1 px en tono claro alrededor de la silueta (separa a los
+// personajes del fondo): la capa en color sólido, desplazada en 4 sentidos.
+// Se dibuja antes que el sprite, que lo tapa por dentro.
+void blitHalo(const gfx::Sheet& s, int layer, int frame, int x, int y,
+              int dissolve = 0) {
+  static const Remap halo = Remap::solid(pal::CLARO);
+  c4.blit(s, layer, frame, x - 1, y, halo, dissolve);
+  c4.blit(s, layer, frame, x + 1, y, halo, dissolve);
+  c4.blit(s, layer, frame, x, y - 1, halo, dissolve);
+  c4.blit(s, layer, frame, x, y + 1, halo, dissolve);
+}
+
 void drawHero() {
   namespace H = gfx::heroe;  // capas y animaciones (iguales en todos los héroes)
   const gfx::HeroArt& art = gfx::kHeroArt[static_cast<int>(hero.clase)];
@@ -655,13 +667,14 @@ void drawHero() {
       {H::PECHERA, (int)Slot::PECHERA}, {H::CASCO, (int)Slot::CASCO},
       {H::ESCUDO, (int)Slot::ESCUDO}, {H::BRAZO, (int)Slot::ESPADA},
   };
+  auto visible = [&](int layer, int slot) {
+    return slot < 0 || layer == H::BRAZO || hero.equip[slot].present;
+  };
+  for (auto& c : capas)
+    if (visible(c.layer, c.slot)) blitHalo(*art.sheet, c.layer, frame, x0, y0);
   for (auto& c : capas) {
-    Remap r = Remap::identity();
-    if (c.slot >= 0) {
-      const Item& it = hero.equip[c.slot];
-      if (!it.present && c.layer != H::BRAZO) continue;
-      r = rarityRemap(it);
-    }
+    if (!visible(c.layer, c.slot)) continue;
+    Remap r = c.slot >= 0 ? rarityRemap(hero.equip[c.slot]) : Remap::identity();
     c4.blit(*art.sheet, c.layer, frame, x0, y0, flash ? white : r);
   }
   // Chispas espectrales mientras se carga el especial.
@@ -696,6 +709,7 @@ void drawEnemy(int dissolve = 0) {
     frame = a.idle.frameAt(gt);  // respiración
   }
   static const Remap white = Remap::solid(pal::BRILLO);
+  blitHalo(*a.sheet, 0, frame, x0, y0, dissolve);
   c4.blit(*a.sheet, 0, frame, x0, y0, flash ? white : Remap::identity(),
           dissolve);
   if (enemy.preparado && st != St::ENEMY_DIE && (gt / 220) % 2 == 0) {
@@ -1064,6 +1078,8 @@ void heroColumn(HeroClass c, int x0, int x1, bool selected) {
   const gfx::HeroArt& art = gfx::kHeroArt[static_cast<int>(c)];
   int frame = selected ? H::IDLE.frameAt(gt) : H::IDLE.from;
   int fx = cx - 6, fy = 100;  // pies
+  for (int l = 0; l < H::LAYER_COUNT; ++l)
+    blitHalo(*art.sheet, l, frame, fx - art.ax, fy - art.ay);
   for (int l = 0; l < H::LAYER_COUNT; ++l)
     c4.blit(*art.sheet, l, frame, fx - art.ax, fy - art.ay, Remap::identity());
   const char* l1 = c == HeroClass::VIKINGA ? "ATAQUE Y CRITICO" : "MAS DEFENSA";
