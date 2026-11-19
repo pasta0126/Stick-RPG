@@ -42,10 +42,28 @@ float Battle::extraChance() const {
   return hero_.eff(Stat::EXTRA) / static_cast<float>(1 << chain_);
 }
 
-HeroTurnResult Battle::heroAttack(float chargeMult) {
+HeroTurnResult Battle::attack(float mult, bool special) {
   HeroTurnResult r;
-  r.atk = resolveAttack(rng_, hero_.combatant(), enemy_.c, chargeMult);
+  if (special && !hero_.especialListo()) {
+    special = false;
+    mult = 1.0f;
+  }
+  // El contador se mantiene entre combates; los fallos también cuentan.
+  if (special)
+    hero_.golpesEspecial = 0;
+  else if (hero_.golpesEspecial < bal::ESPECIAL_CADA)
+    ++hero_.golpesEspecial;
+  r.atk = resolveAttack(rng_, hero_.combatant(), enemy_.c, mult);
   enemy_.hp -= r.atk.damage;
+  // Vampirismo (§5): recupera un % del daño infligido, mínimo 1 si hay VAMP.
+  int vamp = hero_.eff(Stat::VAMP);
+  if (vamp > 0 && r.atk.damage > 0) {
+    int heal = r.atk.damage * vamp / 100;
+    if (heal < 1) heal = 1;
+    int before = hero_.hp;
+    hero_.hp = hero_.hp + heal > hero_.hpMax ? hero_.hpMax : hero_.hp + heal;
+    r.healed = hero_.hp - before;
+  }
   if (enemy_.hp <= 0) {
     enemy_.hp = 0;
     r.enemyDead = true;

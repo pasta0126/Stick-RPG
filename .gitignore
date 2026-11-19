@@ -33,3 +33,5 @@ build/
 
 # Varios
 *.log
+__pycache__/
+*.pyc

@@ -92,7 +92,7 @@ static void testExtraChain() {
   Battle b(h, e, rng);
   int maxChain = 0;
   for (int i = 0; i < 5000; ++i) {
-    HeroTurnResult r = b.heroAttack(1.0f);
+    HeroTurnResult r = b.heroAttack();
     if (r.extraTurn) maxChain = b.chain() > maxChain ? b.chain() : maxChain;
     else b.enemyTurn(), h.hp = h.hpMax;
   }
@@ -102,12 +102,55 @@ static void testExtraChain() {
 
 static void testEnemies() {
   Rng rng(5);
-  CHECK(makeEnemy(rng, 1).type == EnemyType::BANDIDO);
-  CHECK(makeEnemy(rng, 10).type == EnemyType::JEFE);
+  for (int n = 1; n < 200; ++n)
+    CHECK(isBoss(makeEnemy(rng, n).type) == isBossLevel(n));
+  CHECK(makeEnemy(rng, 10).type == EnemyType::REY_CIERVO);
+  CHECK(makeEnemy(rng, 50).type == EnemyType::REY_LICHE);
+  CHECK(makeEnemy(rng, 60).type == EnemyType::REY_CIERVO);
   CHECK(makeEnemy(rng, 30).hpMax > makeEnemy(rng, 1).hpMax);
 }
 
+static void testVamp() {
+  Hero h = makeHero();
+  Item it; it.present = true; it.slot = Slot::ESCUDO; it.nMods = 1;
+  it.mods[0] = {Stat::VAMP, 500};
+  equipItem(h, it);
+  CHECK(h.eff(Stat::VAMP) == bal::TOPE_VAMP);
+  Rng rng(4);
+  Enemy e = makeEnemy(rng, 1);
+  e.hp = e.hpMax = 100000;
+  h.hp = 10;
+  Battle b(h, e, rng);
+  int healedTotal = 0;
+  for (int i = 0; i < 50; ++i) {
+    HeroTurnResult r = b.heroAttack();
+    healedTotal += r.healed;
+    if (r.atk.damage > 0) CHECK(r.healed >= 0);
+    CHECK(h.hp <= h.hpMax);
+  }
+  CHECK(healedTotal > 0);
+}
+
+static void testSpecial() {
+  Hero h = makeHero();
+  Rng rng(9);
+  Enemy e = makeEnemy(rng, 1);
+  e.hp = e.hpMax = 100000;
+  Battle b(h, e, rng);
+  CHECK(!h.especialListo());
+  b.heroAttack(); b.heroAttack();
+  CHECK(!h.especialListo());
+  b.heroAttack();
+  CHECK(h.especialListo());                 // a partir del 3.er golpe
+  b.heroSpecial(2.0f);
+  CHECK(h.golpesEspecial == 0);             // se vacía al usarlo
+  b.heroSpecial(2.0f);                      // sin cargar: cuenta como normal
+  CHECK(h.golpesEspecial == 1);
+}
+
 int main() {
+  testVamp();
+  testSpecial();
   testDamage();
   testCharge();
   testCaps();

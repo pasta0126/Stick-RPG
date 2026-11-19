@@ -14,12 +14,14 @@ const char* statName(Stat s) {
     case Stat::CRIT_DMG: return "C.DMG";
     case Stat::EXTRA: return "EXTRA";
     case Stat::LUCK: return "LUCK";
+    case Stat::VAMP: return "VAMP";
     default: return "?";
   }
 }
 
 bool statIsPercent(Stat s) {
-  return s == Stat::CRIT || s == Stat::CRIT_DMG || s == Stat::EXTRA;
+  return s == Stat::CRIT || s == Stat::CRIT_DMG || s == Stat::EXTRA ||
+         s == Stat::VAMP;
 }
 
 const char* slotName(Slot s) {
@@ -58,11 +60,15 @@ void itemName(const Item& it, char* buf, int len) {
 
 const char* enemyName(EnemyType t) {
   switch (t) {
-    case EnemyType::BANDIDO: return "Bandido";
+    case EnemyType::BANDIDO: return "Salteador";
     case EnemyType::GOLEM: return "Golem";
-    case EnemyType::LOBO: return "Lobo";
-    case EnemyType::OGRO: return "Ogro";
-    case EnemyType::JEFE: return "Jefe";
+    case EnemyType::LOBO: return "Huargo";
+    case EnemyType::OGRO: return "Troll";
+    case EnemyType::REY_CIERVO: return "Rey Ciervo";
+    case EnemyType::DAMA_ESPECTRAL: return "Dama Espectral";
+    case EnemyType::CABALLERO_NEGRO: return "Caballero Negro";
+    case EnemyType::TEJEDORA: return "La Tejedora";
+    case EnemyType::REY_LICHE: return "Rey Liche";
     default: return "?";
   }
 }
@@ -83,9 +89,12 @@ int Hero::eff(Stat s) const {
     case Stat::CRIT: return clampi(v, 0, bal::TOPE_CRIT);
     case Stat::CRIT_DMG: return clampi(v, 0, bal::TOPE_CRIT_DMG);
     case Stat::EXTRA: return clampi(v, 0, bal::TOPE_EXTRA);
+    case Stat::VAMP: return clampi(v, 0, bal::TOPE_VAMP);
     default: return v < 0 ? 0 : v;
   }
 }
+
+bool Hero::especialListo() const { return golpesEspecial >= bal::ESPECIAL_CADA; }
 
 Combatant Hero::combatant() const {
   Combatant c;

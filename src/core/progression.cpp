@@ -30,7 +30,12 @@ EnemyProfile profile(EnemyType t) {
     case EnemyType::GOLEM: return {1.40f, 0.80f, 1.70f, 3, 12, 10};
     case EnemyType::LOBO:  return {0.80f, 0.95f, 0.60f, 20, 5, 10};
     case EnemyType::OGRO:  return {1.15f, 1.25f, 0.85f, 5, 14, 35};
-    case EnemyType::JEFE:  return {1.90f, 1.10f, 1.15f, 10, 8, 25};
+    // Jefes (§7.1): cada uno con su estilo.
+    case EnemyType::REY_CIERVO:      return {2.00f, 1.10f, 1.20f, 8, 10, 20};
+    case EnemyType::DAMA_ESPECTRAL:  return {1.50f, 1.15f, 0.90f, 25, 4, 20};
+    case EnemyType::CABALLERO_NEGRO: return {1.90f, 1.15f, 1.45f, 10, 8, 30};
+    case EnemyType::TEJEDORA:        return {1.70f, 1.20f, 1.00f, 15, 6, 25};
+    case EnemyType::REY_LICHE:       return {2.20f, 1.25f, 1.25f, 12, 6, 35};
     case EnemyType::BANDIDO:
     default:               return {1.00f, 1.00f, 1.00f, 5, 10, 15};
   }
@@ -58,15 +63,29 @@ Hero makeHero() {
 
 bool isBossLevel(int nivel) { return nivel > 0 && nivel % bal::JEFE_CADA == 0; }
 
+Bioma biomaDe(int nivel) {
+  int i = ((nivel - 1) / bal::JEFE_CADA) % static_cast<int>(Bioma::COUNT);
+  return static_cast<Bioma>(i);
+}
+
+const char* biomaName(Bioma b) {
+  switch (b) {
+    case Bioma::CEMENTERIO: return "El Cementerio";
+    case Bioma::CASTILLO: return "El Castillo";
+    default: return "El Bosque";
+  }
+}
+
 Enemy makeEnemy(Rng& rng, int nivel) {
   Enemy e;
   e.nivel = nivel;
-  if (isBossLevel(nivel))
-    e.type = EnemyType::JEFE;
-  else if (nivel <= 1)
-    e.type = EnemyType::BANDIDO;
-  else
-    e.type = static_cast<EnemyType>(rng.range(0, 3));
+  if (isBossLevel(nivel)) {
+    // Jefes en orden; tras el quinto, se repiten (más fuertes por el nivel).
+    int k = (nivel / bal::JEFE_CADA - 1) % NUM_JEFES;
+    e.type = static_cast<EnemyType>(NUM_NORMALES + k);
+  } else {
+    e.type = static_cast<EnemyType>(rng.range(0, NUM_NORMALES - 1));
+  }
 
   EnemyProfile p = profile(e.type);
   int n = nivel - 1;
@@ -98,7 +117,8 @@ Rareza rollRareza(Rng& rng, int luck, bool jefe) {
 Item makeItem(Rng& rng, Slot slot, int nivel, Rareza rareza) {
   static const float kSlotFactor[SLOT_COUNT] = {0.6f, 1.0f, 0.5f, 1.6f, 0.8f};
   static const float kRareza[] = {1.0f, 1.25f, 1.55f};
-  static const int kSecundaria[] = {40, 80, 100};  // % de tener 2.ª estadística
+  // Común: % de tener 1 secundaria. Rara: % de tener 2 (si no, 1).
+  static const int kSecundaria[] = {50, 40, 100};
 
   Item it;
   it.present = true;
@@ -116,22 +136,33 @@ Item makeItem(Rng& rng, Slot slot, int nivel, Rareza rareza) {
   it.mods[0] = {primary, static_cast<int16_t>(pv < 1 ? 1 : pv)};
   it.nMods = 1;
 
-  if (rng.chance(kSecundaria[r])) {
-    static const Stat kArma[] = {Stat::CRIT, Stat::CRIT_DMG, Stat::EXTRA,
-                                 Stat::LUCK};
-    static const Stat kArmadura[] = {Stat::CRIT, Stat::EXTRA, Stat::LUCK};
-    Stat s = slot == Slot::ESPADA ? kArma[rng.range(0, 3)]
-                                  : kArmadura[rng.range(0, 2)];
+  // Secundarias: Común 0-1, Rara 1-2, Épica 2 (máx. 3 estadísticas).
+  int nSec = 0;
+  if (rareza == Rareza::COMUN) nSec = rng.chance(kSecundaria[0]) ? 1 : 0;
+  else if (rareza == Rareza::RARA) nSec = rng.chance(kSecundaria[1]) ? 2 : 1;
+  else nSec = 2;
+
+  static const Stat kArma[] = {Stat::CRIT, Stat::CRIT_DMG, Stat::EXTRA,
+                               Stat::LUCK, Stat::VAMP};
+  static const Stat kArmadura[] = {Stat::CRIT, Stat::EXTRA, Stat::LUCK,
+                                   Stat::VAMP};
+  const Stat* pool = slot == Slot::ESPADA ? kArma : kArmadura;
+  int poolN = slot == Slot::ESPADA ? 5 : 4;
+  for (int k = 0; k < nSec; ++k) {
+    Stat s;
+    do {
+      s = pool[rng.range(0, poolN - 1)];
+    } while (it.get(s) != 0);  // sin repetir estadística
     int base;
     switch (s) {
       case Stat::CRIT: base = rng.range(1, 4); break;
       case Stat::CRIT_DMG: base = rng.range(5, 15); break;
       case Stat::EXTRA: base = rng.range(1, 4); break;
+      case Stat::VAMP: base = rng.range(2, 5); break;
       default: base = rng.range(2, 6); break;  // LUCK
     }
     int sv = roundi((base + nivel / 15) * kRareza[r]);
-    it.mods[1] = {s, static_cast<int16_t>(sv < 1 ? 1 : sv)};
-    it.nMods = 2;
+    it.mods[it.nMods++] = {s, static_cast<int16_t>(sv < 1 ? 1 : sv)};
   }
   return it;
 }

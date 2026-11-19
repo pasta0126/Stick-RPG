@@ -29,7 +29,8 @@ float itemScore(const Item& it) {
   if (!it.present) return 0;
   return it.get(Stat::ATK) * 1.2f + it.get(Stat::DEF) * 1.0f +
          it.get(Stat::CRIT) * 0.4f + it.get(Stat::CRIT_DMG) * 0.1f +
-         it.get(Stat::EXTRA) * 0.6f + it.get(Stat::LUCK) * 0.15f;
+         it.get(Stat::EXTRA) * 0.6f + it.get(Stat::LUCK) * 0.15f +
+         it.get(Stat::VAMP) * 0.5f;
 }
 
 float playerCharge(Rng& rng, const Options& o) {
@@ -54,7 +55,9 @@ RunStats playRun(Rng& rng, const Options& o) {
     Battle b(hero, enemy, rng);
     bool heroDead = false;
     while (true) {
-      HeroTurnResult hr = b.heroAttack(playerCharge(rng, o));
+      HeroTurnResult hr = (o.charge && hero.especialListo())
+                              ? b.heroSpecial(playerCharge(rng, o))
+                              : b.heroAttack();
       ++st.turns;
       st.maxHit = std::max(st.maxHit, hr.atk.damage);
       if (hr.enemyDead) break;

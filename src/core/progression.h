@@ -7,6 +7,11 @@
 Hero makeHero();
 
 bool isBossLevel(int nivel);
+
+// Biomas (GDD §7.2): cambian tras cada jefe y se repiten en ciclo.
+enum class Bioma : uint8_t { BOSQUE, CEMENTERIO, CASTILLO, COUNT };
+Bioma biomaDe(int nivel);
+const char* biomaName(Bioma b);
 Enemy makeEnemy(Rng& rng, int nivel);
 
 struct Loot {

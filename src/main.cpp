@@ -54,7 +54,8 @@ struct Floater {
   uint8_t color = pal::BLANCO;
   int x = 0, y = 0;
   uint32_t t0 = 0;
-} floater;
+};
+Floater floaters[2];  // [0] daño / textos, [1] vida robada
 
 // Partida.
 int nivel = 1, derrotados = 0, golpeMax = 0;
@@ -93,7 +94,8 @@ void show(const char* text, uint8_t color, uint32_t dur, St next) {
   setState(St::SHOW);
 }
 
-void floatText(const char* text, uint8_t color, int x, int y) {
+void floatText(const char* text, uint8_t color, int x, int y, int slot = 0) {
+  Floater& floater = floaters[slot];
   floater.on = true;
   std::snprintf(floater.text, sizeof(floater.text), "%s", text);
   floater.color = color;
@@ -182,8 +184,8 @@ void setState(St s) {
 
 // ------------------------------------------------------------------- combate
 
-void doHeroAttack(float mult, bool perfect) {
-  HeroTurnResult r = battle.heroAttack(mult);
+void doHeroAttack(bool special, float mult, bool perfect) {
+  HeroTurnResult r = special ? battle.heroSpecial(mult) : battle.heroAttack();
   heroAtkT = gt;
   if (r.atk.damage > golpeMax) golpeMax = r.atk.damage;
 
@@ -199,6 +201,11 @@ void doHeroAttack(float mult, bool perfect) {
     floatText(d, r.atk.crit ? pal::AMARILLO : pal::BLANCO, enemyX,
               SUELO_Y - 50);
     enemyHitT = gt;
+    if (r.healed > 0) {
+      char h[12];
+      std::snprintf(h, sizeof(h), "+%d", r.healed);
+      floatText(h, pal::VERDE, heroX, SUELO_Y - 50, 1);
+    }
     if (perfect) std::strcat(buf, "PERFECTO ");
     if (r.atk.crit) {
       std::strcat(buf, "CRITICO ");
@@ -286,6 +293,11 @@ void updateHeroTurn() {
   }
   if (statsOpen) return;
 
+  // Sin el especial disponible (§4.3), A ataca al pulsar.
+  if (M5.BtnA.wasPressed() && !hero.especialListo()) {
+    doHeroAttack(false, 1.0f, false);
+    return;
+  }
   if (M5.BtnA.wasPressed()) {
     aArmed = true;
     aPressMs = millis();
@@ -305,7 +317,7 @@ void updateHeroTurn() {
     bool charged = held > bal::T_UMBRAL_MS;
     float f = chargeFill(held);
     aArmed = charging = false;
-    doHeroAttack(charged ? chargeMultiplier(f) : 1.0f,
+    doHeroAttack(charged, charged ? chargeMultiplier(f) : 1.0f,
                  charged && chargeIsPerfect(f));
   }
 }
@@ -330,7 +342,7 @@ void updateLoot(bool potion) {
 }
 
 void update() {
-  floater.on = floater.on && gt - floater.t0 < 700;
+  for (Floater& f : floaters) f.on = f.on && gt - f.t0 < 700;
   switch (st) {
     case St::START: updateStart(); break;
     case St::RUN: updateRun(); break;
@@ -465,8 +477,7 @@ void drawEnemy(int x) {
       cv.fillRect(x + 4, y - 10, 6, 10, pal::VERDE_OSC);
       cv.fillRoundRect(x - 26, y - 40, 6, 20, 3, pal::MARRON);
       break;
-    case EnemyType::JEFE:
-    default:
+    default:  // jefes (provisional)
       cv.fillRoundRect(x - 14, y - 44, 28, 32, 4, pal::MORADO);
       cv.fillRect(x - 10, y - 12, 7, 12, pal::MORADO);
       cv.fillRect(x + 3, y - 12, 7, 12, pal::MORADO);
@@ -566,19 +577,19 @@ void drawLootItem() {
   itemName(nue, buf, sizeof(buf));
   text(buf, W / 2 + 6, 30, rarezaColor(nue.rareza));
 
-  // Unión de estadísticas de ambos objetos (máx. 4 líneas).
-  Stat list[4];
+  // Unión de estadísticas de ambos objetos (máx. 6 líneas).
+  Stat list[2 * MAX_MODS];
   int n = 0;
   auto add = [&](Stat s) {
     for (int i = 0; i < n; ++i) if (list[i] == s) return;
-    if (n < 4) list[n++] = s;
+    if (n < 2 * MAX_MODS) list[n++] = s;
   };
   for (int i = 0; i < cur.nMods && cur.present; ++i) add(cur.mods[i].stat);
   for (int i = 0; i < nue.nMods; ++i) add(nue.mods[i].stat);
 
   for (int i = 0; i < n; ++i) {
     Stat s = list[i];
-    int y = 46 + i * 13;
+    int y = 44 + i * 10;
     int cv0 = cur.present ? cur.get(s) : 0, nv = nue.get(s);
     if (cv0) { fmtStat(buf, sizeof(buf), s, cv0); text(buf, 6, y, pal::BLANCO); }
     else text("-", 6, y, pal::GRIS);
@@ -670,10 +681,10 @@ void render() {
       break;
     }
   }
-  if (floater.on) {
-    int dy = static_cast<int>((gt - floater.t0) / 25);
-    textShadow(floater.text, floater.x, floater.y - dy, floater.color, 2,
-               middle_center);
+  for (const Floater& f : floaters) {
+    if (!f.on) continue;
+    int dy = static_cast<int>((gt - f.t0) / 25);
+    textShadow(f.text, f.x, f.y - dy, f.color, 2, middle_center);
   }
   if (paused) {
     cv.fillRect(60, 46, 120, 42, pal::NEGRO);

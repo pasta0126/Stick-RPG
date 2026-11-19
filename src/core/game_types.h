@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-enum class Stat : uint8_t { ATK, DEF, CRIT, CRIT_DMG, EXTRA, LUCK, COUNT };
+enum class Stat : uint8_t { ATK, DEF, CRIT, CRIT_DMG, EXTRA, LUCK, VAMP, COUNT };
 constexpr int STAT_COUNT = static_cast<int>(Stat::COUNT);
 
 enum class Slot : uint8_t { CASCO, PECHERA, BOTAS, ESPADA, ESCUDO, COUNT };
@@ -21,8 +21,8 @@ struct StatMod {
   int16_t value = 0;
 };
 
-// Máximo 2 estadísticas por objeto (GDD §5.1).
-constexpr int MAX_MODS = 2;
+// Máximo 3 estadísticas por objeto (GDD §5.1): 1 principal + 2 secundarias.
+constexpr int MAX_MODS = 3;
 
 struct Item {
   bool present = false;
@@ -57,7 +57,10 @@ struct Hero {
   int hpMax = 0;
   int base[STAT_COUNT] = {};
   int fallo = 0;
+  int golpesEspecial = 0;  // golpes acumulados para el ataque especial (§4.3)
   Item equip[SLOT_COUNT];
+
+  bool especialListo() const;
 
   // Suma base + equipo, sin topes.
   int raw(Stat s) const;
@@ -66,8 +69,18 @@ struct Hero {
   Combatant combatant() const;
 };
 
-enum class EnemyType : uint8_t { BANDIDO, GOLEM, LOBO, OGRO, JEFE, COUNT };
+// 4 enemigos normales (aleatorios) y 5 jefes únicos, en orden, cada 10 encuentros.
+enum class EnemyType : uint8_t {
+  BANDIDO, GOLEM, LOBO, OGRO,
+  REY_CIERVO, DAMA_ESPECTRAL, CABALLERO_NEGRO, TEJEDORA, REY_LICHE,
+  COUNT
+};
+constexpr int NUM_NORMALES = 4;
+constexpr int NUM_JEFES = 5;
 const char* enemyName(EnemyType t);
+inline bool isBoss(EnemyType t) {
+  return static_cast<int>(t) >= NUM_NORMALES && t != EnemyType::COUNT;
+}
 
 struct Enemy {
   EnemyType type = EnemyType::BANDIDO;

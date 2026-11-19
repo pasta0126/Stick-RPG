@@ -25,6 +25,7 @@ AttackResult resolveAttack(Rng& rng, const Combatant& a, const Combatant& d,
 
 struct HeroTurnResult {
   AttackResult atk;
+  int healed = 0;  // vida robada por VAMP
   bool extraTurn = false;
   bool enemyDead = false;
 };
@@ -42,8 +43,10 @@ class Battle {
   Battle(Hero& hero, Enemy& enemy, Rng& rng)
       : hero_(hero), enemy_(enemy), rng_(rng) {}
 
-  // chargeMult = 1 para el ataque normal.
-  HeroTurnResult heroAttack(float chargeMult);
+  // Ataque normal: suma 1 golpe al contador del especial.
+  HeroTurnResult heroAttack() { return attack(1.0f, false); }
+  // Ataque cargado: solo si hero.especialListo(); vacía el contador.
+  HeroTurnResult heroSpecial(float chargeMult) { return attack(chargeMult, true); }
   EnemyTurnResult enemyTurn();
 
   // Probabilidad (%) de turno extra en este momento (con encadenamiento).
@@ -52,6 +55,8 @@ class Battle {
   void reset() { chain_ = 0; }
 
  private:
+  HeroTurnResult attack(float mult, bool special);
+
   Hero& hero_;
   Enemy& enemy_;
   Rng& rng_;

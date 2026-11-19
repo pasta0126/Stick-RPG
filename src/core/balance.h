@@ -9,17 +9,19 @@ namespace bal {
 // --- Entrada (§4.3) ---------------------------------------------------------
 constexpr uint32_t T_UMBRAL_MS      = 200;   // toque vs. mantener
 constexpr uint32_t CICLO_CARGA_MS   = 1100;  // 0 → 100 % de la barra
+constexpr int      ESPECIAL_CADA    = 3;     // golpes normales para habilitar la carga
 
 // --- Ataque cargado (§4.3) --------------------------------------------------
-constexpr float CARGA_MIN       = 0.5f;
-constexpr float CARGA_MAX       = 1.8f;
+constexpr float CARGA_MIN       = 0.6f;
+constexpr float CARGA_MAX       = 2.4f;
 constexpr float ZONA_PERFECTA   = 0.92f;
-constexpr float CARGA_PERFECTA  = 2.2f;
+constexpr float CARGA_PERFECTA  = 3.2f;
 
 // --- Topes (§5) ---------------------------------------------------------------
 constexpr int TOPE_CRIT      = 50;   // %
 constexpr int TOPE_CRIT_DMG  = 150;  // % extra
 constexpr int TOPE_EXTRA     = 35;   // %
+constexpr int TOPE_VAMP      = 25;   // % del daño infligido
 constexpr int TOPE_FALLO_MIN = 2;    // % (nunca se acierta el 100 %)
 
 // --- Héroe inicial (§5) -------------------------------------------------------
