@@ -275,12 +275,95 @@ def behind_shield(layers, W, H):
             cu.px[y][end] = NEGRO
 
 
+def figure_labels(mask, w, h, n):
+    """Asigna cada píxel opaco a uno de los n fotogramas por piezas
+    conectadas, no por columnas: un arma que invade la columna del vecino
+    sigue siendo de su figura. Devuelve (etiquetas, [bbox por fotograma])."""
+    from collections import deque
+    lab = [[-1] * w for _ in range(h)]
+    comps = []
+    for y in range(h):
+        for x in range(w):
+            if mask[y][x] and lab[y][x] == -1:
+                cid = len(comps)
+                q = deque([(x, y)])
+                lab[y][x] = cid
+                n_px, x0, y0, x1, y1 = 0, x, y, x, y
+                while q:
+                    cx, cy = q.popleft()
+                    n_px += 1
+                    x0, x1 = min(x0, cx), max(x1, cx)
+                    y0, y1 = min(y0, cy), max(y1, cy)
+                    for dx in (-1, 0, 1):
+                        for dy in (-1, 0, 1):
+                            nx, ny = cx + dx, cy + dy
+                            if 0 <= nx < w and 0 <= ny < h and mask[ny][nx] \
+                                    and lab[ny][nx] == -1:
+                                lab[ny][nx] = cid
+                                q.append((nx, ny))
+                comps.append((n_px, x0, y0, x1 + 1, y1 + 1))
+    # las n piezas más grandes son las figuras, ordenadas de izquierda a derecha
+    big = sorted(sorted(range(len(comps)), key=lambda c: -comps[c][0])[:n],
+                 key=lambda c: comps[c][1])
+    frame_of = {c: i for i, c in enumerate(big)}
+    for c, (_, x0, y0, x1, y1) in enumerate(comps):
+        if c in frame_of:
+            continue
+        # resto: al recuadro de figura más cercano (motas muy pequeñas fuera)
+        if comps[c][0] < 30:
+            frame_of[c] = -1
+            continue
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+
+        def dist(i):
+            _, a0, b0, a1, b1 = comps[big[i]]
+            return max(a0 - cx, 0, cx - a1) + max(b0 - cy, 0, cy - b1)
+        frame_of[c] = min(range(n), key=dist)
+    boxes = [[w, h, 0, 0] for _ in range(n)]
+    for y in range(h):
+        row = lab[y]
+        for x in range(w):
+            if row[x] >= 0:
+                f = frame_of[row[x]]
+                row[x] = f
+                if f >= 0:
+                    b = boxes[f]
+                    b[0], b[1] = min(b[0], x), min(b[1], y)
+                    b[2], b[3] = max(b[2], x + 1), max(b[3], y + 1)
+    return lab, [tuple(b) for b in boxes]
+
+
+def _mask(im):
+    w, h = im.size
+    p = im.load()
+    return [[not is_bg(*p[x, y]) for x in range(w)] for y in range(h)], w, h
+
+
+def _bbox(mask, x0, x1, h):
+    ys = [y for y in range(h) if any(mask[y][x0:x1])]
+    xs = [x for x in range(x0, x1) if any(mask[y][x] for y in ys)]
+    return min(xs), min(ys), max(xs) + 1, max(ys) + 1
+
+
+def fit_map(im, mp, n=7):
+    """Encaja el mapa de piezas sobre la tira fotograma a fotograma: el
+    generador no siempre lo calca, pero sí repite la pose; se escala el
+    recuadro de cada figura del mapa al de la tira."""
+    ma, w, h = _mask(im)
+    mb, mw, mh = _mask(mp)
+    _, boxa = figure_labels(ma, w, h, n)
+    _, boxb = figure_labels(mb, mw, mh, n)
+    out = Image.new("RGB", (w, h), (255, 0, 255))
+    for A, B in zip(boxa, boxb):
+        piece = mp.crop(B).resize((A[2] - A[0], A[3] - A[1]), Image.NEAREST)
+        out.paste(piece, (A[0], A[1]))
+    return out
+
+
 class ImportedHero:
     def __init__(self, file=HERO_FILE, mapfile=HERO_MAP):
         im = Image.open(os.path.join(SRC, file)).convert("RGB")
-        mp = Image.open(os.path.join(SRC, mapfile)).convert("RGB")
-        if mp.size != im.size:
-            mp = mp.resize(im.size, Image.NEAREST)
+        mp = fit_map(im, Image.open(os.path.join(SRC, mapfile)).convert("RGB"))
         w, h = im.size
         p, q = im.load(), mp.load()
         idx = [[KEY if is_bg(*p[x, y]) else classify(*p[x, y]) for x in range(w)]
@@ -293,18 +376,15 @@ class ImportedHero:
         # índice combinado: capa * 16 + color, para reducir ambos a la vez
         comb = [[KEY if idx[y][x] == KEY else (lab[y][x] or 0) * 16 + idx[y][x]
                  for x in range(w)] for y in range(h)]
-        segs = segments(mask, w, h, 7)
-        ground = max(y for y in range(h) if any(mask[y]))
-        x0, x1 = segs[0]
-        top = min(y for y in range(h) if any(mask[y][x0:x1]))
-        s = HERO_H / (ground - top + 1)
+        flab, boxes = figure_labels(mask, w, h, 7)
+        ground = max(b[3] for b in boxes) - 1
+        s = HERO_H / (ground - boxes[0][1] + 1)
 
-        for x0, x1 in segs:
-            drop_specks(comb, mask, x0, x1, h)
         cels = []
-        for x0, x1 in segs:
-            top = min(y for y in range(h) if any(mask[y][x0:x1]))
-            sub = [row[x0:x1] for row in comb[top:ground + 1]]
+        for f, (x0, top, x1, _) in enumerate(boxes):
+            sub = [[v if flab[y][x] == f else KEY for x, v in
+                    zip(range(x0, x1), comb[y][x0:x1])]
+                   for y in range(top, ground + 1)]
             px, fw, fh = downscale_comb(sub, x1 - x0, ground + 1 - top, s)
             # pies: mediana de las botas en la franja inferior
             xs = sorted(x for y in range(fh - max(3, fh // 10), fh)

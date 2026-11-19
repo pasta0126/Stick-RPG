@@ -43,7 +43,7 @@ struct HeroArt {
 // Mismo orden que HeroClass (src/core/game_types.h).
 static const HeroArt kHeroArt[] = {
     {&heroe::sheet, 26, 89},  // heroe
-    {&vikinga::sheet, 26, 89},  // vikinga
+    {&vikinga::sheet, 32, 91},  // vikinga
 };
 
 struct EnemyArt {

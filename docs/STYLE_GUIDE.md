@@ -150,7 +150,7 @@ The anchor is the feet position inside the canvas, in the left-facing file. Keep
 
 The current enemies come from the strips in `assets/ai/` (8 frames in a row, facing left, magenta background). `python3 tools/art/build.py --enemies` imports them with `tools/art/import_ai.py`: it splits the frames, maps every pixel to the 8 palette roles, scales to the height set in `SOURCES`, aligns the frames by the torso, closes the black outline and recomputes canvas and anchor. To replace an enemy, drop a new strip there with the same name and run that command, then `make sprites`.
 
-The hero comes from `assets/ai/heroe.png` (7 frames facing right) and `assets/ai/heroe_mapa.png` (same silhouette, one flat colour per layer: helmet blue, chestplate yellow, boots cyan, shield orange, sword arm green, body grey). `python3 tools/art/build.py --hero` splits it into the six layers and fills the torso behind the shield so the hero looks right without one.
+The hero comes from `assets/ai/heroe.png` (7 frames facing right) and `assets/ai/heroe_mapa.png` (same silhouette, one flat colour per layer: helmet blue, chestplate yellow, boots cyan, shield orange, sword arm green, body grey). `python3 tools/art/build.py --hero` splits it into the six layers and fills the torso behind the shield so the hero looks right without one. The Vikinga uses the same pipeline with `assets/ai/vikinga.png` and `vikinga_mapa.png`. Frames are separated by connected pieces (a weapon reaching into the next cell stays with its figure), and the piece map is fitted to the strip frame by frame, so the map does not need to be a pixel-exact copy.
 
 ### Screen placement
 
