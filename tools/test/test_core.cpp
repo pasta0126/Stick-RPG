@@ -81,6 +81,9 @@ static void testHealing() {
   CHECK(h.hp == 42);                       // +50 % de los 37 que faltan
   h.hp = h.hpMax;
   CHECK(potionRecover(h) == 0);
+
+  h.hp = 20; h.hpMax = 60;
+  CHECK(healBeforeBoss(h) == 20 && h.hp == 40);  // 50 % de lo que falta
 }
 
 static void testExtraChain() {

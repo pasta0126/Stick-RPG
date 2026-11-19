@@ -238,10 +238,15 @@ void onEnter(St s) {
     case St::BIOME_INTRO:
       audio::jingleBioma();
       break;
-    case St::BOSS_INTRO:
+    case St::BOSS_INTRO: {
       audio::jingleJefe();
       shake(2, 600);
+      int healed = healBeforeBoss(hero);
+      char buf[12];
+      std::snprintf(buf, sizeof(buf), "+%d", healed);
+      if (healed > 0) floatText(buf, pal::ESPECTRAL, HERO_FX, FEET_Y - 82);
       break;
+    }
     case St::HERO_TURN:
       aArmed = charging = inPerfect = false;
       statsOpen = false;

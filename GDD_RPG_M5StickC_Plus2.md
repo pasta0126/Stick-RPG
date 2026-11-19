@@ -182,9 +182,11 @@ During the hero’s turn, B opens a single **Atributos** (*Attributes*) panel: o
 
 After every won fight the hero automatically recovers a **percentage of max HP** (`CURA_VICTORIA`, 20 %), never above max. Shown as a floating number before the loot screen.
 
+**Pre-boss heal:** when a boss appears (with the “- Jefe -” banner) the hero recovers **50 % of the missing HP** (`CURA_JEFE`), shown as a floating number.
+
 ## 6.2. Loot
 
-Every defeated enemy drops exactly 1 reward: a gear piece (sword, helmet, chestplate, boots or shield) or, rarely, a potion. The encounter level sets the overall item scale; luck improves the odds of better stats, not the number of items.
+Every defeated enemy drops exactly 1 reward: a gear piece (sword, helmet, chestplate, boots or shield) or a potion. The encounter level sets the overall item scale; luck improves the odds of better stats, not the number of items.
 
 Potion chance: 25 % (to be balanced). Bosses never drop potions.
 
@@ -259,7 +261,7 @@ A boss **always** appears every 10 encounters. There are 5 unique bosses with th
 |---------------|---------------------------------------|---------------------------------------------------|--------|---------|---------|----------|----------|--------------|
 | 10            | Rey Ciervo (*Stag King*)              | Forest giant with antlers and a crown of roots    | ×2.0   | ×1.1    | ×1.2    | 8 %      | 10 %     | 20 %         |
 | 20            | Dama Espectral (*Spectral Lady*)      | Floating apparition with a veil and chains        | ×1.5   | ×1.15   | ×0.9    | 25 %     | 4 %      | 20 %         |
-| 30            | Caballero Negro (*Black Knight*)      | Dark mirror of the hero, greatsword, torn cape    | ×1.9   | ×1.15   | ×1.45   | 10 %     | 8 %      | 30 %         |
+| 30            | Caballero Negro (*Black Knight*)      | Dark mirror of the hero, greatsword, torn cape    | ×1.6   | ×1.1    | ×1.2    | 10 %     | 8 %      | 25 %         |
 | 40            | La Tejedora (*The Weaver*)            | Colossal spider with a pale mask                  | ×1.7   | ×1.2    | ×1.0    | 15 %     | 6 %      | 25 %         |
 | 50            | Rey Liche (*Lich King*)               | Crowned skeleton with a staff of spectral fire    | ×2.2   | ×1.25   | ×1.25   | 12 %     | 6 %      | 35 %         |
 

@@ -25,6 +25,7 @@ Loot rollLoot(Rng& rng, int nivel, int luck, bool jefe);
 
 // Devuelven los HP realmente recuperados / ganados.
 int healVictory(Hero& h);      // §6.1
+int healBeforeBoss(Hero& h);   // §6.1: al aparecer un jefe
 int potionRecoverGain(const Hero& h);
 int potionRecover(Hero& h);    // §6.4 RECUPERAR
 int potionMaxGain(const Hero& h);

@@ -33,7 +33,7 @@ EnemyProfile profile(EnemyType t) {
     // Jefes (§7.1): cada uno con su estilo.
     case EnemyType::REY_CIERVO:      return {2.00f, 1.10f, 1.20f, 8, 10, 20};
     case EnemyType::DAMA_ESPECTRAL:  return {1.50f, 1.15f, 0.90f, 25, 4, 20};
-    case EnemyType::CABALLERO_NEGRO: return {1.90f, 1.15f, 1.45f, 10, 8, 30};
+    case EnemyType::CABALLERO_NEGRO: return {1.60f, 1.10f, 1.20f, 10, 8, 25};
     case EnemyType::TEJEDORA:        return {1.70f, 1.20f, 1.00f, 15, 6, 25};
     case EnemyType::REY_LICHE:       return {2.20f, 1.25f, 1.25f, 12, 6, 35};
     case EnemyType::BANDIDO:
@@ -183,6 +183,12 @@ int healVictory(Hero& h) {
   int before = h.hp;
   h.hp = h.hp + amount > h.hpMax ? h.hpMax : h.hp + amount;
   return h.hp - before;
+}
+
+int healBeforeBoss(Hero& h) {
+  int g = roundi((h.hpMax - h.hp) * bal::CURA_JEFE / 100.0f);
+  h.hp += g;
+  return g;
 }
 
 int potionRecoverGain(const Hero& h) {

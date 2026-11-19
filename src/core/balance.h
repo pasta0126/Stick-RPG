@@ -37,6 +37,7 @@ constexpr int HEROE_FALLO   = 8;
 
 // --- Curación (§6) ------------------------------------------------------------
 constexpr int CURA_VICTORIA  = 20;  // % de vida máx.
+constexpr int CURA_JEFE      = 50;  // % de la vida que falta, al aparecer un jefe
 constexpr int POCION_RECUPERA = 50;  // % de la vida que falta
 constexpr int POCION_HPMAX   = 20;  // % de vida máx. (no cura)
 constexpr int PROB_POCION    = 25;  // % del botín

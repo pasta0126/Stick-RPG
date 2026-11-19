@@ -52,6 +52,7 @@ RunStats playRun(Rng& rng, const Options& o) {
   Hero hero = makeHero();
   for (int nivel = 1;; ++nivel) {
     Enemy enemy = makeEnemy(rng, nivel);
+    if (isBossLevel(nivel)) healBeforeBoss(hero);
     Battle b(hero, enemy, rng);
     bool heroDead = false;
     while (true) {
