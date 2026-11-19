@@ -84,24 +84,30 @@ def build_backgrounds():
         assemble("bg_" + b, bg.W, bg.H, [(n, [layers[n]]) for n in bg.ORDER], [])
 
 
-_hero = []
+# Héroes jugables, en el orden de HeroClass (src/core/game_types.h).
+HEROES = ["heroe", "vikinga"]
+_hero = {}
 
 
-def HERO():
-    """(W, H, ANCHOR, {capa: frames}): importado de assets/ai si existe."""
-    if not _hero:
-        imp = import_ai.load_hero()
+def HERO(name="heroe"):
+    """(W, H, ANCHOR, {capa: frames}) importado de assets/ai/<name>.png si
+    existe; si no, el caballero (importado o de hero.py)."""
+    if name not in _hero:
+        imp = import_ai.load_hero(name)
         if imp:
-            _hero.append((imp.W, imp.H, imp.ANCHOR, imp.layers))
+            _hero[name] = (imp.W, imp.H, imp.ANCHOR, imp.layers)
+        elif name != "heroe":
+            _hero[name] = HERO("heroe")
         else:
-            _hero.append((hero.W, hero.H, hero.ANCHOR, hero.build()))
-    return _hero[0]
+            _hero[name] = (hero.W, hero.H, hero.ANCHOR, hero.build())
+    return _hero[name]
 
 
 def build_hero():
-    print("Héroe…")
-    w, h, _, hl = HERO()
-    assemble("heroe", w, h, [(n, hl[n]) for n in hero.LAYERS], hero.TAGS)
+    print("Héroes…")
+    for name in HEROES:
+        w, h, _, hl = HERO(name)
+        assemble(name, w, h, [(n, hl[n]) for n in hero.LAYERS], hero.TAGS)
 
 
 def build_title():
@@ -187,7 +193,7 @@ def build_tables():
         cols = ", ".join("{0x%02X, 0x%02X, 0x%02X}" % c for c in BIOMAS[b])
         pals.append(f"    {{{cols}}},  // {b}")
     includes = "\n".join(f'#include "{n}_gfx.h"' for n in
-                         ["heroe", "titulo", "titulo_fondo"] + [c.name for c in enemies.ENEMIES] +
+                         HEROES + ["titulo", "titulo_fondo"] + [c.name for c in enemies.ENEMIES] +
                          ["bg_" + b for b in BIOME_ORDER])
     art = []
     for c, frames in ENEMY_ART():
@@ -222,7 +228,15 @@ static const Sheet* const kBiomeBg[NUM_BIOMAS] = {{
 static const int16_t kParallax[{len(bg.ORDER)}] = {{{par}}};
 constexpr int BG_LAYER_PERSONAJES = {bg.ORDER.index("frente")};  // se dibujan antes de esta capa
 
-constexpr int HERO_AX = {HERO()[2][0]}, HERO_AY = {HERO()[2][1]};
+struct HeroArt {{
+  const Sheet* sheet;  // capas: las de heroe::Layer
+  uint8_t ax, ay;      // pies
+}};
+
+// Mismo orden que HeroClass (src/core/game_types.h).
+static const HeroArt kHeroArt[] = {{
+{chr(10).join(f"    {{&{n}::sheet, {HERO(n)[2][0]}, {HERO(n)[2][1]}}},  // {n}" for n in HEROES)}
+}};
 
 struct EnemyArt {{
   const Sheet* sheet;

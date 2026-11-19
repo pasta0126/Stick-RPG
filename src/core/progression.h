@@ -4,7 +4,7 @@
 #include "game_types.h"
 #include "rng.h"
 
-Hero makeHero();
+Hero makeHero(HeroClass c = HeroClass::CABALLERO);
 
 bool isBossLevel(int nivel);
 

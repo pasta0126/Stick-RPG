@@ -54,6 +54,7 @@ Landscape game with **dark medieval fantasy** pixel art and 8 colours per biome 
 | **State**          | **Button A**                                                              | **Button B**                       |
 |--------------------|---------------------------------------------------------------------------|------------------------------------|
 | Title              | Start                                                                     | Sound on / off                     |
+| Hero select        | Confirm the highlighted hero                                              | Switch hero (Caballero / Vikinga)  |
 | Biome intro        | Skip (after a short delay)                                                | —                                  |
 | Enemy walking in   | —                                                                         | —                                  |
 | Hero turn          | Tap: normal attack. Hold: charge the special (when ready, §4.3).          | Sound on / off                     |
@@ -63,6 +64,8 @@ Landscape game with **dark medieval fantasy** pixel art and 8 colours per biome 
 | Defeat             | Back to title                                                             | —                                  |
 
 An extra turn is a normal hero turn and is controlled the same way. While A is held, B does nothing.
+
+**Hero select:** after the title the player picks the hero. *Caballero*: base stats. *Vikinga* (axe and round shield): ATK 9, DEF 1, crit damage +80 %, miss 12 % (`VIKINGA_*` in `balance.h`); the simulator puts both at ~35 enemies on average. The record is shared.
 
 **B toggles sound at any moment** (title, combat, intros, pause, defeat) and shows a short “SONIDO SI / NO” notice; the only exception is the reward screens, where B switches panel.
 

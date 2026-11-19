@@ -35,6 +35,12 @@ constexpr int HEROE_EXTRA   = 5;
 constexpr int HEROE_LUCK    = 0;
 constexpr int HEROE_FALLO   = 8;
 
+// Vikinga: pega más fuerte y hace más daño crítico, pero defiende peor.
+constexpr int VIKINGA_ATK     = 9;
+constexpr int VIKINGA_DEF     = 1;
+constexpr int VIKINGA_CRITDMG = 80;
+constexpr int VIKINGA_FALLO   = 12;
+
 // --- Curación (§6) ------------------------------------------------------------
 constexpr int CURA_VICTORIA  = 20;  // % de vida máx.
 constexpr int CURA_JEFE      = 50;  // % de la vida que falta, al aparecer un jefe

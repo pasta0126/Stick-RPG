@@ -3,6 +3,7 @@
 
 #include "sprite.h"
 #include "heroe_gfx.h"
+#include "vikinga_gfx.h"
 #include "titulo_gfx.h"
 #include "titulo_fondo_gfx.h"
 #include "salteador_gfx.h"
@@ -34,7 +35,16 @@ static const Sheet* const kBiomeBg[NUM_BIOMAS] = {
 static const int16_t kParallax[6] = {0, 17, 29, 53, 89, 131};
 constexpr int BG_LAYER_PERSONAJES = 5;  // se dibujan antes de esta capa
 
-constexpr int HERO_AX = 26, HERO_AY = 89;
+struct HeroArt {
+  const Sheet* sheet;  // capas: las de heroe::Layer
+  uint8_t ax, ay;      // pies
+};
+
+// Mismo orden que HeroClass (src/core/game_types.h).
+static const HeroArt kHeroArt[] = {
+    {&heroe::sheet, 26, 89},  // heroe
+    {&vikinga::sheet, 26, 89},  // vikinga
+};
 
 struct EnemyArt {
   const Sheet* sheet;

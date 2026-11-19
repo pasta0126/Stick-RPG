@@ -24,12 +24,22 @@ bool statIsPercent(Stat s) {
          s == Stat::VAMP;
 }
 
+namespace {
+const char* gWeaponName = "Espada";
+}
+
+void setWeaponName(const char* name) { gWeaponName = name; }
+
+const char* heroClassName(HeroClass c) {
+  return c == HeroClass::VIKINGA ? "Vikinga" : "Caballero";
+}
+
 const char* slotName(Slot s) {
   switch (s) {
     case Slot::CASCO: return "Casco";
     case Slot::PECHERA: return "Pechera";
     case Slot::BOTAS: return "Botas";
-    case Slot::ESPADA: return "Espada";
+    case Slot::ESPADA: return gWeaponName;
     case Slot::ESCUDO: return "Escudo";
     default: return "?";
   }

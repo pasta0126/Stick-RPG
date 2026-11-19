@@ -276,9 +276,9 @@ def behind_shield(layers, W, H):
 
 
 class ImportedHero:
-    def __init__(self):
-        im = Image.open(os.path.join(SRC, HERO_FILE)).convert("RGB")
-        mp = Image.open(os.path.join(SRC, HERO_MAP)).convert("RGB")
+    def __init__(self, file=HERO_FILE, mapfile=HERO_MAP):
+        im = Image.open(os.path.join(SRC, file)).convert("RGB")
+        mp = Image.open(os.path.join(SRC, mapfile)).convert("RGB")
         if mp.size != im.size:
             mp = mp.resize(im.size, Image.NEAREST)
         w, h = im.size
@@ -413,10 +413,12 @@ def downscale_comb(idx, w, h, s):
     return out, nw, nh
 
 
-def load_hero():
-    if not all(os.path.exists(os.path.join(SRC, f)) for f in (HERO_FILE, HERO_MAP)):
+def load_hero(name="heroe"):
+    """Héroe desde assets/ai/<name>.png + <name>_mapa.png, o None."""
+    files = (f"{name}.png", f"{name}_mapa.png")
+    if not all(os.path.exists(os.path.join(SRC, f)) for f in files):
         return None
-    return ImportedHero()
+    return ImportedHero(*files)
 
 
 # ------------------------------------------------------------------ título

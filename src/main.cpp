@@ -52,7 +52,7 @@ Enemy enemy;
 Battle battle(hero, enemy, rng);
 
 enum class St : uint8_t {
-  TITLE, FADE, BIOME_INTRO, ENEMY_ENTER, BOSS_INTRO, HERO_TURN, HERO_STRIKE,
+  TITLE, SELECT, FADE, BIOME_INTRO, ENEMY_ENTER, BOSS_INTRO, HERO_TURN, HERO_STRIKE,
   SHOW, ENEMY_WAIT, ENEMY_STRIKE, ENEMY_DIE, VICTORY, LOOT_ITEM, LOOT_POTION,
   GAME_OVER
 };
@@ -105,6 +105,7 @@ int shakeAmp = 0;
 int enemyX = ENEMY_START;
 Loot loot;
 int sel = 0;
+HeroClass elegido = HeroClass::CABALLERO;  // héroe de la partida
 
 // ---------------------------------------------------------------- utilidades
 
@@ -198,7 +199,8 @@ void startEncounter() {
 }
 
 void newGame() {
-  hero = makeHero();
+  hero = makeHero(elegido);
+  setWeaponName(elegido == HeroClass::VIKINGA ? "Hacha" : "Espada");
   nivel = 1;
   derrotados = 0;
   golpeMax = 0;
@@ -235,6 +237,9 @@ void onEnter(St s) {
     case St::TITLE:
       initTitle();
       audio::jingleInicio();
+      break;
+    case St::SELECT:
+      sel = static_cast<int>(elegido);
       break;
     case St::BIOME_INTRO:
       audio::jingleBioma();
@@ -380,6 +385,20 @@ void resolveEnemyTurn() {
 void updateTitle() {
   if (M5.BtnA.wasPressed() && since(stT) > 300) {
     audio::sfx(660, 60, true);
+    setState(St::SELECT);
+  }
+}
+
+// Elegir héroe: B cambia de personaje, A lo confirma.
+void updateSelect() {
+  if (since(stT) < 250) return;
+  if (M5.BtnB.wasPressed()) {
+    sel = (sel + 1) % HERO_CLASS_COUNT;
+    audio::sfx(770, 30);
+  }
+  if (M5.BtnA.wasPressed()) {
+    elegido = static_cast<HeroClass>(sel);
+    audio::sfx(990, 60, true);
     fadeTo(FadeAct::NEW_GAME);
   }
 }
@@ -462,6 +481,7 @@ void update() {
 
   switch (st) {
     case St::TITLE: updateTitle(); break;
+    case St::SELECT: updateSelect(); break;
     case St::FADE: updateFade(); break;
     case St::BIOME_INTRO:
       if (since(stT) > T_BIOMA || (since(stT) > 600 && M5.BtnA.wasPressed()))
@@ -610,8 +630,9 @@ uint8_t rarityColor(Rareza r) {
 }
 
 void drawHero() {
-  namespace H = gfx::heroe;
-  int x0 = HERO_FX - gfx::HERO_AX, y0 = FEET_Y - gfx::HERO_AY;
+  namespace H = gfx::heroe;  // capas y animaciones (iguales en todos los héroes)
+  const gfx::HeroArt& art = gfx::kHeroArt[static_cast<int>(hero.clase)];
+  int x0 = HERO_FX - art.ax, y0 = FEET_Y - art.ay;
   int frame;
   bool flash = false;
   bool isCharging = charging && st == St::HERO_TURN;
@@ -641,7 +662,7 @@ void drawHero() {
       if (!it.present && c.layer != H::BRAZO) continue;
       r = rarityRemap(it);
     }
-    c4.blit(H::sheet, c.layer, frame, x0, y0, flash ? white : r);
+    c4.blit(*art.sheet, c.layer, frame, x0, y0, flash ? white : r);
   }
   // Chispas espectrales mientras se carga el especial.
   if (isCharging) {
@@ -700,7 +721,8 @@ void drawHud() {
   // Héroe (espejo de la placa del enemigo): nombre arriba; vida y barra debajo.
   panel(1, 112, 98, 134);
   icon(HEART, 6, 5, 116, '#', pal::NEGRO, 'r', pal::SANGRE);
-  c4.label("CABALLERO", 15, 116, pal::BRILLO, pal::NEGRO);
+  c4.label(hero.clase == HeroClass::VIKINGA ? "VIKINGA" : "CABALLERO", 15, 116,
+           pal::BRILLO, pal::NEGRO);
   std::snprintf(buf, sizeof(buf), "%d/%d", hero.hp, hero.hpMax);
   int hw = gfx::Canvas4::textWidth(buf, 1, true);
   c4.label(buf, 4, 125, pal::BRILLO, pal::NEGRO);
@@ -1031,6 +1053,33 @@ void drawTitle() {
            pal::MEDIO, pal::NEGRO, 2);
 }
 
+// Placa de un héroe en la pantalla de selección: nombre, sprite respirando
+// con todo el equipo y su estilo de juego.
+void heroColumn(HeroClass c, int x0, int x1, bool selected) {
+  namespace H = gfx::heroe;
+  const int y0 = 3, y1 = 131;
+  panel(x0, y0, x1, y1);
+  int cx = (x0 + x1) / 2;
+  txt(B9, heroClassName(c), cx, 16, pal::ORO, middle_center, NONE);
+  const gfx::HeroArt& art = gfx::kHeroArt[static_cast<int>(c)];
+  int frame = selected ? H::IDLE.frameAt(gt) : H::IDLE.from;
+  int fx = cx - 6, fy = 100;  // pies
+  for (int l = 0; l < H::LAYER_COUNT; ++l)
+    c4.blit(*art.sheet, l, frame, fx - art.ax, fy - art.ay, Remap::identity());
+  const char* l1 = c == HeroClass::VIKINGA ? "ATAQUE Y CRITICO" : "MAS DEFENSA";
+  const char* l2 = c == HeroClass::VIKINGA ? "MENOS DEFENSA" : "EQUILIBRADO";
+  c4.label(l1, cx, 108, pal::CLARO, pal::NEGRO, 1);
+  c4.label(l2, cx, 118, pal::MEDIO, pal::NEGRO, 1);
+  choiceFrame(x0, y0, x1, y1, selected);
+}
+
+void drawSelect() {
+  c4.blit(gfx::titulo_fondo::sheet, 0, 0, 0, 0, Remap::identity());
+  c4.shade(0, 0, W, H, pal::NEGRO, 9);
+  heroColumn(HeroClass::CABALLERO, 3, 117, sel == 0);
+  heroColumn(HeroClass::VIKINGA, 122, 236, sel == 1);
+}
+
 void drawBiomeIntro() {
   drawSceneNoEnemy();
   float u = clamp01(since(stT) / 400.0f);
@@ -1106,7 +1155,7 @@ void render() {
   if (st == St::FADE) {
     // Durante el fundido se ve la escena de origen y después la de destino.
     if (!fadeDone)
-      view = fadeAct == FadeAct::NEW_GAME   ? St::TITLE
+      view = fadeAct == FadeAct::NEW_GAME   ? St::SELECT
              : fadeAct == FadeAct::TO_TITLE ? St::GAME_OVER
                                             : St::VICTORY;
     else
@@ -1114,6 +1163,7 @@ void render() {
   }
   switch (view) {
     case St::TITLE: drawTitle(); break;
+    case St::SELECT: drawSelect(); break;
     case St::BIOME_INTRO: drawBiomeIntro(); break;
     case St::LOOT_ITEM: drawLootItem(); break;
     case St::LOOT_POTION: drawLootPotion(); break;
@@ -1150,7 +1200,9 @@ void render() {
 // cambia de panel) y con A pulsado (cargando el especial).
 void handleSound() {
   if (!M5.BtnB.wasPressed()) return;
-  if (!paused && (st == St::LOOT_ITEM || st == St::LOOT_POTION)) return;
+  if (!paused && (st == St::LOOT_ITEM || st == St::LOOT_POTION ||
+                  st == St::SELECT))
+    return;
   if (aArmed) return;
   audio::setEnabled(!audio::enabled());
   prefs.putBool("sound", audio::enabled());

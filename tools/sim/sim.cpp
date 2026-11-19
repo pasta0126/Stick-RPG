@@ -1,7 +1,7 @@
 // Simulador de balance: juega miles de partidas con un jugador automático y
 // muestra cuántos enemigos se derrotan. Uso:
 //   ./build/sim [--games N] [--seed S] [--skill P] [--policy charge|normal]
-//               [--verbose]
+//               [--class caballero|vikinga] [--verbose]
 //   skill = probabilidad de soltar la carga en la zona perfecta (0..1).
 
 #include <algorithm>
@@ -23,6 +23,7 @@ struct Options {
   float skill = 0.5f;
   bool charge = true;
   bool verbose = false;
+  HeroClass clase = HeroClass::CABALLERO;
 };
 
 float itemScore(const Item& it) {
@@ -49,7 +50,7 @@ struct RunStats {
 
 RunStats playRun(Rng& rng, const Options& o) {
   RunStats st;
-  Hero hero = makeHero();
+  Hero hero = makeHero(o.clase);
   for (int nivel = 1;; ++nivel) {
     Enemy enemy = makeEnemy(rng, nivel);
     if (isBossLevel(nivel)) healBeforeBoss(hero);
@@ -103,6 +104,8 @@ int main(int argc, char** argv) {
     else if (arg("--seed")) o.seed = std::strtoull(argv[++i], nullptr, 10);
     else if (arg("--skill")) o.skill = static_cast<float>(std::atof(argv[++i]));
     else if (arg("--policy")) o.charge = std::strcmp(argv[++i], "normal") != 0;
+    else if (arg("--class")) o.clase = std::strcmp(argv[++i], "vikinga") == 0
+                                         ? HeroClass::VIKINGA : HeroClass::CABALLERO;
     else if (std::strcmp(argv[i], "--verbose") == 0) o.verbose = true;
     else { std::fprintf(stderr, "argumento desconocido: %s\n", argv[i]); return 1; }
   }

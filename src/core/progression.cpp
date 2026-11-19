@@ -43,8 +43,9 @@ EnemyProfile profile(EnemyType t) {
 
 }  // namespace
 
-Hero makeHero() {
+Hero makeHero(HeroClass c) {
   Hero h;
+  h.clase = c;
   h.hpMax = h.hp = bal::HEROE_HP;
   h.base[static_cast<int>(Stat::ATK)] = bal::HEROE_ATK;
   h.base[static_cast<int>(Stat::DEF)] = bal::HEROE_DEF;
@@ -58,6 +59,12 @@ Hero makeHero() {
   h.equip[static_cast<int>(Slot::BOTAS)] = basic(Slot::BOTAS, Stat::DEF, 1);
   h.equip[static_cast<int>(Slot::ESPADA)] = basic(Slot::ESPADA, Stat::ATK, 2);
   // Escudo vacío (§5.1).
+  if (c == HeroClass::VIKINGA) {
+    h.base[static_cast<int>(Stat::ATK)] = bal::VIKINGA_ATK;
+    h.base[static_cast<int>(Stat::DEF)] = bal::VIKINGA_DEF;
+    h.base[static_cast<int>(Stat::CRIT_DMG)] = bal::VIKINGA_CRITDMG;
+    h.fallo = bal::VIKINGA_FALLO;
+  }
   return h;
 }
 

@@ -7,6 +7,13 @@ enum class Stat : uint8_t { ATK, DEF, CRIT, CRIT_DMG, EXTRA, LUCK, VAMP, COUNT }
 constexpr int STAT_COUNT = static_cast<int>(Stat::COUNT);
 
 enum class Slot : uint8_t { CASCO, PECHERA, BOTAS, ESPADA, ESCUDO, COUNT };
+
+// Héroes jugables (se elige al empezar). Mismo orden que kHeroArt.
+enum class HeroClass : uint8_t { CABALLERO, VIKINGA, COUNT };
+constexpr int HERO_CLASS_COUNT = static_cast<int>(HeroClass::COUNT);
+const char* heroClassName(HeroClass c);  // "Caballero", "Vikinga"
+// El arma del héroe se llama distinto según la clase ("Espada" / "Hacha").
+void setWeaponName(const char* name);
 constexpr int SLOT_COUNT = static_cast<int>(Slot::COUNT);
 
 enum class Rareza : uint8_t { COMUN, RARA, EPICA, COUNT };
@@ -53,6 +60,7 @@ struct Combatant {
 };
 
 struct Hero {
+  HeroClass clase = HeroClass::CABALLERO;
   int hp = 0;
   int hpMax = 0;
   int base[STAT_COUNT] = {};
