@@ -87,29 +87,23 @@ enum class EnemyType : uint8_t {
   JABALI,
   ARQUERO,
   HOMBRE_SETA,
-  ENT,
   TRASGO,
   OSO,
-  DRUIDA,
   SERPIENTE,
   ESQUELETO,
-  ZOMBI,
   FANTASMA,
-  SEPULTURERO,
   BANSHEE,
   GARGOLA,
-  MOMIA,
   CUERVO,
   GUARDIA_REAL,
   ARMADURA,
   VERDUGO,
   MAGO,
   DRAGON_JOVEN,
-  DEMONIO,
   REY_CIERVO, DAMA_ESPECTRAL, CABALLERO_NEGRO, TEJEDORA, REY_LICHE,
   COUNT
 };
-constexpr int NUM_NORMALES = 26;
+constexpr int NUM_NORMALES = 20;
 constexpr int NUM_JEFES = 5;
 const char* enemyName(EnemyType t);
 inline bool isBoss(EnemyType t) {
