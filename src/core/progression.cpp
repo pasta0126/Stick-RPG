@@ -52,6 +52,7 @@ EnemyProfile profile(EnemyType t) {
     case EnemyType::CABALLERO_NEGRO: return {1.60f, 1.10f, 1.20f, 10, 8, 25};
     case EnemyType::TEJEDORA:        return {1.70f, 1.20f, 1.00f, 15, 6, 25};
     case EnemyType::REY_LICHE:       return {2.20f, 1.25f, 1.25f, 12, 6, 35};
+    case EnemyType::BRUJA_PANTANO:   return {1.70f, 1.15f, 0.90f, 12, 8, 30};
     case EnemyType::BANDIDO:
     default:               return {1.00f, 1.00f, 1.00f, 5, 10, 15};
   }
@@ -96,15 +97,33 @@ static EnemyType normalPrueba(int nivel) {
 }
 #endif
 
-Bioma biomaDe(int nivel) {
-  int i = ((nivel - 1) / bal::JEFE_CADA) % static_cast<int>(Bioma::COUNT);
-  return static_cast<Bioma>(i);
+// El viaje: cada capítulo, un bioma y su jefe. Tras el último, vuelta a
+// empezar (más fuertes por el nivel).
+struct Capitulo {
+  Bioma bioma;
+  EnemyType jefe;
+};
+static const Capitulo kCapitulos[] = {
+    {Bioma::BOSQUE, EnemyType::REY_CIERVO},
+    {Bioma::PANTANO, EnemyType::BRUJA_PANTANO},
+    {Bioma::CEMENTERIO, EnemyType::DAMA_ESPECTRAL},
+    {Bioma::CASTILLO, EnemyType::CABALLERO_NEGRO},
+    {Bioma::BOSQUE, EnemyType::TEJEDORA},
+    {Bioma::CASTILLO, EnemyType::REY_LICHE},
+};
+constexpr int NUM_CAPITULOS = sizeof(kCapitulos) / sizeof(kCapitulos[0]);
+
+static const Capitulo& capituloDe(int nivel) {
+  return kCapitulos[((nivel - 1) / bal::JEFE_CADA) % NUM_CAPITULOS];
 }
+
+Bioma biomaDe(int nivel) { return capituloDe(nivel).bioma; }
 
 const char* biomaName(Bioma b) {
   switch (b) {
     case Bioma::CEMENTERIO: return "El Cementerio";
     case Bioma::CASTILLO: return "El Castillo";
+    case Bioma::PANTANO: return "El Pantano";
     default: return "El Bosque";
   }
 }
@@ -113,9 +132,7 @@ Enemy makeEnemy(Rng& rng, int nivel) {
   Enemy e;
   e.nivel = nivel;
   if (isBossLevel(nivel)) {
-    // Jefes en orden; tras el quinto, se repiten (más fuertes por el nivel).
-    int k = (nivel / bal::JEFE_CADA - 1) % NUM_JEFES;
-    e.type = static_cast<EnemyType>(NUM_NORMALES + k);
+    e.type = capituloDe(nivel).jefe;
   } else {
 #ifdef PRUEBA_ENEMIGOS
     e.type = normalPrueba(nivel);

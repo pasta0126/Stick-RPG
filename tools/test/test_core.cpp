@@ -110,8 +110,9 @@ static void testEnemies() {
   for (int n = 1; n < 200; ++n)
     CHECK(isBoss(makeEnemy(rng, n).type) == isBossLevel(n));
   CHECK(makeEnemy(rng, bal::JEFE_CADA).type == EnemyType::REY_CIERVO);
-  CHECK(makeEnemy(rng, 5 * bal::JEFE_CADA).type == EnemyType::REY_LICHE);
-  CHECK(makeEnemy(rng, 6 * bal::JEFE_CADA).type == EnemyType::REY_CIERVO);
+  CHECK(makeEnemy(rng, 2 * bal::JEFE_CADA).type == EnemyType::BRUJA_PANTANO);
+  CHECK(biomaDe(2 * bal::JEFE_CADA) == Bioma::PANTANO);
+  CHECK(biomaDe(2 * bal::JEFE_CADA + 1) == Bioma::CEMENTERIO);
   CHECK(makeEnemy(rng, 30).hpMax > makeEnemy(rng, 1).hpMax);
 }
 

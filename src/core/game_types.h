@@ -79,7 +79,8 @@ struct Hero {
   Combatant combatant() const;
 };
 
-// Enemigos normales (aleatorios) y 5 jefes únicos, en orden, cada 6 encuentros (5 normales + jefe).
+// Enemigos normales (aleatorios) y jefes únicos: un capítulo = 5 normales +
+// el jefe de su bioma (ver kCapitulos en progression.cpp).
 enum class EnemyType : uint8_t {
   BANDIDO, GOLEM, LOBO, OGRO,
   // Lote 2 (arte de IA): salen al azar en cualquier bioma, como los cuatro
@@ -101,10 +102,11 @@ enum class EnemyType : uint8_t {
   MAGO,
   DRAGON_JOVEN,
   REY_CIERVO, DAMA_ESPECTRAL, CABALLERO_NEGRO, TEJEDORA, REY_LICHE,
+  BRUJA_PANTANO,
   COUNT
 };
 constexpr int NUM_NORMALES = 20;
-constexpr int NUM_JEFES = 5;
+constexpr int NUM_JEFES = 6;
 const char* enemyName(EnemyType t);
 inline bool isBoss(EnemyType t) {
   return static_cast<int>(t) >= NUM_NORMALES && t != EnemyType::COUNT;

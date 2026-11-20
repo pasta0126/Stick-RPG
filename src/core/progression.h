@@ -8,8 +8,9 @@ Hero makeHero(HeroClass c = HeroClass::CABALLERO);
 
 bool isBossLevel(int nivel);
 
-// Biomas (GDD §7.2): cambian tras cada jefe y se repiten en ciclo.
-enum class Bioma : uint8_t { BOSQUE, CEMENTERIO, CASTILLO, COUNT };
+// Biomas: cada capítulo (JEFE_CADA encuentros) es un bioma con su jefe, en el
+// orden fijo de kCapitulos (progression.cpp), y vuelta a empezar.
+enum class Bioma : uint8_t { BOSQUE, CEMENTERIO, CASTILLO, PANTANO, COUNT };
 Bioma biomaDe(int nivel);
 const char* biomaName(Bioma b);
 Enemy makeEnemy(Rng& rng, int nivel);

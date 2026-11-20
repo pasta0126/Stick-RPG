@@ -95,6 +95,7 @@ const char* enemyName(EnemyType t) {
     case EnemyType::CABALLERO_NEGRO: return "Caballero Negro";
     case EnemyType::TEJEDORA: return "La Tejedora";
     case EnemyType::REY_LICHE: return "Rey Liche";
+    case EnemyType::BRUJA_PANTANO: return "Bruja del Pantano";
     default: return "?";
   }
 }

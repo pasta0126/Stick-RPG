@@ -556,7 +556,12 @@ LOTE2 = [type(n, (), {"name": n}) for n in [
 ]]
 
 NORMALES = [Salteador, Golem, Huargo, Troll] + LOTE2
-JEFES = [ReyCiervo, DamaEspectral, CaballeroNegro, Tejedora, ReyLiche]
+# Jefes nuevos: solo existen como tiras de IA.
+JEFES2 = [type(n, (), {"name": n}) for n in [
+    "bruja_pantano",
+]]
+
+JEFES = [ReyCiervo, DamaEspectral, CaballeroNegro, Tejedora, ReyLiche] + JEFES2
 ENEMIES = NORMALES + JEFES  # mismo orden que EnemyType en C++
 
 

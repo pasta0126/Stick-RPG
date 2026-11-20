@@ -33,7 +33,7 @@ ASEPRITE = os.environ.get("ASEPRITE",
 BUILD = os.path.join(ROOT, "build", "art")
 ASSETS = os.path.join(ROOT, "assets", "sprites")
 GFX = os.path.join(ROOT, "src", "gfx")
-BIOME_ORDER = ["bosque", "cementerio", "castillo"]
+BIOME_ORDER = ["bosque", "cementerio", "castillo", "pantano"]  # = enum Bioma
 
 
 # ------------------------------------------------------------- .aseprite
@@ -77,7 +77,8 @@ def build_backgrounds():
     niebla sigue siendo procedural); si no, las de bg.py."""
     print("Fondos…")
     for b in BIOME_ORDER:
-        layers = bg.BUILDERS[b]()
+        # Biomas nuevos (solo de IA): la niebla procedural del bosque.
+        layers = bg.BUILDERS.get(b, bg.BUILDERS["bosque"])()
         imp = import_ai.load_biome_bg(b, bg.W, bg.H)
         if imp:
             layers.update(imp)
