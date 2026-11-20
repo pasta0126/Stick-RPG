@@ -1220,12 +1220,14 @@ ESCENARIO: lo alto de la torre de un hechicero (interior, no hay cielo).
 
 ## Paletas propuestas para el juego
 
+Nada de biomas grises: chocan con los sprites. Pantano en verdes claros (si no queda verde, se quita) y Cueva en ocres cálidos.
+
 Los 8 papeles de siempre (contorno, oscuro, medio, claro, brillo, sangre, oro, espectral) con el tono de cada bioma. Se añaden a `tools/art/palettes.py` al importar cada fondo.
 
 | Bioma | Negro | Oscuro | Medio | Claro | Brillo | Sangre | Oro | Espectral |
 |---|---|---|---|---|---|---|---|---|
-| Pantano | `0C0E08` | `22281A` | `46502E` | `8C9460` | `E0E0B8` | `962E2A` | `D0A040` | `C8F040` |
-| Cueva | `0C0B0A` | `231F1C` | `4A4139` | `8C7F70` | `E0D6C4` | `A8342C` | `E0A83C` | `5ED0E8` |
+| Pantano | `0A0F08` | `1A2C14` | `36562A` | `7AA04C` | `DDEDB0` | `962E2A` | `D0A040` | `C8F040` |
+| Cueva | `0E0A06` | `2E2014` | `5E4024` | `A07848` | `EED8B0` | `A8342C` | `E0A83C` | `5ED0E8` |
 | Montaña | `0A0D14` | `1C2638` | `3E5170` | `8AA0BC` | `E8F0F8` | `A0303A` | `D8B060` | `7CF0C0` |
 | Desierto | `120C08` | `3A2618` | `6E4A2C` | `B88E5C` | `F2E2BE` | `A8382A` | `F0B840` | `4CD8C8` |
 | Volcán | `0C0606` | `2A1210` | `54241C` | `8E6A5A` | `F4D8B0` | `D8401C` | `FFB030` | `B060F0` |
