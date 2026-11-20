@@ -1025,13 +1025,13 @@ PERSONAJE: la Viuda Negra, una dama vampira, unos 100 px de alto, mirando a la I
 - La cara debe quedar por debajo del 15 % superior de la imagen.
 ```
 
-### 48 · El Guardián de la Cripta (jefe del Cementerio)
+### 48 · El Guardián de la Cripta (jefe del Desierto)
 
 ```
 PERSONAJE: el Guardián de la Cripta, una estatua funeraria gigante viva, unos 106 px de alto, mirando a la IZQUIERDA. Jefe muy resistente.
-- Caballero de piedra (#3B5247 / #7A9380 / #D4DEC8) como los de los sepulcros: yelmo cerrado, armadura de placas tallada, manos sobre el pomo de la espada.
+- Guardián de piedra arenisca (#3B5247 / #7A9380 / #D4DEC8) de una tumba del desierto: cabeza de chacal tallada con orejas altas, tocado de faraón a rayas con ribetes dorados (#D6A248), torso desnudo de piedra, faldellín y brazaletes de oro.
 - Grietas y musgo oscuro; un trozo del hombro roto que deja ver un núcleo espectral (#9FE05A).
-- Luz espectral en la rendija del yelmo.
+- Ojos de luz espectral.
 - Escudo de piedra con un cráneo tallado en el brazo trasero.
 - Espadón de piedra enorme en la mano delantera.
 - Base del pedestal pegada aún a un pie (un bloque de piedra).
