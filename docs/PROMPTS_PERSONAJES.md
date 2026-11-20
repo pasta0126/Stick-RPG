@@ -1060,7 +1060,7 @@ PERSONAJE: la Reina Hechicera, unos 102 px de alto, mirando a la IZQUIERDA. Jefa
 PERSONAJE: el Dragón Ancestral, unos 100 px de alto y 124 px de ancho, mirando a la IZQUIERDA. Jefe. Compacto para caber: sentado sobre las patas traseras, alas plegadas y cola enroscada a sus pies.
 - Escamas antiguas negras y gris oscuro (#0A0E0D / #1B2925 / #3B5247) con el borde claro (#7A9380); vientre de placas pálidas.
 - Cabeza enorme con una corona natural de cuernos largos hacia atrás, barbas de espinas y ojos dorados (#D6A248).
-- Cicatrices, escamas que faltan y una lanza rota clavada en el cuello.
+- Cicatrices y escamas que faltan (sin armas clavadas).
 - Alas membranosas rotas, plegadas sobre la espalda.
 - Garras delanteras enormes apoyadas en el suelo.
 - Caminar: avanza un paso con las patas delanteras. Ataque: lanza la cabeza hacia delante y abajo con las fauces abiertas.
