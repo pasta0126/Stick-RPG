@@ -1301,7 +1301,7 @@ Todos usan las **6 piezas** del héroe, porque el botín las cambia: casco, pech
 | `nigromante` | Nigromante | Hoz | Farol de almas | Vida baja | Roba vida de base |
 | `druida` | Druida | Cayado | Escudo de corteza | Equilibrado | Se regenera un poco cada turno |
 | `clerigo` | Clérigo de batalla | Maza | Libro sagrado | Defensa alta, ataque bajo | Las pociones curan el doble |
-| `esqueleto` | Esqueleto (maldición no muerta) | La del héroe | La del héroe | Penalizado (ver GDD §6.5) | Forma del héroe al morir con el talismán |
+| `esqueleto` | Esqueleto | La del héroe | La del héroe | Penalizado (ver GDD §6.5) | Futuro héroe seleccionable (arte ya hecho) |
 
 ## Mensaje 1 — bloque común de la tira (pegar antes del héroe)
 
@@ -1469,9 +1469,9 @@ PERSONAJE: un clérigo guerrero, mirando a la DERECHA.
 ````
 Piezas: casco = capucha de malla y diadema · pechera = sobreveste y estola · botas = grebas y botas · mano trasera = libro · brazo con arma = brazo delantero y maza · cuerpo = malla, cara y lo demás.
 
-### Esqueleto (maldición no muerta)
+### Esqueleto (futuro héroe seleccionable)
 
-Es la forma que toma cualquier héroe al morir con el talismán. Conserva su equipo, así que debe parecer un esqueleto guerrero genérico que lleva **restos** de armadura.
+Ya no es la forma del héroe al morir (el talismán se quitó); su arte ya está hecho y será un héroe seleccionable. Debe parecer un esqueleto guerrero genérico que lleva **restos** de armadura.
 
 ````
 PERSONAJE: un esqueleto guerrero maldito, mirando a la DERECHA. Es el héroe que ha vuelto de entre los muertos.
@@ -1485,4 +1485,4 @@ PERSONAJE: un esqueleto guerrero maldito, mirando a la DERECHA. Es el héroe que
 ````
 Piezas: casco = yelmo roto · pechera = restos de peto · botas = grebas oxidadas · mano trasera = escudo roto · brazo con arma = brazo delantero y espada · cuerpo = cráneo, costillas, huesos, capa y lo demás.
 
-> Pásame cada pareja (`<nombre>.png` y `<nombre>_mapa.png`). Yo la importo como el Caballero y la Vikinga, le doy sus stats, su mecánica, el nombre de su arma y de su mano trasera, y la añado a la selección de héroe. El esqueleto sustituye al aspecto provisional de la maldición.
+> Pásame cada pareja (`<nombre>.png` y `<nombre>_mapa.png`). Yo la importo como el Caballero y la Vikinga, le doy sus stats, su mecánica, el nombre de su arma y de su mano trasera, y la añado a la selección de héroe.
