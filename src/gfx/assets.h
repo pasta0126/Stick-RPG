@@ -11,6 +11,30 @@
 #include "golem_gfx.h"
 #include "huargo_gfx.h"
 #include "troll_gfx.h"
+#include "jabali_gfx.h"
+#include "arquero_gfx.h"
+#include "hombre_seta_gfx.h"
+#include "avispa_gfx.h"
+#include "espiritu_roble_gfx.h"
+#include "trasgo_gfx.h"
+#include "oso_gfx.h"
+#include "druida_gfx.h"
+#include "serpiente_gfx.h"
+#include "esqueleto_guerrero_gfx.h"
+#include "zombi_gfx.h"
+#include "fantasma_gfx.h"
+#include "sepulturero_gfx.h"
+#include "banshee_gfx.h"
+#include "gargola_gfx.h"
+#include "momia_gfx.h"
+#include "cuervo_gfx.h"
+#include "guardia_real_gfx.h"
+#include "armadura_animada_gfx.h"
+#include "verdugo_gfx.h"
+#include "mago_torre_gfx.h"
+#include "dragon_joven_gfx.h"
+#include "demonio_gfx.h"
+#include "sucubo_gfx.h"
 #include "rey_ciervo_gfx.h"
 #include "dama_espectral_gfx.h"
 #include "caballero_negro_gfx.h"
@@ -65,6 +89,30 @@ static const EnemyArt kEnemyArt[] = {
     {&golem::sheet, 68, 77, 56, golem::WALK, golem::IDLE, golem::ATTACK, golem::HIT, golem::PREPARE},  // golem
     {&huargo::sheet, 66, 64, 60, huargo::WALK, huargo::IDLE, huargo::ATTACK, huargo::HIT, huargo::PREPARE},  // huargo
     {&troll::sheet, 95, 91, 84, troll::WALK, troll::IDLE, troll::ATTACK, troll::HIT, troll::PREPARE},  // troll
+    {&jabali::sheet, 49, 59, 44, jabali::WALK, jabali::IDLE, jabali::ATTACK, jabali::HIT, jabali::PREPARE},  // jabali
+    {&arquero::sheet, 38, 74, 29, arquero::WALK, arquero::IDLE, arquero::ATTACK, arquero::HIT, arquero::PREPARE},  // arquero
+    {&hombre_seta::sheet, 31, 69, 29, hombre_seta::WALK, hombre_seta::IDLE, hombre_seta::ATTACK, hombre_seta::HIT, hombre_seta::PREPARE},  // hombre_seta
+    {&avispa::sheet, 33, 73, 28, avispa::WALK, avispa::IDLE, avispa::ATTACK, avispa::HIT, avispa::PREPARE},  // avispa
+    {&espiritu_roble::sheet, 50, 93, 27, espiritu_roble::WALK, espiritu_roble::IDLE, espiritu_roble::ATTACK, espiritu_roble::HIT, espiritu_roble::PREPARE},  // espiritu_roble
+    {&trasgo::sheet, 41, 65, 29, trasgo::WALK, trasgo::IDLE, trasgo::ATTACK, trasgo::HIT, trasgo::PREPARE},  // trasgo
+    {&oso::sheet, 47, 90, 36, oso::WALK, oso::IDLE, oso::ATTACK, oso::HIT, oso::PREPARE},  // oso
+    {&druida::sheet, 49, 95, 30, druida::WALK, druida::IDLE, druida::ATTACK, druida::HIT, druida::PREPARE},  // druida
+    {&serpiente::sheet, 31, 68, 23, serpiente::WALK, serpiente::IDLE, serpiente::ATTACK, serpiente::HIT, serpiente::PREPARE},  // serpiente
+    {&esqueleto_guerrero::sheet, 56, 89, 35, esqueleto_guerrero::WALK, esqueleto_guerrero::IDLE, esqueleto_guerrero::ATTACK, esqueleto_guerrero::HIT, esqueleto_guerrero::PREPARE},  // esqueleto_guerrero
+    {&zombi::sheet, 36, 78, 30, zombi::WALK, zombi::IDLE, zombi::ATTACK, zombi::HIT, zombi::PREPARE},  // zombi
+    {&fantasma::sheet, 42, 77, 29, fantasma::WALK, fantasma::IDLE, fantasma::ATTACK, fantasma::HIT, fantasma::PREPARE},  // fantasma
+    {&sepulturero::sheet, 38, 93, 32, sepulturero::WALK, sepulturero::IDLE, sepulturero::ATTACK, sepulturero::HIT, sepulturero::PREPARE},  // sepulturero
+    {&banshee::sheet, 44, 87, 29, banshee::WALK, banshee::IDLE, banshee::ATTACK, banshee::HIT, banshee::PREPARE},  // banshee
+    {&gargola::sheet, 42, 84, 36, gargola::WALK, gargola::IDLE, gargola::ATTACK, gargola::HIT, gargola::PREPARE},  // gargola
+    {&momia::sheet, 50, 76, 33, momia::WALK, momia::IDLE, momia::ATTACK, momia::HIT, momia::PREPARE},  // momia
+    {&cuervo::sheet, 41, 67, 27, cuervo::WALK, cuervo::IDLE, cuervo::ATTACK, cuervo::HIT, cuervo::PREPARE},  // cuervo
+    {&guardia_real::sheet, 37, 76, 33, guardia_real::WALK, guardia_real::IDLE, guardia_real::ATTACK, guardia_real::HIT, guardia_real::PREPARE},  // guardia_real
+    {&armadura_animada::sheet, 48, 89, 39, armadura_animada::WALK, armadura_animada::IDLE, armadura_animada::ATTACK, armadura_animada::HIT, armadura_animada::PREPARE},  // armadura_animada
+    {&verdugo::sheet, 58, 102, 41, verdugo::WALK, verdugo::IDLE, verdugo::ATTACK, verdugo::HIT, verdugo::PREPARE},  // verdugo
+    {&mago_torre::sheet, 63, 91, 31, mago_torre::WALK, mago_torre::IDLE, mago_torre::ATTACK, mago_torre::HIT, mago_torre::PREPARE},  // mago_torre
+    {&dragon_joven::sheet, 47, 81, 42, dragon_joven::WALK, dragon_joven::IDLE, dragon_joven::ATTACK, dragon_joven::HIT, dragon_joven::PREPARE},  // dragon_joven
+    {&demonio::sheet, 43, 99, 41, demonio::WALK, demonio::IDLE, demonio::ATTACK, demonio::HIT, demonio::PREPARE},  // demonio
+    {&sucubo::sheet, 42, 80, 31, sucubo::WALK, sucubo::IDLE, sucubo::ATTACK, sucubo::HIT, sucubo::PREPARE},  // sucubo
     {&rey_ciervo::sheet, 106, 107, 64, rey_ciervo::WALK, rey_ciervo::IDLE, rey_ciervo::ATTACK, rey_ciervo::HIT, rey_ciervo::PREPARE},  // rey_ciervo
     {&dama_espectral::sheet, 118, 101, 73, dama_espectral::WALK, dama_espectral::IDLE, dama_espectral::ATTACK, dama_espectral::HIT, dama_espectral::PREPARE},  // dama_espectral
     {&caballero_negro::sheet, 119, 100, 104, caballero_negro::WALK, caballero_negro::IDLE, caballero_negro::ATTACK, caballero_negro::HIT, caballero_negro::PREPARE},  // caballero_negro

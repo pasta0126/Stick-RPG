@@ -535,7 +535,35 @@ class ReyLiche:
         return L
 
 
-NORMALES = [Salteador, Golem, Huargo, Troll]
+# Lote 2: solo existen como tiras de IA (assets/ai/, ver import_ai.SOURCES).
+LOTE2 = [type(n, (), {"name": n}) for n in [
+    "jabali",
+    "arquero",
+    "hombre_seta",
+    "avispa",
+    "espiritu_roble",
+    "trasgo",
+    "oso",
+    "druida",
+    "serpiente",
+    "esqueleto_guerrero",
+    "zombi",
+    "fantasma",
+    "sepulturero",
+    "banshee",
+    "gargola",
+    "momia",
+    "cuervo",
+    "guardia_real",
+    "armadura_animada",
+    "verdugo",
+    "mago_torre",
+    "dragon_joven",
+    "demonio",
+    "sucubo",
+]]
+
+NORMALES = [Salteador, Golem, Huargo, Troll] + LOTE2
 JEFES = [ReyCiervo, DamaEspectral, CaballeroNegro, Tejedora, ReyLiche]
 ENEMIES = NORMALES + JEFES  # mismo orden que EnemyType en C++
 

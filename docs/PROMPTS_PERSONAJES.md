@@ -938,15 +938,15 @@ PERSONAJE: un demonio menor, unos 84 px de alto, mirando a la IZQUIERDA. Fuerte 
 ### 53 · Súcubo
 
 ```
-PERSONAJE: una súcubo, demonio femenino, unos 80 px de alto, mirando a la IZQUIERDA. Ágil y traicionera, roba vida.
-- Mujer demoníaca esbelta de piel violácea oscura (usa #3B5247 / #7A9380), cabello largo negro que ondea hacia atrás.
-- Dos cuernos finos y curvados hacia atrás, ojos verde espectral (#9FE05A) y una sonrisa con colmillos.
-- Armadura ligera oscura: corpiño de cuero negro con placas y ribetes dorados (#D6A248), hombreras con pinchos y una falda larga abierta hecha jirones. Ropa que cubre, nada provocativo.
-- Alas de murciélago grandes, medio plegadas a la espalda, y una cola fina terminada en punta de corazón, recogida.
-- Botas altas de tacón con pezuña. Garras largas en las manos.
-- Un látigo corto enroscado en la mano delantera (pegado a la mano).
-- Ataque: zarpazo con las garras hacia delante.
-- Fotograma 8: alas abiertas a medias, una mano con un brillo verde espectral pegado a la palma.
+PERSONAJE: una súcubo, demonio femenino seductor, unos 80 px de alto, mirando a la IZQUIERDA. Ágil y traicionera, roba vida.
+- Figura muy femenina, sexy, curvilínea y voluptuosa: silueta de reloj de arena muy marcada, caderas anchas y cintura estrecha, postura seductora y desafiante con la cadera ladeada.
+- Piel violácea oscura (usa #3B5247 / #7A9380), melena larga negra que ondea hacia atrás.
+- Dos cuernos curvados hacia atrás, ojos verde espectral (#9FE05A), labios rojos (#9C2E30) y una sonrisa pícara con colmillos.
+- Atuendo ajustado de cuero negro (corsé con ribetes dorados #D6A248, guantes largos y botas altas de tacón), al estilo de una heroína de fantasía clásica; sin desnudos.
+- Alas de murciélago grandes medio plegadas a la espalda y una cola fina terminada en punta de corazón, recogida.
+- Garras largas; un látigo corto enroscado en la mano delantera (pegado a la mano).
+- Ataque: zarpazo con las garras hacia delante con un giro de cadera.
+- Fotograma 8: alas abiertas a medias, lanza un beso con una mano y un brillo verde espectral pegado a la palma.
 ```
 
 ---

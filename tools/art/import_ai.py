@@ -44,7 +44,7 @@ SOURCES = {
     "druida": ("18_druida_magenta.png", 76),
     "serpiente": ("19_serpiente_magenta.png", 60),
     "cazador": ("20_cazador_magenta.png", 74),
-    "esqueleto": ("21_esqueleto_magenta.png", 70),
+    "esqueleto_guerrero": ("21_esqueleto_magenta.png", 70),
     "zombi": ("22_zombi_magenta.png", 72),
     "necrofago": ("23_necrofago_magenta.png", 62),
     "fantasma": ("24_fantasma_magenta.png", 74),

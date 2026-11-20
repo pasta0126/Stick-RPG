@@ -79,13 +79,39 @@ struct Hero {
   Combatant combatant() const;
 };
 
-// 4 enemigos normales (aleatorios) y 5 jefes únicos, en orden, cada 10 encuentros.
+// Enemigos normales (aleatorios) y 5 jefes únicos, en orden, cada 10 encuentros.
 enum class EnemyType : uint8_t {
   BANDIDO, GOLEM, LOBO, OGRO,
+  // Lote 2 (arte de IA): salen al azar en cualquier bioma, como los cuatro
+  // primeros.
+  JABALI,
+  ARQUERO,
+  HOMBRE_SETA,
+  AVISPA,
+  ENT,
+  TRASGO,
+  OSO,
+  DRUIDA,
+  SERPIENTE,
+  ESQUELETO,
+  ZOMBI,
+  FANTASMA,
+  SEPULTURERO,
+  BANSHEE,
+  GARGOLA,
+  MOMIA,
+  CUERVO,
+  GUARDIA_REAL,
+  ARMADURA,
+  VERDUGO,
+  MAGO,
+  DRAGON_JOVEN,
+  DEMONIO,
+  SUCUBO,
   REY_CIERVO, DAMA_ESPECTRAL, CABALLERO_NEGRO, TEJEDORA, REY_LICHE,
   COUNT
 };
-constexpr int NUM_NORMALES = 4;
+constexpr int NUM_NORMALES = 28;
 constexpr int NUM_JEFES = 5;
 const char* enemyName(EnemyType t);
 inline bool isBoss(EnemyType t) {
