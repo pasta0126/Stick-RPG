@@ -101,12 +101,13 @@ enum class EnemyType : uint8_t {
   VERDUGO,
   MAGO,
   DRAGON_JOVEN,
-  REY_CIERVO, DAMA_ESPECTRAL, CABALLERO_NEGRO, TEJEDORA, REY_LICHE,
-  BRUJA_PANTANO, SENOR_TRASGOS, YETI,
+  REY_CIERVO, DAMA_ESPECTRAL, CABALLERO_NEGRO, TEJEDORA,
+  BRUJA_PANTANO, SENOR_TRASGOS, YETI, GUARDIAN_CRIPTA, DRAGON_ANCESTRAL,
+  PRIMIGENIO,
   COUNT
 };
 constexpr int NUM_NORMALES = 20;
-constexpr int NUM_JEFES = 8;
+constexpr int NUM_JEFES = 10;
 const char* enemyName(EnemyType t);
 inline bool isBoss(EnemyType t) {
   return static_cast<int>(t) >= NUM_NORMALES && t != EnemyType::COUNT;

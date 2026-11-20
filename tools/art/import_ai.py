@@ -32,7 +32,6 @@ SOURCES = {
     "dama_espectral": ("07_dama_espectral_magenta.png", 100),
     "caballero_negro": ("08_caballero_negro_magenta.png", 100),
     "tejedora": ("09_la_tejedora_magenta.png", 84),
-    "rey_liche": ("10_rey_liche_magenta.png", 106),
     # Lote 2 (docs/PROMPTS_PERSONAJES.md): se ignoran mientras falte la tira.
     "jabali": ("11_jabali_magenta.png", 56),
     "arquero": ("12_arquero_magenta.png", 70),

@@ -10,7 +10,8 @@ bool isBossLevel(int nivel);
 
 // Biomas: cada capítulo (JEFE_CADA encuentros) es un bioma con su jefe, en el
 // orden fijo de kCapitulos (progression.cpp), y vuelta a empezar.
-enum class Bioma : uint8_t { BOSQUE, CEMENTERIO, CASTILLO, PANTANO, CUEVA, MONTANA, COUNT };
+enum class Bioma : uint8_t { BOSQUE, CEMENTERIO, CASTILLO, PANTANO, CUEVA, MONTANA,
+                          DESIERTO, VOLCAN, COSTA, CRIPTA, COUNT };
 Bioma biomaDe(int nivel);
 const char* biomaName(Bioma b);
 Enemy makeEnemy(Rng& rng, int nivel);

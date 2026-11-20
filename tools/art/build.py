@@ -33,7 +33,8 @@ ASEPRITE = os.environ.get("ASEPRITE",
 BUILD = os.path.join(ROOT, "build", "art")
 ASSETS = os.path.join(ROOT, "assets", "sprites")
 GFX = os.path.join(ROOT, "src", "gfx")
-BIOME_ORDER = ["bosque", "cementerio", "castillo", "pantano", "cueva", "montana"]  # = enum Bioma
+BIOME_ORDER = ["bosque", "cementerio", "castillo", "pantano", "cueva", "montana",
+               "desierto", "volcan", "costa", "cripta"]  # = enum Bioma
 
 
 # ------------------------------------------------------------- .aseprite

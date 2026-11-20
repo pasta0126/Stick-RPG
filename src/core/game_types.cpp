@@ -94,10 +94,12 @@ const char* enemyName(EnemyType t) {
     case EnemyType::DAMA_ESPECTRAL: return "Dama Espectral";
     case EnemyType::CABALLERO_NEGRO: return "Caballero Negro";
     case EnemyType::TEJEDORA: return "La Tejedora";
-    case EnemyType::REY_LICHE: return "Rey Liche";
     case EnemyType::BRUJA_PANTANO: return "Bruja del Pantano";
     case EnemyType::SENOR_TRASGOS: return "Rey Trasgo";
     case EnemyType::YETI: return "Yeti";
+    case EnemyType::GUARDIAN_CRIPTA: return "Guardian";
+    case EnemyType::DRAGON_ANCESTRAL: return "Dragon Ancestral";
+    case EnemyType::PRIMIGENIO: return "El Primigenio";
     default: return "?";
   }
 }

@@ -770,7 +770,8 @@ void drawBackground(int fromLayer, int toLayer) {
     c4.blitWrap(bg, l, gfx::kParallax[l] * nivel);
     // Nubes procedurales entre el cielo y la capa lejana (no en interiores).
     if (l == 0 && curBiome != static_cast<int>(Bioma::CASTILLO) &&
-        curBiome != static_cast<int>(Bioma::CUEVA))
+        curBiome != static_cast<int>(Bioma::CUEVA) &&
+        curBiome != static_cast<int>(Bioma::CRIPTA))
       clouds::draw(c4, gt);
   }
 }

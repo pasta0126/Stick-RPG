@@ -51,10 +51,13 @@ EnemyProfile profile(EnemyType t) {
     case EnemyType::DAMA_ESPECTRAL:  return {1.50f, 1.15f, 0.90f, 25, 4, 20};
     case EnemyType::CABALLERO_NEGRO: return {1.60f, 1.10f, 1.20f, 10, 8, 25};
     case EnemyType::TEJEDORA:        return {1.70f, 1.20f, 1.00f, 15, 6, 25};
-    case EnemyType::REY_LICHE:       return {2.20f, 1.25f, 1.25f, 12, 6, 35};
     case EnemyType::BRUJA_PANTANO:   return {1.70f, 1.15f, 0.90f, 12, 8, 30};
     case EnemyType::SENOR_TRASGOS:   return {1.90f, 1.20f, 1.00f, 10, 10, 30};
     case EnemyType::YETI:            return {2.10f, 1.25f, 1.00f, 6, 12, 35};
+    case EnemyType::GUARDIAN_CRIPTA: return {2.30f, 1.05f, 1.60f, 4, 12, 30};
+    case EnemyType::DRAGON_ANCESTRAL: return {2.20f, 1.30f, 1.20f, 10, 8, 35};
+    // Jefe final.
+    case EnemyType::PRIMIGENIO:      return {2.40f, 1.30f, 1.25f, 12, 6, 35};
     case EnemyType::BANDIDO:
     default:               return {1.00f, 1.00f, 1.00f, 5, 10, 15};
   }
@@ -89,16 +92,6 @@ Hero makeHero(HeroClass c) {
 
 bool isBossLevel(int nivel) { return nivel > 0 && nivel % bal::JEFE_CADA == 0; }
 
-#ifdef PRUEBA_ENEMIGOS
-// Modo de prueba (entorno `prueba` de platformio.ini): mismo ritmo que el
-// juego (normales y jefe cada JEFE_CADA), pero los normales salen en orden y
-// sin repetir hasta haberlos visto todos.
-static EnemyType normalPrueba(int nivel) {
-  int visto = (nivel - 1) - (nivel - 1) / bal::JEFE_CADA;  // normales previos
-  return static_cast<EnemyType>(visto % NUM_NORMALES);
-}
-#endif
-
 // El viaje: cada capítulo, un bioma y su jefe. Tras el último, vuelta a
 // empezar (más fuertes por el nivel).
 struct Capitulo {
@@ -110,10 +103,12 @@ static const Capitulo kCapitulos[] = {
     {Bioma::PANTANO, EnemyType::BRUJA_PANTANO},
     {Bioma::CUEVA, EnemyType::SENOR_TRASGOS},
     {Bioma::MONTANA, EnemyType::YETI},
-    {Bioma::CEMENTERIO, EnemyType::DAMA_ESPECTRAL},
-    {Bioma::BOSQUE, EnemyType::TEJEDORA},
+    {Bioma::DESIERTO, EnemyType::GUARDIAN_CRIPTA},
+    {Bioma::COSTA, EnemyType::DAMA_ESPECTRAL},
+    {Bioma::CEMENTERIO, EnemyType::TEJEDORA},
+    {Bioma::VOLCAN, EnemyType::DRAGON_ANCESTRAL},
     {Bioma::CASTILLO, EnemyType::CABALLERO_NEGRO},
-    {Bioma::CASTILLO, EnemyType::REY_LICHE},
+    {Bioma::CRIPTA, EnemyType::PRIMIGENIO},  // final
 };
 constexpr int NUM_CAPITULOS = sizeof(kCapitulos) / sizeof(kCapitulos[0]);
 
@@ -130,6 +125,10 @@ const char* biomaName(Bioma b) {
     case Bioma::PANTANO: return "El Pantano";
     case Bioma::CUEVA: return "La Mina";
     case Bioma::MONTANA: return "Las Cumbres";
+    case Bioma::DESIERTO: return "El Desierto";
+    case Bioma::VOLCAN: return "El Volcan";
+    case Bioma::COSTA: return "El Naufragio";
+    case Bioma::CRIPTA: return "La Cripta";
     default: return "El Bosque";
   }
 }
@@ -140,15 +139,8 @@ Enemy makeEnemy(Rng& rng, int nivel) {
   if (isBossLevel(nivel)) {
     e.type = capituloDe(nivel).jefe;
   } else {
-#ifdef PRUEBA_ENEMIGOS
-    e.type = normalPrueba(nivel);
-#else
     e.type = static_cast<EnemyType>(rng.range(0, NUM_NORMALES - 1));
-#endif
   }
-#ifdef PRUEBA_ENEMIGOS
-  nivel = 1;  // todos con fuerza de nivel 1: se trata de verlos
-#endif
 
   EnemyProfile p = profile(e.type);
   int n = nivel - 1;

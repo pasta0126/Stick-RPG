@@ -474,67 +474,6 @@ class Tejedora:
         return L
 
 
-class ReyLiche:
-    name = "rey_liche"
-    W, H = 100, 108
-    ANCHOR = (44, 107)
-
-    @classmethod
-    def draw(cls, pose):
-        by = {"walk0": -1, "walk1": 1, "idle0": 0, "idle1": 2, "atk0": -2,
-              "atk1": 1, "hit": 1, "prep": -3}[pose]
-        bx = {"hit": -4, "atk1": 4}.get(pose, 0)
-        staff = {"atk0": (60, 22), "atk1": (76, 44), "prep": (62, 16)
-                 }.get(pose, (66, 50))
-        flame = BRILLO if pose == "prep" else ESPECTRAL
-        L = Layer(cls.W, cls.H)
-        o = lambda x, y: (x + bx, y + by)
-        # túnica con ribete dorado y bajo en jirones
-        poly(L, [o(30, 38), o(56, 38), o(62, 66), o(68, 98), o(60, 94),
-                 o(54, 104), o(46, 96), o(38, 104), o(32, 94), o(22, 100),
-                 o(24, 66)], ROJA)
-        flat_line(L, [o(30, 40), o(24, 66), o(22, 98)], ORO)
-        flat_line(L, [o(56, 40), o(62, 66)], ORO)
-        # costillas a la vista
-        flat_poly(L, [o(37, 42), o(50, 42), o(48, 60), o(39, 60)], NEGRO)
-        for i in range(4):
-            flat_line(L, [o(38, 45 + i * 4), o(49, 45 + i * 4)], CLARO)
-        flat_line(L, [o(43, 42), o(43, 60)], BRILLO)
-        # cuello de capa
-        poly(L, [o(26, 30), o(36, 38), o(30, 42), o(22, 36)], ROJA)
-        poly(L, [o(60, 30), o(52, 38), o(58, 42), o(64, 36)], ROJA)
-        # cráneo
-        ellipse(L, *o(44, 26), 10, 10, HUESO)
-        poly(L, [o(40, 30), o(52, 30), o(50, 38), o(42, 38)], HUESO)
-        flat_poly(L, [o(43, 23), o(47, 23), o(47, 27), o(43, 27)], NEGRO)
-        flat_poly(L, [o(49, 23), o(53, 23), o(53, 27), o(49, 27)], NEGRO)
-        dot(L, *o(45, 25), flame)
-        dot(L, *o(51, 25), flame)
-        for i in range(4):
-            dot(L, *o(43 + i * 2, 35), NEGRO)
-        # corona
-        flat_poly(L, [o(34, 18), o(36, 8), o(39, 15), o(43, 5), o(46, 14),
-                      o(50, 6), o(52, 15), o(55, 9), o(55, 19), o(34, 19)], ORO)
-        dot(L, *o(43, 15), SANGRE)
-        # báculo con llama espectral
-        hx, hy = staff
-        hy += by
-        top = (hx + 2, hy - 30)
-        limb(L, [(hx - 2, min(104, hy + 50)), (hx, hy), top], 3, CUERO, shadow_w=1)
-        ellipse(L, top[0], top[1] - 2, 6, 7, (MEDIO, flame, BRILLO), contour=None)
-        flat_poly(L, [(top[0] - 3, top[1] - 6), (top[0], top[1] - 16),
-                      (top[0] + 3, top[1] - 6)], flame)
-        # brazo huesudo
-        limb(L, [o(56, 40), ((56 + bx + hx) / 2 + 2, (40 + by + hy) / 2 + 4),
-                 (hx, hy)], 4, HUESO, shadow_w=1)
-        # mano libre con fuego al prepararse
-        if pose == "prep":
-            limb(L, [o(30, 40), o(22, 30), o(20, 18)], 4, HUESO, shadow_w=1)
-            ellipse(L, *o(20, 12), 5, 6, (MEDIO, ESPECTRAL, BRILLO), contour=None)
-        L.outline()
-        return L
-
-
 # Lote 2: solo existen como tiras de IA (assets/ai/, ver import_ai.SOURCES).
 LOTE2 = [type(n, (), {"name": n}) for n in [
     "jabali",
@@ -561,9 +500,12 @@ JEFES2 = [type(n, (), {"name": n}) for n in [
     "bruja_pantano",
     "senor_trasgos",
     "yeti",
+    "guardian_cripta",
+    "dragon_ancestral",
+    "primigenio",
 ]]
 
-JEFES = [ReyCiervo, DamaEspectral, CaballeroNegro, Tejedora, ReyLiche] + JEFES2
+JEFES = [ReyCiervo, DamaEspectral, CaballeroNegro, Tejedora] + JEFES2
 ENEMIES = NORMALES + JEFES  # mismo orden que EnemyType en C++
 
 

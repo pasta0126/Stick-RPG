@@ -31,20 +31,26 @@
 #include "dama_espectral_gfx.h"
 #include "caballero_negro_gfx.h"
 #include "tejedora_gfx.h"
-#include "rey_liche_gfx.h"
 #include "bruja_pantano_gfx.h"
 #include "senor_trasgos_gfx.h"
 #include "yeti_gfx.h"
+#include "guardian_cripta_gfx.h"
+#include "dragon_ancestral_gfx.h"
+#include "primigenio_gfx.h"
 #include "bg_bosque_gfx.h"
 #include "bg_cementerio_gfx.h"
 #include "bg_castillo_gfx.h"
 #include "bg_pantano_gfx.h"
 #include "bg_cueva_gfx.h"
 #include "bg_montana_gfx.h"
+#include "bg_desierto_gfx.h"
+#include "bg_volcan_gfx.h"
+#include "bg_costa_gfx.h"
+#include "bg_cripta_gfx.h"
 
 namespace gfx {
 
-constexpr int NUM_BIOMAS = 6;
+constexpr int NUM_BIOMAS = 10;
 // Paletas de 8 colores por bioma (índices: ver src/palette.h).
 static const uint8_t kBiomePalette[NUM_BIOMAS][8][3] = {
     {{0x0A, 0x0E, 0x0D}, {0x1B, 0x29, 0x25}, {0x3B, 0x52, 0x47}, {0x7A, 0x93, 0x80}, {0xD4, 0xDE, 0xC8}, {0x9C, 0x2E, 0x30}, {0xD6, 0xA2, 0x48}, {0x9F, 0xE0, 0x5A}},  // bosque
@@ -53,10 +59,14 @@ static const uint8_t kBiomePalette[NUM_BIOMAS][8][3] = {
     {{0x0A, 0x0F, 0x08}, {0x1A, 0x2C, 0x14}, {0x36, 0x56, 0x2A}, {0x7A, 0xA0, 0x4C}, {0xDD, 0xED, 0xB0}, {0x96, 0x2E, 0x2A}, {0xD0, 0xA0, 0x40}, {0xC8, 0xF0, 0x40}},  // pantano
     {{0x0E, 0x0A, 0x06}, {0x2E, 0x20, 0x14}, {0x5E, 0x40, 0x24}, {0xA0, 0x78, 0x48}, {0xEE, 0xD8, 0xB0}, {0xA8, 0x34, 0x2C}, {0xE0, 0xA8, 0x3C}, {0x5E, 0xD0, 0xE8}},  // cueva
     {{0x0A, 0x0D, 0x14}, {0x1C, 0x26, 0x38}, {0x3E, 0x51, 0x70}, {0x8A, 0xA0, 0xBC}, {0xE8, 0xF0, 0xF8}, {0xA0, 0x30, 0x3A}, {0xD8, 0xB0, 0x60}, {0x7C, 0xF0, 0xC0}},  // montana
+    {{0x12, 0x0C, 0x08}, {0x3A, 0x26, 0x18}, {0x6E, 0x4A, 0x2C}, {0xB8, 0x8E, 0x5C}, {0xF2, 0xE2, 0xBE}, {0xA8, 0x38, 0x2A}, {0xF0, 0xB8, 0x40}, {0x4C, 0xD8, 0xC8}},  // desierto
+    {{0x0C, 0x06, 0x06}, {0x2A, 0x12, 0x10}, {0x54, 0x24, 0x1C}, {0x8E, 0x6A, 0x5A}, {0xF4, 0xD8, 0xB0}, {0xD8, 0x40, 0x1C}, {0xFF, 0xB0, 0x30}, {0xB0, 0x60, 0xF0}},  // volcan
+    {{0x08, 0x0D, 0x10}, {0x15, 0x26, 0x2C}, {0x2C, 0x4C, 0x54}, {0x6E, 0x94, 0x9A}, {0xD8, 0xE8, 0xE4}, {0x9C, 0x2E, 0x30}, {0xD6, 0xA2, 0x48}, {0x7A, 0xF0, 0xD8}},  // costa
+    {{0x10, 0x06, 0x08}, {0x2E, 0x0E, 0x14}, {0x5A, 0x1C, 0x26}, {0x9A, 0x5A, 0x62}, {0xF0, 0xD0, 0xC8}, {0xD0, 0x28, 0x28}, {0xF0, 0xA0, 0x30}, {0xC0, 0x60, 0xF0}},  // cripta
 };
 
 static const Sheet* const kBiomeBg[NUM_BIOMAS] = {
-    &bg_bosque::sheet, &bg_cementerio::sheet, &bg_castillo::sheet, &bg_pantano::sheet, &bg_cueva::sheet, &bg_montana::sheet};
+    &bg_bosque::sheet, &bg_cementerio::sheet, &bg_castillo::sheet, &bg_pantano::sheet, &bg_cueva::sheet, &bg_montana::sheet, &bg_desierto::sheet, &bg_volcan::sheet, &bg_costa::sheet, &bg_cripta::sheet};
 // Desplazamiento por encuentro de cada capa del fondo (parallax).
 static const int16_t kParallax[6] = {0, 17, 29, 53, 89, 131};
 constexpr int BG_LAYER_PERSONAJES = 5;  // se dibujan antes de esta capa
@@ -110,10 +120,12 @@ static const EnemyArt kEnemyArt[] = {
     {&dama_espectral::sheet, 118, 101, 73, dama_espectral::WALK, dama_espectral::IDLE, dama_espectral::ATTACK, dama_espectral::HIT, dama_espectral::PREPARE},  // dama_espectral
     {&caballero_negro::sheet, 119, 100, 104, caballero_negro::WALK, caballero_negro::IDLE, caballero_negro::ATTACK, caballero_negro::HIT, caballero_negro::PREPARE},  // caballero_negro
     {&tejedora::sheet, 114, 91, 87, tejedora::WALK, tejedora::IDLE, tejedora::ATTACK, tejedora::HIT, tejedora::PREPARE},  // tejedora
-    {&rey_liche::sheet, 91, 107, 56, rey_liche::WALK, rey_liche::IDLE, rey_liche::ATTACK, rey_liche::HIT, rey_liche::PREPARE},  // rey_liche
     {&bruja_pantano::sheet, 51, 102, 40, bruja_pantano::WALK, bruja_pantano::IDLE, bruja_pantano::ATTACK, bruja_pantano::HIT, bruja_pantano::PREPARE},  // bruja_pantano
     {&senor_trasgos::sheet, 71, 121, 53, senor_trasgos::WALK, senor_trasgos::IDLE, senor_trasgos::ATTACK, senor_trasgos::HIT, senor_trasgos::PREPARE},  // senor_trasgos
     {&yeti::sheet, 82, 121, 60, yeti::WALK, yeti::IDLE, yeti::ATTACK, yeti::HIT, yeti::PREPARE},  // yeti
+    {&guardian_cripta::sheet, 81, 117, 63, guardian_cripta::WALK, guardian_cripta::IDLE, guardian_cripta::ATTACK, guardian_cripta::HIT, guardian_cripta::PREPARE},  // guardian_cripta
+    {&dragon_ancestral::sheet, 55, 113, 46, dragon_ancestral::WALK, dragon_ancestral::IDLE, dragon_ancestral::ATTACK, dragon_ancestral::HIT, dragon_ancestral::PREPARE},  // dragon_ancestral
+    {&primigenio::sheet, 54, 106, 39, primigenio::WALK, primigenio::IDLE, primigenio::ATTACK, primigenio::HIT, primigenio::PREPARE},  // primigenio
 };
 
 }  // namespace gfx
