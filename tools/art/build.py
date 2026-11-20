@@ -88,7 +88,7 @@ def build_backgrounds():
 
 # Héroes jugables, en el orden de HeroClass (src/core/game_types.h).
 HEROES = ["heroe", "vikinga"]
-# Forma de no muerto (talismán): cualquier héroe que muere con él la toma.
+# Esqueleto: futuro héroe seleccionable (su arte se sigue exportando).
 UNDEAD = "esqueleto"
 # En la tira del esqueleto el escudo cambia de lado en la preparación (2) y la
 # carga (5): se usan el reposo y el remate en su lugar.
@@ -250,8 +250,7 @@ static const HeroArt kHeroArt[] = {{
 {chr(10).join(f"    {{&{n}::sheet, {HERO(n)[2][0]}, {HERO(n)[2][1]}}},  // {n}" for n in HEROES)}
 }};
 
-// Héroe maldito (talismán). Si aún no hay arte propio es una copia del
-// caballero y el juego lo tiñe.
+// Esqueleto: arte guardado para un futuro héroe seleccionable (aún no se usa).
 static const HeroArt kUndeadArt = {{&{UNDEAD}::sheet, {HERO(UNDEAD)[2][0]}, {HERO(UNDEAD)[2][1]}}};
 constexpr bool kUndeadOwnArt = {"true" if import_ai.load_hero(UNDEAD) else "false"};
 

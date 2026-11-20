@@ -66,8 +66,6 @@ struct Hero {
   int base[STAT_COUNT] = {};
   int fallo = 0;
   int golpesEspecial = 0;  // golpes acumulados para el ataque especial (§4.3)
-  bool talisman = false;   // talismán de los no muertos (lo sueltan los jefes)
-  bool maldito = false;    // ya murió con el talismán: sigue como esqueleto
   Item equip[SLOT_COUNT];
 
   bool especialListo() const;

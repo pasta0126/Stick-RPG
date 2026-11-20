@@ -82,8 +82,7 @@ static const HeroArt kHeroArt[] = {
     {&vikinga::sheet, 32, 91},  // vikinga
 };
 
-// Héroe maldito (talismán). Si aún no hay arte propio es una copia del
-// caballero y el juego lo tiñe.
+// Esqueleto: arte guardado para un futuro héroe seleccionable (aún no se usa).
 static const HeroArt kUndeadArt = {&esqueleto::sheet, 43, 96};
 constexpr bool kUndeadOwnArt = true;
 

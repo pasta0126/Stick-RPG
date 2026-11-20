@@ -41,14 +41,6 @@ constexpr int VIKINGA_DEF     = 1;
 constexpr int VIKINGA_CRITDMG = 80;
 constexpr int VIKINGA_FALLO   = 12;
 
-// --- Talismán de los no muertos ---------------------------------------------
-// Al vencer a un jefe puede caer un talismán. Si el héroe muere con él, se
-// levanta como esqueleto: mismo equipo, pero más frágil y más torpe.
-constexpr int PROB_TALISMAN    = 35;  // % al vencer a un jefe
-constexpr int NO_MUERTO_HPMAX  = 60;  // % de la vida máx. que conserva
-constexpr int NO_MUERTO_FALLO  = 10;  // % de fallo añadido
-constexpr int NO_MUERTO_DEF    = 2;   // defensa base perdida
-
 // --- Curación (§6) ------------------------------------------------------------
 constexpr int CURA_VICTORIA  = 20;  // % de vida máx.
 constexpr int CURA_JEFE      = 50;  // % de la vida que falta, al aparecer un jefe

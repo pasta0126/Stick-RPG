@@ -156,29 +156,7 @@ static void testSpecial() {
   CHECK(h.golpesEspecial == 1);
 }
 
-static void testTalisman() {
-  Hero h = makeHero();
-  CHECK(!reviveUndead(h));                  // sin talismán no se levanta
-  Rng rng(7);
-  int drops = 0;
-  for (int i = 0; i < 1000; ++i) drops += rollTalisman(rng, h);
-  CHECK(drops > 250 && drops < 450);        // ~PROB_TALISMAN
-  h.talisman = true;
-  CHECK(!rollTalisman(rng, h));             // no se acumulan
-  int def = h.raw(Stat::DEF), fallo = h.fallo, hpMax = h.hpMax;
-  h.hp = 0;
-  CHECK(reviveUndead(h));
-  CHECK(h.maldito && !h.talisman);
-  CHECK(h.hpMax < hpMax && h.hp == h.hpMax);
-  CHECK(h.fallo > fallo && h.raw(Stat::DEF) < def);
-  CHECK(h.equip[static_cast<int>(Slot::ESPADA)].present);  // conserva el equipo
-  CHECK(!rollTalisman(rng, h));             // maldito: ya no cae
-  h.talisman = true;
-  CHECK(!reviveUndead(h));                  // solo una vez
-}
-
 int main() {
-  testTalisman();
   testVamp();
   testSpecial();
   testDamage();
