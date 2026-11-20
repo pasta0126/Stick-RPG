@@ -88,6 +88,9 @@ def build_backgrounds():
 HEROES = ["heroe", "vikinga"]
 # Forma de no muerto (talismán): cualquier héroe que muere con él la toma.
 UNDEAD = "esqueleto"
+# En la tira del esqueleto el escudo cambia de lado en la preparación (2) y la
+# carga (5): se usan el reposo y el remate en su lugar.
+FRAME_SWAP = {UNDEAD: {2: 0, 5: 4}}
 _hero = {}
 
 
@@ -96,6 +99,11 @@ def HERO(name="heroe"):
     existe; si no, el caballero (importado o de hero.py)."""
     if name not in _hero:
         imp = import_ai.load_hero(name)
+        if imp and name in FRAME_SWAP:
+            # Fotogramas mal generados: se sustituyen por otros de la tira.
+            for L in imp.layers.values():
+                for dst, src in FRAME_SWAP[name].items():
+                    L[dst] = L[src].copy() if hasattr(L[src], "copy") else L[src]
         if imp:
             _hero[name] = (imp.W, imp.H, imp.ANCHOR, imp.layers)
         elif name != "heroe":

@@ -49,8 +49,8 @@ static const HeroArt kHeroArt[] = {
 
 // Héroe maldito (talismán). Si aún no hay arte propio es una copia del
 // caballero y el juego lo tiñe.
-static const HeroArt kUndeadArt = {&esqueleto::sheet, 26, 89};
-constexpr bool kUndeadOwnArt = false;
+static const HeroArt kUndeadArt = {&esqueleto::sheet, 43, 96};
+constexpr bool kUndeadOwnArt = true;
 
 struct EnemyArt {
   const Sheet* sheet;
