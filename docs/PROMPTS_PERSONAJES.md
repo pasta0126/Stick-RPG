@@ -512,6 +512,7 @@ REGLAS EXTRA (muy importantes)
 | 48 | `48_guardian_cripta_magenta.png` | **Jefe:** el Guardián de la Cripta | Cementerio | 106 |
 | 49 | `49_reina_hechicera_magenta.png` | **Jefa:** la Reina Hechicera | Castillo | 102 |
 | 50 | `50_dragon_ancestral_magenta.png` | **Jefe:** el Dragón Ancestral | Castillo | 100 |
+| 54 | `54_yeti_magenta.png` | **Jefe:** el Yeti de las Cumbres | Montaña | 100 |
 | 51 | `51_rey_loco_magenta.png` | **Jefe:** el Rey Loco ~~(descartado)~~ | Castillo | 104 |
 
 ---
@@ -1064,6 +1065,21 @@ PERSONAJE: el Dragón Ancestral, unos 100 px de alto y 124 px de ancho, mirando 
 - Garras delanteras enormes apoyadas en el suelo.
 - Caminar: avanza un paso con las patas delanteras. Ataque: lanza la cabeza hacia delante y abajo con las fauces abiertas.
 - Fotograma 8: cuello alzado, pecho inflado y grietas brillando en dorado y la boca con brillo dorado (sin fuego fuera de la boca).
+```
+
+### 54 · El Yeti de las Cumbres (jefe de la Montaña nevada)
+
+```
+PERSONAJE: el Yeti de las Cumbres, unos 100 px de alto, de pie sobre dos patas, mirando a la IZQUIERDA. Jefe de la montaña nevada.
+- Bestia simiesca enorme y encorvada, pelaje largo y desgreñado muy claro (#D4DEC8 / #7A9380) con sombras en #3B5247.
+- Cara, palmas y pies de piel oscura (#1B2925); boca grande con colmillos y ojos de luz espectral (#9FE05A).
+- Cuernos curvados de carnero a los lados de la cabeza.
+- Escarcha y carámbanos colgando del pelo de los brazos y de la barbilla.
+- Brazos larguísimos y manos enormes casi tocando el suelo; en la mano delantera arrastra un garrote hecho con un tronco de abeto helado.
+- Restos de un tributo: un collar de cráneos pequeños y un trozo de capa roja (#9C2E30) de un aventurero atado a la cintura.
+- Ataque: alza el garrote y lo descarga hacia delante.
+- Fotograma 8: se golpea el pecho con el puño libre, rugiendo, ojos y escarcha brillando en verde espectral.
+- La cara debe quedar por debajo del 15 % superior de la imagen.
 ```
 
 ### 51 · El Rey Loco (jefe del Castillo)
