@@ -1250,6 +1250,18 @@ ESCENARIO: lo alto de la torre de un hechicero (interior, no hay cielo).
 - Primer plano: pilas de libros y cofres casi negros en los extremos.
 ````
 
+### Cripta satánica (para el Primigenio)
+
+````
+ESCENARIO: una cripta satánica subterránea, templo demoníaco de un culto (no hay cielo).
+- Cielo (en su lugar): muro del fondo de piedra tallada con un enorme sello ritual circular (pentagrama, runas y un ojo en el centro) grabado y brillando en rojo (#9C2E30), flanqueado por relieves de demonios con cuernos.
+- Lejos: hileras de arcos góticos y columnas retorcidas como huesos, con nichos llenos de cráneos y velas de llama dorada.
+- Plano medio: un altar de sacrificio de piedra negra con cadenas, estatuas de demonios alados en pedestales, braseros con fuego dorado, candelabros altos y un pozo con un resplandor rojo.
+- Suelo: losas agrietadas con un círculo ritual pintado en rojo, cráneos y huesos sueltos en el suelo (apoyados).
+- Primer plano: columnas rotas y montones de cráneos casi negros en los extremos.
+- Detalles: unas pocas runas flotantes en verde espectral pegadas al sello del muro, nada suelto.
+````
+
 ## Paletas propuestas para el juego
 
 Nada de biomas grises: chocan con los sprites. Pantano en verdes claros (si no queda verde, se quita) y Cueva en ocres cálidos.
@@ -1265,6 +1277,7 @@ Los 8 papeles de siempre (contorno, oscuro, medio, claro, brillo, sangre, oro, e
 | Volcán | `0C0606` | `2A1210` | `54241C` | `8E6A5A` | `F4D8B0` | `D8401C` | `FFB030` | `B060F0` |
 | Costa | `080D10` | `15262C` | `2C4C54` | `6E949A` | `D8E8E4` | `9C2E30` | `D6A248` | `7AF0D8` |
 | Catacumbas | `0A0908` | `211D19` | `453D35` | `8A8074` | `DCD4C6` | `A02A2A` | `D8A850` | `E0F070` |
+| Cripta | `100608` | `2E0E14` | `5A1C26` | `9A5A62` | `F0D0C8` | `D02828` | `F0A030` | `C060F0` |
 | Torre | `0A0A12` | `1E1C34` | `3E3A64` | `8480B0` | `E4E0F4` | `B0304A` | `E8B848` | `60E0F0` |
 
 > Cuando tengas las imágenes, déjalas en `assets/ai/` con el nombre de la tabla y dime cuáles entran: yo añado la paleta, importo el fondo, le pongo nombre y rótulo de entrada, y lo meto en el orden de biomas con los enemigos que le toquen.
