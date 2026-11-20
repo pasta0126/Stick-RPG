@@ -540,7 +540,6 @@ LOTE2 = [type(n, (), {"name": n}) for n in [
     "jabali",
     "arquero",
     "hombre_seta",
-    "avispa",
     "espiritu_roble",
     "trasgo",
     "oso",
@@ -560,7 +559,6 @@ LOTE2 = [type(n, (), {"name": n}) for n in [
     "mago_torre",
     "dragon_joven",
     "demonio",
-    "sucubo",
 ]]
 
 NORMALES = [Salteador, Golem, Huargo, Troll] + LOTE2

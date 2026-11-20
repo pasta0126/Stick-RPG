@@ -33,7 +33,6 @@ EnemyProfile profile(EnemyType t) {
     case EnemyType::JABALI: return {0.95f, 1.10f, 0.80f, 8, 10, 30};
     case EnemyType::ARQUERO: return {0.75f, 1.10f, 0.60f, 18, 6, 15};
     case EnemyType::HOMBRE_SETA: return {1.20f, 0.85f, 1.00f, 3, 14, 20};
-    case EnemyType::AVISPA: return {0.70f, 0.95f, 0.50f, 22, 4, 15};
     case EnemyType::ENT: return {1.50f, 0.85f, 1.60f, 3, 12, 15};
     case EnemyType::TRASGO: return {0.70f, 0.90f, 0.70f, 15, 6, 10};
     case EnemyType::OSO: return {1.40f, 1.20f, 0.90f, 6, 14, 35};
@@ -53,7 +52,6 @@ EnemyProfile profile(EnemyType t) {
     case EnemyType::MAGO: return {0.85f, 1.25f, 0.70f, 12, 8, 30};
     case EnemyType::DRAGON_JOVEN: return {1.30f, 1.20f, 1.10f, 8, 10, 35};
     case EnemyType::DEMONIO: return {1.20f, 1.20f, 1.00f, 10, 10, 30};
-    case EnemyType::SUCUBO: return {0.90f, 1.10f, 0.70f, 20, 5, 20};
     // Jefes (§7.1): cada uno con su estilo.
     case EnemyType::REY_CIERVO:      return {2.00f, 1.10f, 1.20f, 8, 10, 20};
     case EnemyType::DAMA_ESPECTRAL:  return {1.50f, 1.15f, 0.90f, 25, 4, 20};
@@ -92,7 +90,16 @@ Hero makeHero(HeroClass c) {
   return h;
 }
 
+#ifdef PRUEBA_ENEMIGOS
+// Modo de prueba (entorno `prueba` de platformio.ini): cada encuentro es un
+// enemigo distinto, en orden (normales y luego jefes), y vuelta a empezar.
+static EnemyType tipoPrueba(int nivel) {
+  return static_cast<EnemyType>((nivel - 1) % static_cast<int>(EnemyType::COUNT));
+}
+bool isBossLevel(int nivel) { return nivel > 0 && isBoss(tipoPrueba(nivel)); }
+#else
 bool isBossLevel(int nivel) { return nivel > 0 && nivel % bal::JEFE_CADA == 0; }
+#endif
 
 Bioma biomaDe(int nivel) {
   int i = ((nivel - 1) / bal::JEFE_CADA) % static_cast<int>(Bioma::COUNT);
@@ -110,6 +117,11 @@ const char* biomaName(Bioma b) {
 Enemy makeEnemy(Rng& rng, int nivel) {
   Enemy e;
   e.nivel = nivel;
+#ifdef PRUEBA_ENEMIGOS
+  (void)rng;
+  e.type = tipoPrueba(nivel);
+  nivel = 1;  // todos con fuerza de nivel 1: se trata de verlos
+#else
   if (isBossLevel(nivel)) {
     // Jefes en orden; tras el quinto, se repiten (más fuertes por el nivel).
     int k = (nivel / bal::JEFE_CADA - 1) % NUM_JEFES;
@@ -117,6 +129,7 @@ Enemy makeEnemy(Rng& rng, int nivel) {
   } else {
     e.type = static_cast<EnemyType>(rng.range(0, NUM_NORMALES - 1));
   }
+#endif
 
   EnemyProfile p = profile(e.type);
   int n = nivel - 1;

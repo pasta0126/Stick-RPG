@@ -77,7 +77,6 @@ const char* enemyName(EnemyType t) {
     case EnemyType::JABALI: return "Jabali";
     case EnemyType::ARQUERO: return "Arquero";
     case EnemyType::HOMBRE_SETA: return "Hombre Seta";
-    case EnemyType::AVISPA: return "Avispa Reina";
     case EnemyType::ENT: return "Ent del Roble";
     case EnemyType::TRASGO: return "Trasgo";
     case EnemyType::OSO: return "Oso Pardo";
@@ -97,7 +96,6 @@ const char* enemyName(EnemyType t) {
     case EnemyType::MAGO: return "Mago Oscuro";
     case EnemyType::DRAGON_JOVEN: return "Dragon Joven";
     case EnemyType::DEMONIO: return "Demonio";
-    case EnemyType::SUCUBO: return "Sucubo";
     case EnemyType::REY_CIERVO: return "Rey Ciervo";
     case EnemyType::DAMA_ESPECTRAL: return "Dama Espectral";
     case EnemyType::CABALLERO_NEGRO: return "Caballero Negro";

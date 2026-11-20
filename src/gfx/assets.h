@@ -14,7 +14,6 @@
 #include "jabali_gfx.h"
 #include "arquero_gfx.h"
 #include "hombre_seta_gfx.h"
-#include "avispa_gfx.h"
 #include "espiritu_roble_gfx.h"
 #include "trasgo_gfx.h"
 #include "oso_gfx.h"
@@ -34,7 +33,6 @@
 #include "mago_torre_gfx.h"
 #include "dragon_joven_gfx.h"
 #include "demonio_gfx.h"
-#include "sucubo_gfx.h"
 #include "rey_ciervo_gfx.h"
 #include "dama_espectral_gfx.h"
 #include "caballero_negro_gfx.h"
@@ -92,7 +90,6 @@ static const EnemyArt kEnemyArt[] = {
     {&jabali::sheet, 49, 59, 44, jabali::WALK, jabali::IDLE, jabali::ATTACK, jabali::HIT, jabali::PREPARE},  // jabali
     {&arquero::sheet, 38, 74, 29, arquero::WALK, arquero::IDLE, arquero::ATTACK, arquero::HIT, arquero::PREPARE},  // arquero
     {&hombre_seta::sheet, 31, 69, 29, hombre_seta::WALK, hombre_seta::IDLE, hombre_seta::ATTACK, hombre_seta::HIT, hombre_seta::PREPARE},  // hombre_seta
-    {&avispa::sheet, 33, 73, 28, avispa::WALK, avispa::IDLE, avispa::ATTACK, avispa::HIT, avispa::PREPARE},  // avispa
     {&espiritu_roble::sheet, 50, 93, 27, espiritu_roble::WALK, espiritu_roble::IDLE, espiritu_roble::ATTACK, espiritu_roble::HIT, espiritu_roble::PREPARE},  // espiritu_roble
     {&trasgo::sheet, 41, 65, 29, trasgo::WALK, trasgo::IDLE, trasgo::ATTACK, trasgo::HIT, trasgo::PREPARE},  // trasgo
     {&oso::sheet, 47, 90, 36, oso::WALK, oso::IDLE, oso::ATTACK, oso::HIT, oso::PREPARE},  // oso
@@ -112,7 +109,6 @@ static const EnemyArt kEnemyArt[] = {
     {&mago_torre::sheet, 63, 91, 31, mago_torre::WALK, mago_torre::IDLE, mago_torre::ATTACK, mago_torre::HIT, mago_torre::PREPARE},  // mago_torre
     {&dragon_joven::sheet, 47, 81, 42, dragon_joven::WALK, dragon_joven::IDLE, dragon_joven::ATTACK, dragon_joven::HIT, dragon_joven::PREPARE},  // dragon_joven
     {&demonio::sheet, 43, 99, 41, demonio::WALK, demonio::IDLE, demonio::ATTACK, demonio::HIT, demonio::PREPARE},  // demonio
-    {&sucubo::sheet, 42, 80, 31, sucubo::WALK, sucubo::IDLE, sucubo::ATTACK, sucubo::HIT, sucubo::PREPARE},  // sucubo
     {&rey_ciervo::sheet, 106, 107, 64, rey_ciervo::WALK, rey_ciervo::IDLE, rey_ciervo::ATTACK, rey_ciervo::HIT, rey_ciervo::PREPARE},  // rey_ciervo
     {&dama_espectral::sheet, 118, 101, 73, dama_espectral::WALK, dama_espectral::IDLE, dama_espectral::ATTACK, dama_espectral::HIT, dama_espectral::PREPARE},  // dama_espectral
     {&caballero_negro::sheet, 119, 100, 104, caballero_negro::WALK, caballero_negro::IDLE, caballero_negro::ATTACK, caballero_negro::HIT, caballero_negro::PREPARE},  // caballero_negro

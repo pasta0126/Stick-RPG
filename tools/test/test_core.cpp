@@ -109,9 +109,9 @@ static void testEnemies() {
   Rng rng(5);
   for (int n = 1; n < 200; ++n)
     CHECK(isBoss(makeEnemy(rng, n).type) == isBossLevel(n));
-  CHECK(makeEnemy(rng, 10).type == EnemyType::REY_CIERVO);
-  CHECK(makeEnemy(rng, 50).type == EnemyType::REY_LICHE);
-  CHECK(makeEnemy(rng, 60).type == EnemyType::REY_CIERVO);
+  CHECK(makeEnemy(rng, bal::JEFE_CADA).type == EnemyType::REY_CIERVO);
+  CHECK(makeEnemy(rng, 5 * bal::JEFE_CADA).type == EnemyType::REY_LICHE);
+  CHECK(makeEnemy(rng, 6 * bal::JEFE_CADA).type == EnemyType::REY_CIERVO);
   CHECK(makeEnemy(rng, 30).hpMax > makeEnemy(rng, 1).hpMax);
 }
 
