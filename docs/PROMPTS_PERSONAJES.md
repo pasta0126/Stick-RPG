@@ -513,6 +513,7 @@ REGLAS EXTRA (muy importantes)
 | 49 | `49_reina_hechicera_magenta.png` | **Jefa:** la Reina Hechicera | Castillo | 102 |
 | 50 | `50_dragon_ancestral_magenta.png` | **Jefe:** el Dragón Ancestral | Castillo | 100 |
 | 54 | `54_yeti_magenta.png` | **Jefe:** el Yeti de las Cumbres | Montaña | 100 |
+| 55 | `55_primigenio_magenta.png` | **Jefe:** el Primigenio de las Profundidades | Costa | 104 |
 | 51 | `51_rey_loco_magenta.png` | **Jefe:** el Rey Loco ~~(descartado)~~ | Castillo | 104 |
 
 ---
@@ -1080,6 +1081,21 @@ PERSONAJE: el Yeti de las Cumbres, unos 100 px de alto, de pie sobre dos patas, 
 - Ataque: alza el garrote y lo descarga hacia delante.
 - Fotograma 8: se golpea el pecho con el puño libre, rugiendo, ojos y escarcha brillando en verde espectral.
 - La cara debe quedar por debajo del 15 % superior de la imagen.
+```
+
+### 55 · El Primigenio de las Profundidades (jefe de la Costa)
+
+```
+PERSONAJE: el Primigenio de las Profundidades, un dios marino al estilo Cthulhu salido del mar, unos 104 px de alto, de pie sobre dos piernas, mirando a la IZQUIERDA. Jefe de la costa del naufragio.
+- Cuerpo humanoide enorme y encorvado, piel escamosa y húmeda en tonos medios y oscuros (#1B2925 / #3B5247) con brillos claros (#7A9380 / #D4DEC8) de agua.
+- Cabeza de pulpo bulbosa con ojos pequeños de luz espectral (#9FE05A); en lugar de boca, una barba de 6 tentáculos gruesos que cuelgan hasta el pecho y se enroscan (pegados al cuerpo).
+- Alas membranosas pequeñas y plegadas a la espalda, rotas en el borde.
+- Manos con garras largas y membranas entre los dedos; pies palmeados.
+- Restos del galeón: una cadena de ancla oxidada enrollada en el brazo trasero, algas y percebes en hombros y rodillas, y un trozo de vela roja (#9C2E30) colgando de la cintura.
+- Una corona de coral y conchas con algún toque dorado (#D6A248).
+- Caminar: pasos pesados, tentáculos meciéndose. Ataque: los tentáculos de la barba y la garra delantera se lanzan hacia delante a la vez (pegados a la cara y a la mano).
+- Fotograma 8: alza los dos brazos, los tentáculos abiertos en abanico, ojos y runas del pecho brillando en verde espectral.
+- La cabeza debe quedar por debajo del 15 % superior de la imagen.
 ```
 
 ### 51 · El Rey Loco (jefe del Castillo)
