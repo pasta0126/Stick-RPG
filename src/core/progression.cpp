@@ -185,6 +185,23 @@ Loot rollLoot(Rng& rng, int nivel, int luck, bool jefe) {
   return l;
 }
 
+bool rollTalisman(Rng& rng, const Hero& h) {
+  return !h.talisman && !h.maldito && rng.chance(bal::PROB_TALISMAN);
+}
+
+bool reviveUndead(Hero& h) {
+  if (!h.talisman || h.maldito) return false;
+  h.talisman = false;
+  h.maldito = true;
+  int hpMax = roundi(h.hpMax * bal::NO_MUERTO_HPMAX / 100.0f);
+  h.hpMax = hpMax < 1 ? 1 : hpMax;
+  h.hp = h.hpMax;
+  h.fallo += bal::NO_MUERTO_FALLO;
+  h.base[static_cast<int>(Stat::DEF)] -= bal::NO_MUERTO_DEF;
+  h.golpesEspecial = 0;
+  return true;
+}
+
 int healVictory(Hero& h) {
   int amount = roundi(h.hpMax * bal::CURA_VICTORIA / 100.0f);
   int before = h.hp;

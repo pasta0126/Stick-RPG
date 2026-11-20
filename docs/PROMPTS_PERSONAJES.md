@@ -1205,3 +1205,208 @@ Los 8 papeles de siempre (contorno, oscuro, medio, claro, brillo, sangre, oro, e
 | Torre | `0A0A12` | `1E1C34` | `3E3A64` | `8480B0` | `E4E0F4` | `B0304A` | `E8B848` | `60E0F0` |
 
 > Cuando tengas las imágenes, déjalas en `assets/ai/` con el nombre de la tabla y dime cuáles entran: yo añado la paleta, importo el fondo, le pongo nombre y rótulo de entrada, y lo meto en el orden de biomas con los enemigos que le toquen.
+
+---
+
+# Héroes nuevos (mismo método que el héroe v2)
+
+Cada héroe se hace en **dos mensajes dentro de la misma conversación**: primero la tira (bloque común de la tira y el bloque del héroe) y después el mapa de piezas (bloque común del mapa y la lista de piezas del héroe). Se guardan en `assets/ai/` como `<nombre>.png` y `<nombre>_mapa.png`.
+
+Todos usan las **6 piezas** del héroe, porque el botín las cambia: casco, pechera, botas, mano trasera (en el código, el escudo), brazo con arma y cuerpo. El arma y la pieza de la mano trasera cambian de nombre según el héroe.
+
+| Archivo | Héroe | Arma | Mano trasera | Stats (propuesta) | Mecánica propia |
+|---|---|---|---|---|---|
+| `samurai` | Samurái errante | Katana | Vaina | Crítico alto, poca vida | Zona perfecta de la carga más ancha |
+| `enano` | Enano | Martillo | Escudo redondo | Mucha vida y defensa, falla más | Anula el primer crítico recibido en cada combate |
+| `espartano` | Espartano | Lanza | Hoplón (escudo redondo) | Defensa alta, ataque medio | Contraataque cuando el enemigo falla |
+| `picara` | Pícara | Daga | Segunda daga | Crítico alto, defensa baja | Más botín raro y más pociones |
+| `duelista` | Duelista | Estoque | Daga de parada | Poco fallo, crítico medio | Esquiva: probabilidad de no recibir daño |
+| `hechicera` | Hechicera | Báculo | Grimorio | Ataque alto, defensa muy baja | Especial cada 2 golpes en vez de 3 |
+| `nigromante` | Nigromante | Hoz | Farol de almas | Vida baja | Roba vida de base |
+| `druida` | Druida | Cayado | Escudo de corteza | Equilibrado | Se regenera un poco cada turno |
+| `clerigo` | Clérigo de batalla | Maza | Libro sagrado | Defensa alta, ataque bajo | Las pociones curan el doble |
+| `esqueleto` | Esqueleto (maldición no muerta) | La del héroe | La del héroe | Penalizado (ver GDD §6.5) | Forma del héroe al morir con el talismán |
+
+## Mensaje 1 — bloque común de la tira (pegar antes del héroe)
+
+````
+Genera una tira de sprites de pixel art del héroe de un RPG de fantasía medieval oscura.
+
+COMPOSICIÓN
+- 7 celdas del mismo ancho, una junto a otra, en este orden:
+  1. Reposo A: en guardia, arma lista y la pieza de la mano trasera delante del cuerpo.
+  2. Reposo B: idéntico al 1, pero el torso, la cabeza y los brazos 1 píxel más abajo. Las piernas no se mueven.
+  3. Ataque, preparación: arma echada atrás.
+  4. Ataque, golpe: arma lanzada hacia delante (a la derecha), cuerpo algo adelantado.
+  5. Ataque, remate: arma terminando el movimiento, abajo y delante.
+  6. Carga: arma en alto sobre la cabeza, postura tensa.
+  7. Recibe golpe: echado hacia atrás y encogido.
+- El personaje mira a la DERECHA, de perfil, de cuerpo entero, unos 64 px de alto en resolución nativa. Proporciones heroicas compactas: unas 4 cabezas de alto, nada de estilo chibi.
+- La pieza de la mano trasera (el brazo más alejado) se ve en los 7 fotogramas.
+- En todas las celdas, los pies sobre la misma línea de suelo y en la misma posición horizontal (en el tercio izquierdo de la celda, para que el arma tenga sitio a la derecha). Misma escala en todas. Las piernas cambian lo mínimo: el héroe nunca camina.
+- Nada suelto: sin proyectiles, chispas, partículas ni resplandores separados del cuerpo.
+- Sin texto, sin números y sin sombra en el suelo.
+
+ESTILO
+- Pixel art limpio de 16 bits, como dibujado a mano en Aseprite a unos 64 px de alto y escalado con vecino más cercano. Todos los píxeles son cuadrados del mismo tamaño.
+- Contorno negro de 1 píxel alrededor de toda la silueta.
+- Luz desde arriba a la izquierda. Tres tonos por material.
+- Sin antialiasing, sin degradados, sin píxeles sueltos. El borde con el fondo es duro.
+
+PALETA ESTRICTA (solo estos colores):
+#0A0E0D negro (contornos), #1B2925 oscuro (cuero, tela oscura), #3B5247 medio, #7A9380 claro (metal, piedra, hueso), #D4DEC8 brillo (reflejos, piel muy clara), #9C2E30 rojo, #D6A248 oro (con moderación), #9FE05A verde espectral (solo si el héroe lo pide, con moderación).
+
+FONDO: magenta puro #FF00FF, liso.
+````
+
+## Mensaje 2 — bloque común del mapa de piezas (sobre la imagen anterior)
+
+````
+Ahora, sobre la imagen exacta que acabas de generar, haz una versión de mapa de piezas. Debe tener las mismas 7 celdas, las mismas poses y la misma silueta píxel a píxel. No muevas, añadas ni quites nada; solo cambia los colores.
+
+Pinta cada pieza con un único color plano, sin sombras ni contornos:
+- CASCO: azul puro #0000FF
+- PECHERA: amarillo puro #FFFF00
+- BOTAS: cian puro #00FFFF
+- MANO TRASERA: naranja puro #FF8000
+- BRAZO CON ARMA: verde puro #00FF00
+- CUERPO (todo lo demás): gris #808080
+
+El fondo sigue en magenta #FF00FF. Sin contorno negro: cada píxel del personaje pasa a ser exactamente uno de esos 6 colores.
+QUÉ ES CADA PIEZA EN ESTE PERSONAJE:
+````
+
+Después de «QUÉ ES CADA PIEZA EN ESTE PERSONAJE:» se pega la lista de piezas del héroe (la que va debajo de su bloque).
+
+## Bloques de cada héroe
+
+### Samurái errante
+
+````
+PERSONAJE: un samurái errante, ronin, mirando a la DERECHA.
+- Kabuto (casco) de placas lacadas oscuras con un adorno frontal dorado en media luna y una máscara menpo de demonio en la cara.
+- Do (coraza) de láminas atadas con cordones rojos (#9C2E30).
+- Hombreras de láminas, hakama ancho y oscuro, sandalias de paja y espinilleras de placas.
+- Una cinta roja en la cintura cuyas puntas caen detrás.
+- Katana larga de hoja clara y guarda dorada redonda en la mano delantera; en la mano trasera, la vaina negra de la katana sujeta delante del cuerpo.
+- Carga: katana vertical sobre la cabeza con las dos manos (la vaina queda en la mano trasera, baja).
+````
+Piezas: casco = kabuto con su máscara · pechera = coraza y hombreras · botas = espinilleras y sandalias · mano trasera = la vaina · brazo con arma = brazo delantero y la katana · cuerpo = hakama, cinta, brazo trasero y lo demás.
+
+### Enano
+
+````
+PERSONAJE: un guerrero enano, mirando a la DERECHA. Bajo y muy ancho: unas 3 cabezas de alto y casi tan ancho como alto (mide unos 52 px de alto).
+- Yelmo de acero redondo con nasal y dos cuernos cortos.
+- Barba enorme y espesa, roja (#9C2E30), trenzada con anillas doradas, que le cae sobre el pecho.
+- Peto de acero grueso con remaches y una runa dorada, cinturón ancho con hebilla dorada.
+- Cota de malla corta, brazos musculosos, botas de hierro pesadas.
+- Martillo de guerra de cabeza enorme de acero con runas en la mano delantera; en la mano trasera, un escudo redondo de madera con borde de hierro y una runa dorada.
+- Ataque: martillazo de arriba abajo.
+````
+Piezas: casco = yelmo con cuernos · pechera = peto y cinturón · botas = botas de hierro · mano trasera = escudo redondo · brazo con arma = brazo delantero y martillo · cuerpo = barba, cara, malla y lo demás.
+
+### Espartano
+
+````
+PERSONAJE: un guerrero espartano (hoplita), mirando a la DERECHA.
+- Yelmo corintio de bronce (usa el oro #D6A248 sombreado con medio y oscuro) que cubre la cara, con una cresta alta y transversal de crin roja (#9C2E30).
+- Coraza de bronce musculada, faldón de tiras de cuero (pteruges).
+- Capa roja larga a la espalda.
+- Grebas de bronce en las espinillas y sandalias.
+- Lanza larga (dory) de madera con punta de acero en la mano delantera, sujeta por encima del hombro; en la mano trasera, un escudo hoplón redondo y grande de bronce con una lambda (Λ) roja.
+- Ataque: estocada de lanza hacia delante. Carga: lanza alzada sobre la cabeza para arrojarla (sin soltarla).
+````
+Piezas: casco = yelmo con cresta · pechera = coraza · botas = grebas y sandalias · mano trasera = hoplón · brazo con arma = brazo delantero y lanza · cuerpo = capa, faldón y lo demás.
+
+### Pícara
+
+````
+PERSONAJE: una pícara ladrona, ágil y delgada, mirando a la DERECHA.
+- Capucha corta de cuero oscuro con la cara medio en sombra y un pañuelo rojo (#9C2E30) que le tapa la boca; un mechón de pelo claro asomando.
+- Jubón de cuero ajustado con correas cruzadas en el pecho y bolsitas.
+- Capa corta hecha jirones, pantalones oscuros y botas altas de cuero blando.
+- Una daga en cada mano: la delantera, de hoja más larga; la trasera, cruzada delante del cuerpo con la hoja hacia abajo.
+- Postura baja y agazapada.
+````
+Piezas: casco = capucha y pañuelo · pechera = jubón con correas · botas = botas altas · mano trasera = la segunda daga con su mano · brazo con arma = brazo delantero y daga · cuerpo = capa, piernas y lo demás.
+
+### Duelista
+
+````
+PERSONAJE: un duelista espadachín, elegante, mirando a la DERECHA.
+- Sombrero de ala ancha con una pluma roja (#9C2E30) larga hacia atrás.
+- Jubón acolchado con mangas abullonadas y botones dorados, cuello de encaje claro.
+- Capa corta sobre un hombro, calzas oscuras y botas altas con vuelta.
+- Estoque fino y largo con guarda de lazo dorada en la mano delantera, en postura de esgrima (brazo extendido); en la mano trasera, una daga de parada (main gauche) con guarda grande, levantada.
+- Postura de esgrima: piernas abiertas de lado, de perfil.
+````
+Piezas: casco = sombrero con pluma · pechera = jubón · botas = botas altas · mano trasera = daga de parada con su mano · brazo con arma = brazo delantero y estoque · cuerpo = capa, calzas y lo demás.
+
+### Hechicera
+
+````
+PERSONAJE: una hechicera de batalla, mirando a la DERECHA.
+- Sombrero puntiagudo de ala ancha, oscuro, con una banda dorada; melena larga y clara que cae por la espalda.
+- Corpiño de cuero sobre un vestido largo oscuro con el bajo cortado para poder moverse, y una faja roja (#9C2E30).
+- Botas de cuero.
+- Báculo largo de madera con un cristal verde espectral (#9FE05A) engarzado en la punta, en la mano delantera; en la mano trasera, un grimorio abierto delante del cuerpo con runas verdes en las páginas.
+- Ataque: golpe con el báculo hacia delante. Carga: báculo en alto, el cristal más brillante.
+````
+Piezas: casco = sombrero · pechera = corpiño y faja · botas = botas · mano trasera = grimorio · brazo con arma = brazo delantero y báculo · cuerpo = pelo, vestido y lo demás.
+
+### Nigromante (héroe)
+
+````
+PERSONAJE: un joven nigromante, flaco y pálido, mirando a la DERECHA. Diferente del jefe Nigromante: es humano, joven y lleva armadura ligera.
+- Capucha negra con un cráneo pequeño de cuervo como broche, cara pálida (#D4DEC8) con ojeras y ojos verdes espectrales.
+- Hombrera de hueso en el hombro delantero y coraza ligera de cuero negro con costillas pintadas.
+- Túnica negra larga hecha jirones abajo, botas negras.
+- Hoz de mango largo con hoja curva clara en la mano delantera; en la mano trasera, un farol de hierro con una llama verde espectral dentro.
+- Ataque: tajo curvo con la hoz.
+````
+Piezas: casco = capucha · pechera = coraza y hombrera · botas = botas · mano trasera = farol · brazo con arma = brazo delantero y hoz · cuerpo = túnica, cara y lo demás.
+
+### Druida
+
+````
+PERSONAJE: un druida guerrero, mirando a la DERECHA.
+- Tocado de cráneo de ciervo pequeño con astas cortas sobre una capucha de piel.
+- Barba larga castaña, tatuajes de espiral en los brazos.
+- Peto de cuero con hojas y una capa de pieles.
+- Brazaletes de corteza, pantalones de cuero y botas de piel atadas con cuerda.
+- Cayado de madera viva con hojas brotando y una piedra verde espectral en la punta, en la mano delantera; en la mano trasera, un escudo de corteza y ramas trenzadas.
+- Ataque: golpe con el cayado.
+````
+Piezas: casco = tocado de ciervo y capucha · pechera = peto · botas = botas de piel · mano trasera = escudo de corteza · brazo con arma = brazo delantero y cayado · cuerpo = barba, capa y lo demás.
+
+### Clérigo de batalla
+
+````
+PERSONAJE: un clérigo guerrero, mirando a la DERECHA.
+- Capucha de malla con una diadema dorada; cara seria con barba corta.
+- Sobreveste clara (#D4DEC8) con un sol dorado bordado en el pecho, sobre cota de malla; cinturón con una cadena y un relicario.
+- Estola roja (#9C2E30) colgando del cuello.
+- Grebas de acero y botas.
+- Maza de cabeza con aletas de acero en la mano delantera; en la mano trasera, un libro sagrado grande con tapas doradas y cadena, sujeto delante del pecho.
+- Ataque: mazazo de arriba abajo.
+````
+Piezas: casco = capucha de malla y diadema · pechera = sobreveste y estola · botas = grebas y botas · mano trasera = libro · brazo con arma = brazo delantero y maza · cuerpo = malla, cara y lo demás.
+
+### Esqueleto (maldición no muerta)
+
+Es la forma que toma cualquier héroe al morir con el talismán. Conserva su equipo, así que debe parecer un esqueleto guerrero genérico que lleva **restos** de armadura.
+
+````
+PERSONAJE: un esqueleto guerrero maldito, mirando a la DERECHA. Es el héroe que ha vuelto de entre los muertos.
+- Cráneo con las cuencas ardiendo en verde espectral (#9FE05A) y un yelmo abollado y roto puesto torcido.
+- Costillas, columna y huesos de los brazos visibles (hueso #7A9380 / #D4DEC8); los huecos entre huesos van en negro u oscuro, NO en magenta, para que sea una sola figura.
+- Restos de peto oxidado colgando de una correa, jirones de una capa roja descolorida.
+- Grebas oxidadas sueltas en las piernas de hueso.
+- Espada mellada y oxidada en la mano delantera; en la mano trasera, un escudo roto y agrietado.
+- Un hilo de luz verde espectral en el pecho, donde estaría el corazón (pegado a las costillas).
+- Postura algo encorvada y desmadejada.
+````
+Piezas: casco = yelmo roto · pechera = restos de peto · botas = grebas oxidadas · mano trasera = escudo roto · brazo con arma = brazo delantero y espada · cuerpo = cráneo, costillas, huesos, capa y lo demás.
+
+> Pásame cada pareja (`<nombre>.png` y `<nombre>_mapa.png`). Yo la importo como el Caballero y la Vikinga, le doy sus stats, su mecánica, el nombre de su arma y de su mano trasera, y la añado a la selección de héroe. El esqueleto sustituye al aspecto provisional de la maldición.

@@ -242,6 +242,19 @@ Each panel shows the resulting HP large and the current HP below.
 
 Since items never change max HP, these potions are the only way to raise it, which avoids odd cases when swapping gear.
 
+## 6.5. Undead talisman
+
+Beating a boss has a `PROB_TALISMAN` (35 %) chance to drop the **undead talisman**, if the hero doesn't already carry one and isn't already cursed. A small spectral skull appears in the corner of the hero's HUD plate while it is carried.
+
+If the hero dies while carrying it, the run doesn't end: the talisman breaks and the hero rises as a **skeleton** (“Maldición no muerta”) and keeps fighting the same enemy. The skeleton keeps all the gear but is more fragile and clumsier:
+
+- max HP drops to `NO_MUERTO_HPMAX` (60 %) of what it was, and HP is filled to that new max;
+- `NO_MUERTO_FALLO` (+10 %) miss chance;
+- `NO_MUERTO_DEF` (−2) base defence;
+- the special-attack counter is reset.
+
+It only works once per run: a cursed hero can't get another talisman, and dying again is game over. Until the skeleton art exists, the hero is drawn with faded colours and a spectral outline.
+
 # 7. Difficulty and progression
 
 Each new enemy is a step up in difficulty. Enemy HP, attack and defence grow exponentially with the encounter number (HP ×1.07, ATK ×1.05, DEF ×1.065 per encounter). Rewards scale too, without guaranteeing that every new piece is better. Since the hero only gains max HP through potions, difficulty eventually wins: every run ends.

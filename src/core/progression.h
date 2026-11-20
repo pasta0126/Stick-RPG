@@ -31,5 +31,10 @@ int potionRecover(Hero& h);    // §6.4 RECUPERAR
 int potionMaxGain(const Hero& h);
 int potionMaxHp(Hero& h);      // §6.4 VIDA MÁX.
 
+// Talismán de los no muertos: tirada al vencer a un jefe (solo si no lo
+// tiene ni está ya maldito) y conversión en esqueleto al morir con él.
+bool rollTalisman(Rng& rng, const Hero& h);
+bool reviveUndead(Hero& h);  // false si no tenía talismán
+
 // Equipa el objeto y devuelve el anterior.
 Item equipItem(Hero& h, const Item& it);

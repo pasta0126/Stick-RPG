@@ -51,6 +51,7 @@ constexpr uint32_t T_GOLPE_HEROE = 180;    // hasta el frame del tajo
 constexpr uint32_t T_GOLPE_ENEMIGO = 200;
 constexpr uint32_t T_MUERTE = 800;
 constexpr uint32_t T_VICTORIA = 700;
+constexpr uint32_t T_NO_MUERTO = 1800;  // el héroe se levanta como esqueleto
 
 M5Canvas cv(&M5.Display);
 gfx::Canvas4 c4;
@@ -63,7 +64,7 @@ Battle battle(hero, enemy, rng);
 enum class St : uint8_t {
   TITLE, SELECT, FADE, BIOME_INTRO, ENEMY_ENTER, BOSS_INTRO, HERO_TURN, HERO_STRIKE,
   SHOW, ENEMY_WAIT, ENEMY_STRIKE, ENEMY_DIE, VICTORY, LOOT_ITEM, LOOT_POTION,
-  GAME_OVER
+  GAME_OVER, UNDEAD
 };
 enum class FadeAct : uint8_t { NEW_GAME, NEXT_ENCOUNTER, TO_TITLE };
 
@@ -111,6 +112,7 @@ float chargeF = 0;
 bool pendingSpecial = false, pendingPerfect = false;
 float pendingMult = 1.0f;
 constexpr uint32_t LEJOS = 0x40000000u;  // "hace mucho" para los temporizadores
+uint32_t talismanT = 0;  // momento en que cayó el talismán
 uint32_t heroAtkT = 0, heroHitT = 0, enemyAtkT = 0, enemyHitT = 0;
 uint32_t shakeT = 0, shakeDur = 0;
 int shakeAmp = 0;
@@ -126,6 +128,7 @@ float lerp(float a, float b, float t) { return a + (b - a) * t; }
 float clamp01(float v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
 
 void resetTimers() {
+  talismanT = gt - LEJOS;
   heroAtkT = heroHitT = enemyAtkT = enemyHitT = gt - LEJOS;
 }
 
@@ -277,8 +280,19 @@ void onEnter(St s) {
       char buf[12];
       std::snprintf(buf, sizeof(buf), "+%d", healed);
       if (healed > 0) floatText(buf, pal::ESPECTRAL, HERO_FX, FEET_Y - 82);
+      if (isBoss(enemy.type) && rollTalisman(rng, hero)) {
+        hero.talisman = true;
+        talismanT = gt;
+        audio::sfx(1180, 120, true);
+      }
       break;
     }
+    case St::UNDEAD:
+      reviveUndead(hero);
+      flashAmt = 1.0f;
+      shake(4, 500);
+      audio::jingleJefe();
+      break;
     case St::GAME_OVER:
       if (static_cast<uint32_t>(derrotados) > record) {
         record = derrotados;
@@ -389,7 +403,9 @@ void resolveEnemyTurn() {
   }
   uint8_t color = heavy || r.atk.crit ? pal::SANGRE : pal::BRILLO;
   uint32_t dur = label[0] ? bal::T_TEXTO_CRITICO : bal::T_TEXTO_GOLPE;
-  show(label, color, dur, r.heroDead ? St::GAME_OVER : St::HERO_TURN);
+  St next = St::HERO_TURN;
+  if (r.heroDead) next = hero.talisman ? St::UNDEAD : St::GAME_OVER;
+  show(label, color, dur, next);
 }
 
 // ------------------------------------------------------------------- update
@@ -530,8 +546,12 @@ void update() {
     case St::ENEMY_DIE:
       if (since(stT) >= T_MUERTE) setState(St::VICTORY);
       break;
+    case St::UNDEAD:
+      if (since(stT) >= T_NO_MUERTO) setState(St::HERO_TURN);
+      break;
     case St::VICTORY:
-      if (since(stT) >= T_VICTORIA) {
+      // Si ha caído el talismán, se deja ver el aviso un poco más.
+      if (since(stT) >= (since(talismanT) <= since(stT) ? 1600u : T_VICTORIA)) {
         loot = rollLoot(rng, nivel, hero.eff(Stat::LUCK), isBossLevel(nivel));
         sel = 0;
         setState(loot.pocion ? St::LOOT_POTION : St::LOOT_ITEM);
@@ -645,8 +665,8 @@ uint8_t rarityColor(Rareza r) {
 // personajes del fondo): la capa en color sólido, desplazada en 4 sentidos.
 // Se dibuja antes que el sprite, que lo tapa por dentro.
 void blitHalo(const gfx::Sheet& s, int layer, int frame, int x, int y,
-              int dissolve = 0) {
-  static const Remap halo = Remap::solid(pal::CLARO);
+              int dissolve = 0, uint8_t color = pal::CLARO) {
+  const Remap halo = Remap::solid(color);
   c4.blit(s, layer, frame, x - 1, y, halo, dissolve);
   c4.blit(s, layer, frame, x + 1, y, halo, dissolve);
   c4.blit(s, layer, frame, x, y - 1, halo, dissolve);
@@ -682,11 +702,23 @@ void drawHero() {
   auto visible = [&](int layer, int slot) {
     return slot < 0 || layer == H::BRAZO || hero.equip[slot].present;
   };
+  // Maldición no muerta (arte provisional): colores apagados y borde
+  // espectral en lugar del claro.
+  Remap curse = Remap::identity();
+  if (hero.maldito) {
+    curse.to[pal::SANGRE] = pal::MEDIO;
+    curse.to[pal::ORO] = pal::CLARO;
+    curse.to[pal::OSCURO] = pal::NEGRO;
+  }
+  uint8_t haloCol = hero.maldito ? pal::ESPECTRAL : pal::CLARO;
   for (auto& c : capas)
-    if (visible(c.layer, c.slot)) blitHalo(*art.sheet, c.layer, frame, x0, y0);
+    if (visible(c.layer, c.slot))
+      blitHalo(*art.sheet, c.layer, frame, x0, y0, 0, haloCol);
   for (auto& c : capas) {
     if (!visible(c.layer, c.slot)) continue;
-    Remap r = c.slot >= 0 ? rarityRemap(hero.equip[c.slot]) : Remap::identity();
+    Remap rar = c.slot >= 0 ? rarityRemap(hero.equip[c.slot]) : Remap::identity();
+    Remap r;
+    for (int i = 0; i < 16; ++i) r.to[i] = rar.to[curse.to[i]];
     c4.blit(*art.sheet, c.layer, frame, x0, y0, flash ? white : r);
   }
   // Chispas espectrales mientras se carga el especial.
@@ -746,9 +778,16 @@ void drawHud() {
   char buf[24];
   // Héroe (espejo de la placa del enemigo): nombre arriba; vida y barra debajo.
   panel(1, 112, 98, 134);
-  icon(HEART, 6, 5, 116, '#', pal::NEGRO, 'r', pal::SANGRE);
-  c4.label(hero.clase == HeroClass::VIKINGA ? "VIKINGA" : "CABALLERO", 15, 116,
-           pal::BRILLO, pal::NEGRO);
+  icon(HEART, 6, 5, 116, '#', pal::NEGRO, 'r',
+       hero.maldito ? pal::ESPECTRAL : pal::SANGRE);
+  const char* heroName = hero.maldito ? "ESQUELETO"
+                         : hero.clase == HeroClass::VIKINGA ? "VIKINGA"
+                                                            : "CABALLERO";
+  c4.label(heroName, 15, 116, hero.maldito ? pal::ESPECTRAL : pal::BRILLO,
+           pal::NEGRO);
+  // Talismán de los no muertos: calavera en la esquina de la placa.
+  if (hero.talisman)
+    icon(SKULL, 6, 89, 116, '#', pal::NEGRO, 'c', pal::ESPECTRAL);
   std::snprintf(buf, sizeof(buf), "%d/%d", hero.hp, hero.hpMax);
   int hw = gfx::Canvas4::textWidth(buf, 1, true);
   c4.label(buf, 4, 125, pal::BRILLO, pal::NEGRO);
@@ -1192,6 +1231,14 @@ void drawCombat(St view) {
     if (charging) drawChargeBar();
   }
   if (view == St::BOSS_INTRO) drawBossBanner();
+  if (view == St::VICTORY && since(talismanT) <= since(stT)) {
+    icon(SKULL, 6, W / 2 - 3, 30, '#', pal::NEGRO, 'c', pal::ESPECTRAL);
+    txt(B9, "Talisman no muerto", W / 2, 50, pal::ESPECTRAL);
+  }
+  if (view == St::UNDEAD) {
+    txt(B12, "Maldicion no muerta", W / 2, 42, pal::ESPECTRAL);
+    txt(S9, "Te levantas como esqueleto", W / 2, 62, pal::BRILLO);
+  }
   drawFloaters();
 }
 
