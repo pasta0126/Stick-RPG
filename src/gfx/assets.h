@@ -33,24 +33,30 @@
 #include "tejedora_gfx.h"
 #include "rey_liche_gfx.h"
 #include "bruja_pantano_gfx.h"
+#include "senor_trasgos_gfx.h"
+#include "yeti_gfx.h"
 #include "bg_bosque_gfx.h"
 #include "bg_cementerio_gfx.h"
 #include "bg_castillo_gfx.h"
 #include "bg_pantano_gfx.h"
+#include "bg_cueva_gfx.h"
+#include "bg_montana_gfx.h"
 
 namespace gfx {
 
-constexpr int NUM_BIOMAS = 4;
+constexpr int NUM_BIOMAS = 6;
 // Paletas de 8 colores por bioma (índices: ver src/palette.h).
 static const uint8_t kBiomePalette[NUM_BIOMAS][8][3] = {
     {{0x0A, 0x0E, 0x0D}, {0x1B, 0x29, 0x25}, {0x3B, 0x52, 0x47}, {0x7A, 0x93, 0x80}, {0xD4, 0xDE, 0xC8}, {0x9C, 0x2E, 0x30}, {0xD6, 0xA2, 0x48}, {0x9F, 0xE0, 0x5A}},  // bosque
     {{0x0B, 0x0A, 0x12}, {0x22, 0x1D, 0x33}, {0x43, 0x3B, 0x5C}, {0x82, 0x7A, 0x9A}, {0xDA, 0xD4, 0xE6}, {0xA0, 0x2C, 0x3E}, {0xD8, 0xB4, 0x62}, {0x72, 0xE4, 0xD4}},  // cementerio
     {{0x0E, 0x0A, 0x0A}, {0x2A, 0x1E, 0x1D}, {0x52, 0x40, 0x3A}, {0x8E, 0x7E, 0x72}, {0xE4, 0xDA, 0xCA}, {0xB8, 0x30, 0x2A}, {0xEC, 0xA4, 0x3A}, {0xA4, 0x72, 0xE0}},  // castillo
     {{0x0A, 0x0F, 0x08}, {0x1A, 0x2C, 0x14}, {0x36, 0x56, 0x2A}, {0x7A, 0xA0, 0x4C}, {0xDD, 0xED, 0xB0}, {0x96, 0x2E, 0x2A}, {0xD0, 0xA0, 0x40}, {0xC8, 0xF0, 0x40}},  // pantano
+    {{0x0E, 0x0A, 0x06}, {0x2E, 0x20, 0x14}, {0x5E, 0x40, 0x24}, {0xA0, 0x78, 0x48}, {0xEE, 0xD8, 0xB0}, {0xA8, 0x34, 0x2C}, {0xE0, 0xA8, 0x3C}, {0x5E, 0xD0, 0xE8}},  // cueva
+    {{0x0A, 0x0D, 0x14}, {0x1C, 0x26, 0x38}, {0x3E, 0x51, 0x70}, {0x8A, 0xA0, 0xBC}, {0xE8, 0xF0, 0xF8}, {0xA0, 0x30, 0x3A}, {0xD8, 0xB0, 0x60}, {0x7C, 0xF0, 0xC0}},  // montana
 };
 
 static const Sheet* const kBiomeBg[NUM_BIOMAS] = {
-    &bg_bosque::sheet, &bg_cementerio::sheet, &bg_castillo::sheet, &bg_pantano::sheet};
+    &bg_bosque::sheet, &bg_cementerio::sheet, &bg_castillo::sheet, &bg_pantano::sheet, &bg_cueva::sheet, &bg_montana::sheet};
 // Desplazamiento por encuentro de cada capa del fondo (parallax).
 static const int16_t kParallax[6] = {0, 17, 29, 53, 89, 131};
 constexpr int BG_LAYER_PERSONAJES = 5;  // se dibujan antes de esta capa
@@ -106,6 +112,8 @@ static const EnemyArt kEnemyArt[] = {
     {&tejedora::sheet, 114, 91, 87, tejedora::WALK, tejedora::IDLE, tejedora::ATTACK, tejedora::HIT, tejedora::PREPARE},  // tejedora
     {&rey_liche::sheet, 91, 107, 56, rey_liche::WALK, rey_liche::IDLE, rey_liche::ATTACK, rey_liche::HIT, rey_liche::PREPARE},  // rey_liche
     {&bruja_pantano::sheet, 51, 102, 40, bruja_pantano::WALK, bruja_pantano::IDLE, bruja_pantano::ATTACK, bruja_pantano::HIT, bruja_pantano::PREPARE},  // bruja_pantano
+    {&senor_trasgos::sheet, 71, 121, 53, senor_trasgos::WALK, senor_trasgos::IDLE, senor_trasgos::ATTACK, senor_trasgos::HIT, senor_trasgos::PREPARE},  // senor_trasgos
+    {&yeti::sheet, 82, 121, 60, yeti::WALK, yeti::IDLE, yeti::ATTACK, yeti::HIT, yeti::PREPARE},  // yeti
 };
 
 }  // namespace gfx

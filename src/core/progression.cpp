@@ -53,6 +53,8 @@ EnemyProfile profile(EnemyType t) {
     case EnemyType::TEJEDORA:        return {1.70f, 1.20f, 1.00f, 15, 6, 25};
     case EnemyType::REY_LICHE:       return {2.20f, 1.25f, 1.25f, 12, 6, 35};
     case EnemyType::BRUJA_PANTANO:   return {1.70f, 1.15f, 0.90f, 12, 8, 30};
+    case EnemyType::SENOR_TRASGOS:   return {1.90f, 1.20f, 1.00f, 10, 10, 30};
+    case EnemyType::YETI:            return {2.10f, 1.25f, 1.00f, 6, 12, 35};
     case EnemyType::BANDIDO:
     default:               return {1.00f, 1.00f, 1.00f, 5, 10, 15};
   }
@@ -106,9 +108,11 @@ struct Capitulo {
 static const Capitulo kCapitulos[] = {
     {Bioma::BOSQUE, EnemyType::REY_CIERVO},
     {Bioma::PANTANO, EnemyType::BRUJA_PANTANO},
+    {Bioma::CUEVA, EnemyType::SENOR_TRASGOS},
+    {Bioma::MONTANA, EnemyType::YETI},
     {Bioma::CEMENTERIO, EnemyType::DAMA_ESPECTRAL},
-    {Bioma::CASTILLO, EnemyType::CABALLERO_NEGRO},
     {Bioma::BOSQUE, EnemyType::TEJEDORA},
+    {Bioma::CASTILLO, EnemyType::CABALLERO_NEGRO},
     {Bioma::CASTILLO, EnemyType::REY_LICHE},
 };
 constexpr int NUM_CAPITULOS = sizeof(kCapitulos) / sizeof(kCapitulos[0]);
@@ -124,6 +128,8 @@ const char* biomaName(Bioma b) {
     case Bioma::CEMENTERIO: return "El Cementerio";
     case Bioma::CASTILLO: return "El Castillo";
     case Bioma::PANTANO: return "El Pantano";
+    case Bioma::CUEVA: return "La Mina";
+    case Bioma::MONTANA: return "Las Cumbres";
     default: return "El Bosque";
   }
 }

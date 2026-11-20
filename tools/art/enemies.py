@@ -559,6 +559,8 @@ NORMALES = [Salteador, Golem, Huargo, Troll] + LOTE2
 # Jefes nuevos: solo existen como tiras de IA.
 JEFES2 = [type(n, (), {"name": n}) for n in [
     "bruja_pantano",
+    "senor_trasgos",
+    "yeti",
 ]]
 
 JEFES = [ReyCiervo, DamaEspectral, CaballeroNegro, Tejedora, ReyLiche] + JEFES2

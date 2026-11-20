@@ -112,7 +112,7 @@ static void testEnemies() {
   CHECK(makeEnemy(rng, bal::JEFE_CADA).type == EnemyType::REY_CIERVO);
   CHECK(makeEnemy(rng, 2 * bal::JEFE_CADA).type == EnemyType::BRUJA_PANTANO);
   CHECK(biomaDe(2 * bal::JEFE_CADA) == Bioma::PANTANO);
-  CHECK(biomaDe(2 * bal::JEFE_CADA + 1) == Bioma::CEMENTERIO);
+  CHECK(biomaDe(2 * bal::JEFE_CADA + 1) == Bioma::CUEVA);
   CHECK(makeEnemy(rng, 30).hpMax > makeEnemy(rng, 1).hpMax);
 }
 
