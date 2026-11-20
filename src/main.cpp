@@ -33,6 +33,15 @@ constexpr uint32_t T_APAGAR_MS = 2000;
 constexpr uint32_t T_ATENUAR_MS = 10000;
 constexpr uint8_t BRILLO_PANTALLA = 120;
 constexpr uint8_t BRILLO_PAUSA = 12;
+// Inactividad: sin tocar ningún botón se pasa a reposo (pantalla apagada y
+// CPU dormida; cualquier botón despierta en pausa) y, si sigue sin usarse,
+// el dispositivo se apaga solo.
+constexpr uint32_t T_REPOSO_MS = 2 * 60 * 1000;
+constexpr uint32_t T_AUTOAPAGADO_MS = 10 * 60 * 1000;  // ya en reposo
+// Batería: colores fijos (fuera de la paleta del bioma) y lectura periódica.
+constexpr uint8_t COL_BAT_OK = 8;
+constexpr uint8_t COL_BAT_BAJA = 9;
+constexpr uint32_t T_BATERIA_MS = 3000;
 
 constexpr uint32_t T_FADE = 320;
 constexpr uint32_t T_BIOMA = 2200;
@@ -91,6 +100,9 @@ bool nuevoRecord = false;
 
 // UI y efectos.
 bool paused = false;
+uint32_t lastInputMs = 0;  // millis() de la última pulsación
+float batLevel = -1;       // % suavizado
+int batCells = 3;          // celdas encendidas (1..3)
 uint32_t soundToastMs = 0;  // millis() del último cambio de sonido
 uint32_t pausedAtMs = 0;
 bool aArmed = false, charging = false, inPerfect = false;
@@ -1141,6 +1153,24 @@ void drawGameOver() {
   txt(S9, "A: volver", W / 2, 120, pal::MEDIO);
 }
 
+// Pila de 3 celdas arriba a la derecha: verde con 2-3 celdas, roja con 1.
+void drawBattery() {
+  const int x0 = W - 20, y0 = 3;
+  c4.rect(x0 - 1, y0 - 1, 18, 9, pal::NEGRO);
+  for (int x = x0; x <= x0 + 14; ++x) {
+    c4.pset(x, y0, pal::CLARO);
+    c4.pset(x, y0 + 6, pal::CLARO);
+  }
+  for (int y = y0; y <= y0 + 6; ++y) {
+    c4.pset(x0, y, pal::CLARO);
+    c4.pset(x0 + 14, y, pal::CLARO);
+  }
+  for (int y = y0 + 2; y <= y0 + 4; ++y) c4.pset(x0 + 15, y, pal::CLARO);
+  uint8_t col = batCells >= 2 ? COL_BAT_OK : COL_BAT_BAJA;
+  for (int i = 0; i < batCells; ++i)
+    c4.rect(x0 + 2 + i * 4, y0 + 2, 3, 3, col);
+}
+
 void drawCombat(St view) {
   drawBackground(0, gfx::BG_LAYER_PERSONAJES);
   bool gone = view == St::VICTORY;
@@ -1190,6 +1220,7 @@ void render() {
   if (view != St::TITLE && soundToastMs && millis() - soundToastMs < 1000)
     c4.label(audio::enabled() ? "SONIDO SI" : "SONIDO NO", W / 2, 24,
              pal::BRILLO, pal::NEGRO, 1, 1, true);
+  if (!(view == St::HERO_TURN && charging)) drawBattery();
   if (paused) {
     panel(70, 44, 169, 90);
     txt(B12, "Pausa", W / 2, 60, pal::ORO, middle_center, NONE);
@@ -1226,11 +1257,77 @@ void handleSound() {
   soundToastMs = millis();
 }
 
-void handlePower() {
-  if (M5.BtnPWR.pressedFor(T_APAGAR_MS)) {
-    M5.Display.setBrightness(0);
-    M5.Power.powerOff();
+void readBattery() {
+  int lv = M5.Power.getBatteryLevel();
+  if (lv < 0 || lv > 100) return;
+  batLevel = batLevel < 0 ? lv : batLevel * 0.7f + lv * 0.3f;
+  // Umbrales 67 % / 34 %, con 3 puntos de margen para no parpadear.
+  int t = batLevel >= 67 ? 3 : batLevel >= 34 ? 2 : 1;
+  if (t > batCells && batLevel < (t == 3 ? 70 : 37)) t = batCells;
+  if (t < batCells && batLevel > (batCells == 3 ? 64 : 31)) t = batCells;
+  batCells = t;
+}
+
+void updateBattery() {
+  static uint32_t lastRead = 0;
+  if (lastRead && millis() - lastRead < T_BATERIA_MS) return;
+  lastRead = millis();
+  readBattery();
+}
+
+bool anyButton() {
+  return M5.BtnA.isPressed() || M5.BtnB.isPressed() || M5.BtnPWR.isPressed();
+}
+
+void powerOff() {
+  M5.Speaker.stop();
+  M5.Display.setBrightness(0);
+  M5.Power.powerOff();
+}
+
+// Reposo: pantalla y CPU dormidas hasta pulsar un botón. Si se agota el
+// tiempo sin tocar nada, se apaga del todo.
+void standby() {
+  M5.Speaker.stop();
+  aArmed = charging = false;
+  if (st != St::TITLE) paused = true;
+  M5.Display.setBrightness(0);
+  M5.Display.sleep();
+  uint32_t t0 = millis();
+  bool woke = false;
+  while (!woke) {
+    uint32_t slept = millis() - t0;
+    if (slept >= T_AUTOAPAGADO_MS) powerOff();
+    gpio_wakeup_enable(GPIO_NUM_37, GPIO_INTR_LOW_LEVEL);  // A
+    gpio_wakeup_enable(GPIO_NUM_39, GPIO_INTR_LOW_LEVEL);  // B
+    gpio_wakeup_enable(GPIO_NUM_35, GPIO_INTR_LOW_LEVEL);  // PWR
+    esp_sleep_enable_gpio_wakeup();
+    esp_sleep_enable_timer_wakeup(
+        static_cast<uint64_t>(T_AUTOAPAGADO_MS - slept) * 1000);
+    gpio_hold_en(GPIO_NUM_4);  // mantiene el equipo encendido con batería
+    esp_light_sleep_start();
+    gpio_hold_dis(GPIO_NUM_4);
+    woke = esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_GPIO;
   }
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+  // La pulsación que despierta no cuenta como acción del juego.
+  while (digitalRead(37) == LOW || digitalRead(39) == LOW ||
+         digitalRead(35) == LOW)
+    delay(10);
+  delay(30);
+  M5.update();
+  M5.Display.wakeup();
+  M5.Display.setBrightness(BRILLO_PANTALLA);
+  pausedAtMs = lastInputMs = millis();
+}
+
+void handleIdle() {
+  if (anyButton()) lastInputMs = millis();
+  if (millis() - lastInputMs > T_REPOSO_MS) standby();
+}
+
+void handlePower() {
+  if (M5.BtnPWR.pressedFor(T_APAGAR_MS)) powerOff();
   if (M5.BtnPWR.wasClicked()) {
     paused = !paused;
     pausedAtMs = millis();
@@ -1259,6 +1356,8 @@ void setup() {
   uint8_t* buf = static_cast<uint8_t*>(cv.getBuffer());
   c4.attach(buf, W, H, buf[0] == 0x10);
   for (int i = 8; i < 16; ++i) cv.setPaletteColor(i, 0, 0, 0);
+  cv.setPaletteColor(COL_BAT_OK, 40, 200, 70);
+  cv.setPaletteColor(COL_BAT_BAJA, 220, 40, 40);
 
   prefs.begin("stickrpg", false);
   record = prefs.getUInt("record", 0);
@@ -1269,6 +1368,8 @@ void setup() {
   clouds::generate(esp_random());
   resetTimers();
   setState(St::TITLE);
+  readBattery();
+  lastInputMs = millis();
 }
 
 void loop() {
@@ -1278,7 +1379,9 @@ void loop() {
   last = now;
 
   M5.update();
+  handleIdle();
   handlePower();
+  updateBattery();
   handleSound();
   audio::update();
   if (!paused) {
