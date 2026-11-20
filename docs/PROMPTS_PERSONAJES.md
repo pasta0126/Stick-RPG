@@ -442,3 +442,613 @@ Ahora dame SOLO la capa del PRIMER PLANO: los elementos muy oscuros de los borde
 ````
 
 > Pásame por bioma las 6 imágenes (la escena y las 5 capas) con nombres como `bosque_escena.png`, `bosque_cielo.png`, `bosque_lejos.png`, `bosque_medio.png`, `bosque_suelo.png` y `bosque_frente.png`. Si alguna capa no cuadra con la escena, la recorto yo a partir de la escena completa.
+
+---
+
+# Lote 2: enemigos y jefes nuevos
+
+Mismo método que con los primeros enemigos. Para cada personaje se pega en un mensaje:
+
+1. el **bloque de estilo común** (arriba),
+2. las **reglas extra del lote 2** (justo debajo),
+3. los **fotogramas para los enemigos** (arriba, los 8 de siempre),
+4. el bloque del personaje.
+
+La imagen se guarda en `assets/ai/` con el nombre de la tabla (fondo magenta). El importador ya conoce esos nombres y la altura de cada uno (`tools/art/import_ai.py`, `SOURCES`). Mientras falte una imagen, ese enemigo se ignora.
+
+## Reglas extra del lote 2 (pegar siempre, después del estilo común)
+
+```
+REGLAS EXTRA (muy importantes)
+- Cada fotograma es UNA sola figura conectada: nada suelto ni flotando separado del cuerpo. Sin flechas en vuelo, sin frascos lanzados, sin llamas sueltas, sin chispas, sin partículas ni insectos sueltos. El arma o la magia siempre van en la mano o pegadas al cuerpo (los efectos los añade el juego).
+- La parte más baja del personaje (pies, patas, cola o jirones) toca la misma línea de suelo en los 8 fotogramas, aunque sea una criatura que vuela o flota.
+- No lo hagas más ancho que 1,3 veces su altura en ningún fotograma: alas plegadas a medias, colas recogidas.
+- Deja bastante separación de magenta entre fotogramas.
+```
+
+## Tabla de archivos
+
+| Nº | Archivo | Personaje | Bioma | Alto (px) |
+|---|---|---|---|---|
+| 11 | `11_jabali_magenta.png` | Jabalí de colmillo negro | Bosque | 56 |
+| 12 | `12_arquero_magenta.png` | Arquero furtivo | Bosque | 70 |
+| 13 | `13_hombre_seta_magenta.png` | Hombre-seta | Bosque | 62 |
+| 14 | `14_avispa_magenta.png` | Avispa gigante (reina del enjambre) | Bosque | 60 |
+| 15 | `15_espiritu_roble_magenta.png` | Espíritu del roble | Bosque | 88 |
+| 16 | `16_trasgo_magenta.png` | Trasgo ladrón | Bosque | 54 |
+| 17 | `17_oso_magenta.png` | Oso pardo | Bosque | 84 |
+| 18 | `18_druida_magenta.png` | Druida corrupto | Bosque | 76 |
+| 19 | `19_serpiente_magenta.png` | Serpiente del pantano | Bosque | 60 |
+| 20 | `20_cazador_magenta.png` | Cazador de cabezas | Bosque | 74 |
+| 21 | `21_esqueleto_magenta.png` | Esqueleto | Cementerio | 70 |
+| 22 | `22_zombi_magenta.png` | Zombi | Cementerio | 72 |
+| 23 | `23_necrofago_magenta.png` | Necrófago | Cementerio | 62 |
+| 24 | `24_fantasma_magenta.png` | Fantasma | Cementerio | 74 |
+| 25 | `25_murcielago_magenta.png` | Murciélago vampiro | Cementerio | 60 |
+| 26 | `26_sepulturero_magenta.png` | Sepulturero loco | Cementerio | 72 |
+| 27 | `27_banshee_magenta.png` | Banshee | Cementerio | 78 |
+| 28 | `28_gargola_magenta.png` | Gárgola | Cementerio | 76 |
+| 29 | `29_sabueso_magenta.png` | Sabueso del inframundo | Cementerio | 58 |
+| 30 | `30_momia_magenta.png` | Momia | Cementerio | 74 |
+| 31 | `31_cuervo_magenta.png` | Cuervo de la muerte | Cementerio | 56 |
+| 32 | `32_guardia_real_magenta.png` | Guardia real | Castillo | 76 |
+| 33 | `33_armadura_animada_magenta.png` | Armadura animada | Castillo | 80 |
+| 34 | `34_alquimista_magenta.png` | Alquimista | Castillo | 70 |
+| 35 | `35_bufon_magenta.png` | Bufón siniestro | Castillo | 64 |
+| 36 | `36_verdugo_magenta.png` | Verdugo | Castillo | 86 |
+| 37 | `37_mago_torre_magenta.png` | Mago de la torre | Castillo | 80 |
+| 38 | `38_dragon_joven_magenta.png` | Dragón joven | Castillo | 72 |
+| 39 | `39_mimico_magenta.png` | Mímico | Castillo | 56 |
+| 40 | `40_espia_magenta.png` | Espía de la corte | Castillo | 70 |
+| 41 | `41_ballestero_magenta.png` | Ballestero | Castillo | 72 |
+| 42 | `42_mastin_magenta.png` | Mastín de guerra | Castillo | 58 |
+| 43 | `43_bruja_pantano_magenta.png` | **Jefa:** la Bruja del Pantano | Bosque | 98 |
+| 44 | `44_gran_jabali_magenta.png` | **Jefe:** el Gran Jabalí | Bosque | 90 |
+| 45 | `45_senor_trasgos_magenta.png` | **Jefe:** el Señor de los Trasgos | Bosque | 96 |
+| 46 | `46_nigromante_magenta.png` | **Jefe:** el Nigromante | Cementerio | 104 |
+| 47 | `47_viuda_negra_magenta.png` | **Jefa:** la Viuda Negra | Cementerio | 100 |
+| 48 | `48_guardian_cripta_magenta.png` | **Jefe:** el Guardián de la Cripta | Cementerio | 106 |
+| 49 | `49_reina_hechicera_magenta.png` | **Jefa:** la Reina Hechicera | Castillo | 102 |
+| 50 | `50_dragon_ancestral_magenta.png` | **Jefe:** el Dragón Ancestral | Castillo | 100 |
+| 51 | `51_rey_loco_magenta.png` | **Jefe:** el Rey Loco | Castillo | 104 |
+
+---
+
+## Bosque: enemigos normales
+
+### 11 · Jabalí de colmillo negro
+
+```
+PERSONAJE: un jabalí salvaje enorme, unos 56 px de alto y 84 px de largo, a cuatro patas, mirando a la IZQUIERDA. Embiste con fuerza.
+- Cuerpo macizo y alto de hombros, cuarto trasero más bajo; pelaje erizado oscuro (#1B2925 / #3B5247) con una cresta de cerdas a lo largo del lomo.
+- Cabeza baja y grande, hocico ancho, dos colmillos curvos negros con la punta pálida (#D4DEC8).
+- Ojo pequeño rojo (#9C2E30). Cicatrices claras en el costado.
+- Patas cortas y fuertes con pezuñas negras.
+- Ataque: baja la cabeza (preparación) y embiste hacia delante con los colmillos.
+- Fotograma 8: escarba el suelo con una pata delantera, cabeza baja, ojo brillando en verde espectral.
+```
+
+### 12 · Arquero furtivo
+
+```
+PERSONAJE: un arquero bandido, unos 70 px de alto, mirando a la IZQUIERDA. Ágil y frágil.
+- Capucha verde muy oscura (#1B2925) y capa corta hecha jirones; la cara es una sombra con un brillo de ojos claro.
+- Jubón de cuero acolchado, brazal de cuero en el antebrazo, carcaj a la espalda con plumas rojas (#9C2E30).
+- Pantalones y botas de cuero, cinturón con hebilla dorada pequeña.
+- Un arco largo de madera oscura en la mano delantera.
+- Ataque: preparación con la cuerda tensada y la flecha en el arco; golpe con la cuerda suelta y el arco hacia delante (la flecha NO se dibuja en vuelo).
+- Fotograma 8: tensa el arco al máximo, la punta de la flecha brilla en verde espectral.
+```
+
+### 13 · Hombre-seta
+
+```
+PERSONAJE: un hombre-seta, criatura fúngica bípeda, unos 62 px de alto, mirando a la IZQUIERDA. Lento y raro.
+- Sombrero de seta enorme y redondeado, más ancho que el cuerpo, rojo oscuro (#9C2E30) con manchas pálidas (#D4DEC8).
+- Bajo el sombrero, láminas oscuras y dos ojos pequeños de luz espectral (#9FE05A).
+- Tronco grueso y pálido (#7A9380) a modo de cuerpo, con brazos cortos como raíces y pies como bulbos.
+- Algo de musgo oscuro en la base.
+- Ataque: echa el cuerpo atrás y da un cabezazo con el sombrero hacia delante.
+- Fotograma 8: el sombrero se hincha y las manchas brillan en verde espectral.
+```
+
+### 14 · Avispa gigante
+
+```
+PERSONAJE: una avispa gigante, reina de un enjambre, unos 60 px de alto y 72 px de largo, mirando a la IZQUIERDA. Rápida y venenosa. Vuela bajo: la punta del aguijón o las patas tocan la línea de suelo.
+- Cuerpo segmentado: cabeza con mandíbulas, tórax peludo oscuro y abdomen grande con franjas doradas (#D6A248) y negras.
+- Ojos compuestos grandes en verde espectral (#9FE05A).
+- Dos alas translúcidas en tonos claros (#7A9380 / #D4DEC8), pegadas al cuerpo y medio abiertas.
+- Patas finas colgando y un aguijón largo y afilado al final del abdomen.
+- Caminar: aleteo (alas arriba y abajo). Ataque: dobla el abdomen bajo el cuerpo y clava el aguijón hacia delante.
+- Fotograma 8: abdomen muy curvado, gota verde espectral en la punta del aguijón (pegada).
+```
+
+### 15 · Espíritu del roble
+
+```
+PERSONAJE: un espíritu del bosque, un roble viviente que camina, unos 88 px de alto, mirando a la IZQUIERDA. Muy resistente.
+- Tronco grueso y nudoso como cuerpo (corteza #1B2925 / #3B5247 / #7A9380), con una cara tallada en la corteza: dos huecos con luz espectral (#9FE05A) y una boca de grieta.
+- Copa pequeña de ramas sin apenas hojas sobre la cabeza, con algunas hojas oscuras.
+- Dos brazos largos de rama que acaban en dedos-ramita.
+- Piernas de raíces gruesas que se arrastran.
+- Musgo y setas pequeñas en el tronco.
+- Ataque: levanta un brazo-rama y lo descarga como un látigo hacia delante.
+- Fotograma 8: las grietas de la corteza brillan en verde espectral, raíces tensas.
+```
+
+### 16 · Trasgo ladrón
+
+```
+PERSONAJE: un trasgo (goblin) ladrón, pequeño, unos 54 px de alto, mirando a la IZQUIERDA. Escurridizo.
+- Cabeza grande con orejas puntiagudas larguísimas hacia atrás, nariz ganchuda, sonrisa con dientes torcidos, ojos dorados (#D6A248).
+- Piel en tonos medios (#3B5247 / #7A9380).
+- Chaleco de cuero roto y un saco de botín atado a la espalda, con una moneda dorada asomando.
+- Pies descalzos y grandes. Postura encorvada.
+- Un cuchillo curvo corto en la mano delantera.
+- Ataque: se agacha y da un salto corto con una puñalada hacia delante.
+- Fotograma 8: se frota las manos con el cuchillo en alto, ojos brillando.
+```
+
+### 17 · Oso pardo
+
+```
+PERSONAJE: un oso enorme erguido sobre las patas traseras, unos 84 px de alto, mirando a la IZQUIERDA. Mucha vida, golpes lentos y fuertes.
+- Pelaje espeso y desgreñado en tonos oscuros (#1B2925 / #3B5247), algo más claro en el hocico.
+- Cabeza ancha con orejas redondas, fauces con colmillos claros (#D4DEC8) y ojos pequeños rojos (#9C2E30).
+- Cicatrices y una flecha rota clavada en el hombro.
+- Garras largas y pálidas en las patas delanteras.
+- Caminar: a dos patas, balanceándose pesadamente.
+- Ataque: levanta una zarpa sobre la cabeza y la descarga en diagonal hacia delante.
+- Fotograma 8: ruge con los dos brazos abiertos en alto.
+```
+
+### 18 · Druida corrupto
+
+```
+PERSONAJE: un druida corrompido por la magia oscura, unos 76 px de alto, mirando a la IZQUIERDA. Lanzador de maldiciones.
+- Túnica larga con capucha de tela oscura (#1B2925) con ribetes de hojas secas; la cara es pálida y demacrada, con ojos de luz espectral (#9FE05A).
+- Cornamenta pequeña de ramas saliendo de la capucha.
+- Collar de huesos pequeños y un cinturón de cuerda.
+- Báculo de madera retorcida con una piedra verde espectral engarzada en raíces.
+- Pies descalzos, envueltos en raíces.
+- Ataque: apunta el báculo hacia delante con el brazo extendido.
+- Fotograma 8: alza el báculo con las dos manos; la piedra brilla mucho más.
+```
+
+### 19 · Serpiente del pantano
+
+```
+PERSONAJE: una serpiente gigante del pantano, unos 60 px de alto (con la cabeza erguida) y 90 px de largo, mirando a la IZQUIERDA. Venenosa.
+- Cuerpo grueso enrollado en el suelo detrás, con la parte delantera alzada en forma de S.
+- Escamas oscuras (#1B2925 / #3B5247) con dibujo de rombos claros (#7A9380) en el lomo y vientre pálido (#D4DEC8).
+- Cabeza ancha y triangular con capuchón abierto, ojos rojos (#9C2E30) y lengua bífida roja.
+- Colmillos largos y claros.
+- Caminar: las curvas del cuerpo se desplazan (reptar). Ataque: echa la cabeza atrás y la lanza hacia delante con la boca abierta.
+- Fotograma 8: boca muy abierta, gotas de veneno verde espectral pegadas a los colmillos.
+```
+
+### 20 · Cazador de cabezas
+
+```
+PERSONAJE: un mercenario cazador de recompensas, unos 74 px de alto, mirando a la IZQUIERDA. Peligroso cuando estás débil.
+- Máscara de hierro sin rostro (#3B5247 / #7A9380) con una sola rendija con brillo rojo (#9C2E30).
+- Capa de piel de lobo sobre los hombros, armadura de cuero tachonado.
+- Cinturón con trofeos colgando (cráneos pequeños de animal y dientes, en #D4DEC8).
+- Botas altas y guantes de cuero.
+- Un hacha de mano en la mano delantera y otra colgada del cinturón.
+- Ataque: hachazo horizontal de derecha a izquierda.
+- Fotograma 8: hacha alzada sobre el hombro, cuerpo agazapado, rendija brillando en verde espectral.
+```
+
+## Cementerio: enemigos normales
+
+### 21 · Esqueleto
+
+```
+PERSONAJE: un esqueleto guerrero, unos 70 px de alto, mirando a la IZQUIERDA. Se levanta una vez al morir.
+- Huesos pálidos (#7A9380 / #D4DEC8) con contorno negro, costillas y columna visibles entre los huecos (magenta NO; los huecos van en #0A0E0D o #1B2925 para que sea una sola figura).
+- Cráneo con cuencas que brillan en verde espectral (#9FE05A).
+- Restos de armadura: una hombrera oxidada y un cinturón de cuero con jirones de tela roja (#9C2E30).
+- Escudo redondo de madera rota en el brazo trasero y espada oxidada y mellada en el delantero.
+- Ataque: tajo descendente con la espada.
+- Fotograma 8: la mandíbula abierta (risa) y las cuencas brillando mucho más.
+```
+
+### 22 · Zombi
+
+```
+PERSONAJE: un zombi, unos 72 px de alto, mirando a la IZQUIERDA. Lento y duro.
+- Cuerpo encorvado y desgarbado, piel en tonos medios y enfermizos (#3B5247 / #7A9380), con algún hueso claro a la vista.
+- Cabeza ladeada, mandíbula colgando, ojos vacíos con un punto de luz espectral (#9FE05A).
+- Ropa de campesino hecha jirones (camisa clara y pantalón oscuro), un pie descalzo.
+- Manchas de sangre oscura (#9C2E30).
+- Brazos extendidos hacia delante.
+- Caminar: arrastrando un pie. Ataque: echa los brazos atrás y se abalanza con las dos manos hacia delante.
+- Fotograma 8: echa la cabeza atrás con la boca muy abierta (gemido).
+```
+
+### 23 · Necrófago
+
+```
+PERSONAJE: un necrófago (ghoul), unos 62 px de alto, mirando a la IZQUIERDA, agazapado a cuatro patas casi siempre. Se cura al morder.
+- Cuerpo flaco y nudoso, piel gris pálida (#7A9380) con costillas marcadas.
+- Cabeza calva y alargada, orejas puntiagudas, boca enorme con dientes afilados, ojos blancos brillantes (#D4DEC8).
+- Garras largas en manos y pies. Taparrabos de tela oscura.
+- Sangre (#9C2E30) en la boca y las garras.
+- Caminar: gatea con brazos y piernas. Ataque: salto con las garras por delante.
+- Fotograma 8: erguido a medias, boca abierta, garras abiertas a los lados.
+```
+
+### 24 · Fantasma
+
+```
+PERSONAJE: un fantasma, unos 74 px de alto, mirando a la IZQUIERDA. Flota: los jirones de abajo tocan la línea de suelo.
+- Figura encapuchada de sábana o sudario pálido (#7A9380 / #D4DEC8) que se estrecha hacia abajo en jirones ondulantes.
+- Sin rostro: un hueco oscuro con dos ojos de luz espectral (#9FE05A).
+- Dos brazos espectrales largos con manos de dedos finos.
+- Contorno interior de 1 px en verde espectral dentro del contorno negro.
+- Caminar: ondula y sube y baja unos píxeles (los jirones siguen tocando el suelo).
+- Ataque: echa los brazos atrás y los lanza hacia delante con las manos abiertas.
+- Fotograma 8: se hincha, el hueco del rostro se abre en un grito.
+```
+
+### 25 · Murciélago vampiro
+
+```
+PERSONAJE: un murciélago vampiro gigante, unos 60 px de alto, mirando a la IZQUIERDA. Rápido, roba vida. Vuela bajo: las patas tocan la línea de suelo.
+- Cuerpo peludo pequeño y oscuro (#1B2925), cabeza con orejas enormes y puntiagudas, hocico de cerdo y colmillos claros.
+- Ojos rojos brillantes (#9C2E30).
+- Dos alas membranosas grandes (membrana #3B5247 con huesos claros #7A9380), medio desplegadas hacia arriba y hacia atrás.
+- Patas con garras colgando bajo el cuerpo.
+- Caminar: aleteo (alas arriba / alas abajo). Ataque: alas hacia atrás y mordisco hacia delante con la boca abierta.
+- Fotograma 8: alas abiertas al máximo hacia arriba, boca abierta con sangre en los colmillos.
+```
+
+### 26 · Sepulturero loco
+
+```
+PERSONAJE: un sepulturero enloquecido, unos 72 px de alto, mirando a la IZQUIERDA. Su palazo aturde.
+- Hombre jorobado y flaco con sombrero de copa abollado y abrigo largo raído (#1B2925).
+- Cara pálida y hundida con una sonrisa desquiciada y ojos con brillo espectral (#9FE05A).
+- Bufanda roja (#9C2E30) deshilachada, guantes sin dedos.
+- Un farol pequeño colgado del cinturón con luz dorada (#D6A248).
+- Una pala grande de hierro sujeta a dos manos.
+- Ataque: pala alzada por encima del hombro y palazo plano hacia delante.
+- Fotograma 8: pala en alto con las dos manos, risa con la boca abierta.
+```
+
+### 27 · Banshee
+
+```
+PERSONAJE: una banshee, espíritu femenino que grita, unos 78 px de alto, mirando a la IZQUIERDA. Flota: el bajo del vestido toca la línea de suelo.
+- Mujer espectral delgada, piel muy pálida (#D4DEC8), cabello larguísimo y blanco que ondea hacia atrás y arriba.
+- Rostro demacrado con boca muy abierta y ojos de luz espectral (#9FE05A).
+- Vestido de luto oscuro (#1B2925 / #3B5247) que se deshace en jirones abajo.
+- Manos huesudas con uñas largas.
+- Diferente de la Dama Espectral: más pequeña, oscura y salvaje, sin cadenas ni velo.
+- Ataque: echa la cabeza atrás y lanza un grito hacia delante con los brazos abiertos (sin ondas dibujadas).
+- Fotograma 8: se encoge sobre sí misma, el cabello erizado, brillo verde en la boca.
+```
+
+### 28 · Gárgola
+
+```
+PERSONAJE: una gárgola de piedra viva, unos 76 px de alto, mirando a la IZQUIERDA, agazapada sobre dos patas. A veces se vuelve de piedra.
+- Cuerpo de piedra gris (#3B5247 / #7A9380) con grietas, musgo oscuro en algunos bordes.
+- Cabeza de demonio con cuernos cortos hacia atrás, orejas puntiagudas, boca de colmillos y ojos espectrales (#9FE05A).
+- Alas de murciélago de piedra plegadas a la espalda.
+- Brazos largos con garras, cola terminada en punta enroscada en el suelo.
+- Caminar: salta a cuatro patas, alas pegadas. Ataque: zarpazo con las garras hacia delante.
+- Fotograma 8: completamente de piedra, encogida y con las alas cerrándola como un capullo; ojos apagados (sin verde).
+```
+
+### 29 · Sabueso del inframundo
+
+```
+PERSONAJE: un sabueso infernal, unos 58 px de alto y 86 px de largo, a cuatro patas, mirando a la IZQUIERDA. Cada vez más furioso.
+- Perro enorme y esquelético, piel negra pegada a los huesos (#0A0E0D / #1B2925), costillas marcadas.
+- Cráneo medio descarnado (#7A9380 / #D4DEC8) con ojos de fuego verde espectral (#9FE05A).
+- Una crin de llamas verdes espectrales pegada al lomo y al cuello, como pelo (sin chispas sueltas).
+- Cadena rota y collar de pinchos al cuello.
+- Cola fina y pelada.
+- Caminar: trote. Ataque: se agacha y se lanza con las fauces abiertas.
+- Fotograma 8: aúlla con la cabeza en alto, la crin de llamas mucho más alta.
+```
+
+### 30 · Momia
+
+```
+PERSONAJE: una momia, unos 74 px de alto, mirando a la IZQUIERDA. Sus vendas atrapan.
+- Cuerpo envuelto en vendas pálidas (#7A9380 / #D4DEC8) con franjas oscuras entre vuelta y vuelta; algunas vendas cuelgan sueltas pero pegadas al cuerpo.
+- Por un hueco de la cara asoma un ojo de luz espectral (#9FE05A).
+- Un amuleto dorado (#D6A248) en el pecho y restos de un faldón real oscuro.
+- Brazos extendidos al frente.
+- Caminar: rígido y arrastrando los pies. Ataque: lanza el brazo hacia delante con una venda larga que sale de la mano (pegada a la mano).
+- Fotograma 8: brazos en cruz, las vendas sueltas ondeando, el amuleto brilla en verde.
+```
+
+### 31 · Cuervo de la muerte
+
+```
+PERSONAJE: un cuervo gigante, unos 56 px de alto, mirando a la IZQUIERDA, posado en el suelo. Débil pero no viene solo.
+- Plumaje negro con reflejos oscuros (#0A0E0D / #1B2925 / #3B5247), plumas erizadas en el cuello.
+- Pico grande, curvo y afilado, gris pálido (#7A9380).
+- Ojo de luz espectral (#9FE05A).
+- Patas fuertes con garras.
+- Caminar: saltitos con las alas medio abiertas. Ataque: picotazo hacia delante con las alas hacia atrás.
+- Fotograma 8: alas abiertas hacia arriba (sin salirse del ancho máximo) y pico abierto graznando.
+```
+
+## Castillo: enemigos normales
+
+### 32 · Guardia real
+
+```
+PERSONAJE: un guardia real del castillo maldito, unos 76 px de alto, mirando a la IZQUIERDA. Bloquea ataques.
+- Yelmo abierto con nasal y cara cadavérica en sombra, ojos de luz espectral (#9FE05A).
+- Cota de malla (#3B5247) con sobreveste roja (#9C2E30) y un emblema dorado (#D6A248) de corona en el pecho.
+- Escudo grande y rectangular (pavés) de acero delante del cuerpo, con la corona dorada pintada.
+- Lanza larga (alabarda) en la mano delantera.
+- Ataque: estocada con la alabarda hacia delante, por encima del escudo.
+- Fotograma 8: agachado tras el escudo, totalmente cubierto, el emblema brillando.
+```
+
+### 33 · Armadura animada
+
+```
+PERSONAJE: una armadura completa vacía que se mueve sola, unos 80 px de alto, mirando a la IZQUIERDA. Inmune a críticos.
+- Armadura de placas antigua de acero (#3B5247 / #7A9380 / #D4DEC8) con remaches; algunas juntas abiertas por las que se ve oscuridad.
+- Yelmo de cubo (yelmo de tonel) con rendija en cruz; dentro de la rendija, solo luz espectral (#9FE05A).
+- Hilos de luz espectral en las juntas de codos y rodillas (dentro de la figura).
+- Tabardo azul oscuro (usa #1B2925) roto.
+- Mangual (bola de pinchos con cadena corta) en la mano delantera.
+- Ataque: voltea el mangual por encima y lo descarga hacia delante.
+- Fotograma 8: el yelmo levitando un píxel sobre el cuello y la luz de las juntas mucho más intensa.
+```
+
+### 34 · Alquimista
+
+```
+PERSONAJE: un alquimista loco, unos 70 px de alto, mirando a la IZQUIERDA. Imprevisible.
+- Hombre bajo con gafas de lentes redondas que brillan en verde espectral (#9FE05A) y pelo blanco despeinado.
+- Delantal de cuero oscuro sobre túnica, con quemaduras y manchas.
+- Cinturón lleno de frascos pequeños: uno rojo (#9C2E30), uno verde espectral, uno dorado (#D6A248).
+- Mochila con un alambique de cobre a la espalda.
+- Un frasco burbujeante en la mano delantera.
+- Ataque: echa el brazo atrás con el frasco y lo lanza hacia delante (el frasco sigue en la mano en el fotograma del golpe).
+- Fotograma 8: alza el frasco por encima de la cabeza, el frasco brilla en verde.
+```
+
+### 35 · Bufón siniestro
+
+```
+PERSONAJE: un bufón del rey, siniestro, unos 64 px de alto, mirando a la IZQUIERDA. Imprevisible.
+- Gorro de tres puntas con cascabeles dorados (#D6A248).
+- Máscara blanca (#D4DEC8) con sonrisa enorme pintada y ojos negros con un punto espectral (#9FE05A).
+- Traje a rombos rojo (#9C2E30) y oscuro (#1B2925), cuello de gorguera, zapatos puntiagudos curvados.
+- Cuerpo delgado y flexible.
+- Un cetro de bufón (palo con una cabeza de muñeco) en la mano delantera.
+- Caminar: pasos saltarines. Ataque: golpe con el cetro hacia delante.
+- Fotograma 8: haciendo el pino (cabeza abajo) apoyado en una mano, con los pies arriba.
+```
+
+### 36 · Verdugo
+
+```
+PERSONAJE: un verdugo, unos 86 px de alto, mirando a la IZQUIERDA. Remata a los débiles.
+- Hombre enorme y corpulento, torso desnudo y musculoso en tonos medios (#3B5247 / #7A9380).
+- Capucha negra puntiaguda que le tapa toda la cabeza, con dos agujeros y ojos rojos (#9C2E30).
+- Pantalones oscuros, cinturón ancho de cuero con hebilla, brazales de cuero.
+- Hacha de verdugo enorme de hoja ancha, sujeta a dos manos, con manchas de sangre en el filo.
+- Ataque: hacha alzada por encima de la cabeza y golpe vertical hacia delante y abajo.
+- Fotograma 8: hacha apoyada en el hombro, cabeza ladeada mirando al héroe, filo brillando en verde espectral.
+```
+
+### 37 · Mago de la torre
+
+```
+PERSONAJE: un mago oscuro del castillo, unos 80 px de alto, mirando a la IZQUIERDA. Escudo mágico.
+- Sombrero picudo de ala ancha, larga barba gris (#7A9380) y ojos de luz espectral (#9FE05A).
+- Túnica larga oscura (#1B2925) con estrellas y runas doradas (#D6A248) bordadas.
+- Libro de hechizos encadenado al cinturón.
+- Báculo alto con un orbe engarzado en una garra dorada.
+- Ataque: apunta el báculo hacia delante con el brazo extendido.
+- Fotograma 8: alza los dos brazos con el báculo en alto; el orbe y las runas de la túnica brillan.
+```
+
+### 38 · Dragón joven
+
+```
+PERSONAJE: un dragón joven, unos 72 px de alto y 94 px de largo, a cuatro patas, mirando a la IZQUIERDA. Aliento de fuego cada tres turnos.
+- Escamas rojo oscuro (#9C2E30) en el lomo con sombras oscuras, vientre claro a placas (#7A9380 / #D4DEC8).
+- Cabeza con dos cuernos hacia atrás, hocico con colmillos, ojos dorados (#D6A248).
+- Alas membranosas pequeñas plegadas sobre el lomo.
+- Cola larga recogida detrás, sin pasar del ancho máximo.
+- Garras claras.
+- Caminar: andar a cuatro patas. Ataque: mordisco hacia delante con el cuello estirado.
+- Fotograma 8: cuello echado atrás, pecho inflado y un brillo dorado en la boca y la garganta (sin llamas fuera).
+```
+
+### 39 · Mímico
+
+```
+PERSONAJE: un mímico, un cofre del tesoro vivo, unos 56 px de alto y 66 px de ancho, mirando a la IZQUIERDA. Parece botín.
+- Cofre de madera oscura (#1B2925 / #3B5247) con refuerzos de hierro y bordes y cerradura dorados (#D6A248).
+- La tapa abierta como una boca: filas de dientes pálidos (#D4DEC8) y una lengua roja enorme (#9C2E30).
+- Dentro, oscuridad con dos ojos espectrales (#9FE05A).
+- Cuatro patas cortas y peludas o de insecto bajo el cofre.
+- Fotograma 3 y 4 (reposo): tapa entreabierta con los dientes asomando.
+- Ataque: tapa muy abierta y se lanza mordiendo hacia delante.
+- Fotograma 8: tapa cerrada del todo, parece un cofre normal, solo asoma la punta de la lengua.
+```
+
+### 40 · Espía de la corte
+
+```
+PERSONAJE: una asesina de la corte, unos 70 px de alto, mirando a la IZQUIERDA. Primer golpe siempre crítico.
+- Mujer ágil con capucha y antifaz negro, solo se ven los ojos claros (#D4DEC8).
+- Ropa ajustada oscura (#0A0E0D / #1B2925) con un fajín rojo (#9C2E30) atado a la cintura cuyas puntas caen.
+- Brazales de cuero, botas blandas.
+- Una daga curva en cada mano, con la hoja clara y el filo verde espectral (#9FE05A).
+- Postura agazapada y baja, lista para saltar.
+- Ataque: cruza las dagas atrás y da un doble tajo hacia delante.
+- Fotograma 8: dagas cruzadas delante de la cara, agachada al máximo.
+```
+
+### 41 · Ballestero
+
+```
+PERSONAJE: un ballestero del castillo, unos 72 px de alto, mirando a la IZQUIERDA. Su virote ignora la defensa.
+- Capacete redondo de acero (#7A9380) y gorjal; cara en sombra con ojos espectrales (#9FE05A).
+- Gambesón acolchado oscuro y sobreveste roja (#9C2E30) con la corona dorada.
+- Carcaj de virotes al cinturón.
+- Ballesta pesada de madera y acero sujeta a dos manos a la altura del pecho, con un virote cargado.
+- Ataque: preparación apuntando; golpe con el retroceso del disparo, la ballesta un poco hacia arriba (sin virote en vuelo).
+- Fotograma 8: hinca una rodilla y tensa la ballesta con un torno; la punta del virote brilla en verde.
+```
+
+### 42 · Mastín de guerra
+
+```
+PERSONAJE: un mastín de guerra con armadura, unos 58 px de alto y 84 px de largo, a cuatro patas, mirando a la IZQUIERDA. Rápido.
+- Perro enorme y musculoso, pelaje corto oscuro (#1B2925 / #3B5247), papada y hocico corto y ancho.
+- Armadura de placas de acero (#7A9380) sobre el lomo y la cabeza, con una gualdrapa roja (#9C2E30) con borde dorado.
+- Collar de pinchos de acero.
+- Ojos rojos y colmillos claros.
+- Caminar: trote. Ataque: salto con mordisco hacia delante.
+- Fotograma 8: plantado, cabeza baja, dientes al aire y babeando, ojos en verde espectral.
+```
+
+---
+
+## Jefes nuevos (90–108 px de alto)
+
+### 43 · La Bruja del Pantano (jefa del Bosque)
+
+```
+PERSONAJE: la Bruja del Pantano, unos 98 px de alto, mirando a la IZQUIERDA. Jefa.
+- Vieja alta y encorvada, piel verdosa pálida (#7A9380), nariz larguísima y ganchuda, sonrisa de dientes rotos, ojos de luz espectral (#9FE05A).
+- Sombrero puntiagudo enorme y torcido, con setas y musgo creciendo en el ala.
+- Vestido harapiento oscuro (#1B2925) con algas colgando, chal de piel de rana.
+- Un sapo grande sentado en su hombro trasero.
+- Cucharón de madera largo en una mano y, colgando del cinturón, un caldero pequeño humeante (sin humo suelto).
+- Pies descalzos con dedos largos.
+- Ataque: golpe con el cucharón hacia delante, el sapo saca la lengua roja (#9C2E30) a la vez.
+- Fotograma 8: alza los brazos, el cucharón y el sapo brillan en verde espectral.
+- La cara debe quedar por debajo del 15 % superior de la imagen (el sombrero sí puede subir).
+```
+
+### 44 · El Gran Jabalí (jefe del Bosque)
+
+```
+PERSONAJE: el Gran Jabalí, el rey de los jabalíes, unos 90 px de alto y 124 px de largo, a cuatro patas, mirando a la IZQUIERDA. Jefe. Distinto del jabalí normal: mucho más grande y antiguo.
+- Cuerpo colosal y peludo (#1B2925 / #3B5247) con el lomo cubierto de musgo, helechos y flechas rotas clavadas.
+- Cuatro colmillos enormes curvados hacia arriba, pálidos (#D4DEC8) y uno roto.
+- Ojo izquierdo cerrado por una cicatriz; el otro brilla en verde espectral (#9FE05A).
+- Una corona de raíces y huesos entre las orejas, con algún toque dorado (#D6A248).
+- Pezuñas negras gigantes.
+- Caminar: pasos pesados. Ataque: baja la cabeza y embiste con los colmillos.
+- Fotograma 8: se encabrita sobre las patas traseras (sin pasar del ancho máximo), cabeza alta, ojo brillando.
+```
+
+### 45 · El Señor de los Trasgos (jefe del Bosque)
+
+```
+PERSONAJE: el Señor de los Trasgos, un trasgo gordo y enorme de pie, unos 96 px de alto, mirando a la IZQUIERDA. Jefe.
+- Trasgo gigantesco y obeso, piel en tonos medios (#3B5247 / #7A9380), orejas larguísimas caídas con aros dorados.
+- Corona dorada (#D6A248) robada, demasiado pequeña para su cabeza y torcida.
+- Capa roja (#9C2E30) de terciopelo raída con ribete de piel.
+- Collares de monedas y anillos de oro; barriga al aire.
+- Nariz enorme, sonrisa con colmillos, ojos amarillos dorados.
+- Un cetro-maza (una maza de hierro con pinchos) en la mano delantera y una bolsa de oro en la trasera.
+- Ataque: mazazo de arriba abajo hacia delante.
+- Fotograma 8: alza la bolsa de oro y la maza a la vez, riendo, la corona brillando.
+- La cara debe quedar por debajo del 15 % superior de la imagen.
+```
+
+### 46 · El Nigromante (jefe del Cementerio)
+
+```
+PERSONAJE: el Nigromante, unos 104 px de alto, mirando a la IZQUIERDA. Jefe que resucita a los muertos.
+- Hechicero alto y esquelético, cara pálida y chupada con barba negra y fina, ojos de fuego espectral (#9FE05A).
+- Capucha y túnica larga negra (#0A0E0D / #1B2925) con un cuello alto en punta y runas verdes bordadas en el bajo.
+- Hombreras hechas de cráneos (#7A9380 / #D4DEC8).
+- Un libro abierto flotando pegado a su mano trasera (tocándola).
+- Báculo con un cráneo en la punta en la mano delantera.
+- Ataque: apunta el báculo hacia delante.
+- Fotograma 8: alza el báculo y la otra mano con la palma hacia arriba; del suelo, pegadas a sus pies, asoman dos manos esqueléticas.
+- La cara debe quedar por debajo del 15 % superior de la imagen.
+```
+
+### 47 · La Viuda Negra (jefa del Cementerio)
+
+```
+PERSONAJE: la Viuda Negra, una dama vampira, unos 100 px de alto, mirando a la IZQUIERDA. Jefa que roba vida.
+- Mujer alta y elegante, piel muy pálida (#D4DEC8), labios rojos (#9C2E30), colmillos y ojos rojos brillantes.
+- Pelo negro recogido en un moño alto con una peineta dorada (#D6A248) y un velo negro corto.
+- Vestido de luto victoriano negro (#0A0E0D / #1B2925) con cuello alto, mangas abombadas y falda larga con cola; forro rojo.
+- Capa con forma de alas de murciélago a la espalda (plegada).
+- Abanico de encaje negro en una mano; en la otra, uñas largas como garras.
+- Ataque: zarpazo con la mano de las garras hacia delante.
+- Fotograma 8: abre la capa como alas de murciélago (sin pasar del ancho máximo), colmillos a la vista.
+- La cara debe quedar por debajo del 15 % superior de la imagen.
+```
+
+### 48 · El Guardián de la Cripta (jefe del Cementerio)
+
+```
+PERSONAJE: el Guardián de la Cripta, una estatua funeraria gigante viva, unos 106 px de alto, mirando a la IZQUIERDA. Jefe muy resistente.
+- Caballero de piedra (#3B5247 / #7A9380 / #D4DEC8) como los de los sepulcros: yelmo cerrado, armadura de placas tallada, manos sobre el pomo de la espada.
+- Grietas y musgo oscuro; un trozo del hombro roto que deja ver un núcleo espectral (#9FE05A).
+- Luz espectral en la rendija del yelmo.
+- Escudo de piedra con un cráneo tallado en el brazo trasero.
+- Espadón de piedra enorme en la mano delantera.
+- Base del pedestal pegada aún a un pie (un bloque de piedra).
+- Ataque: espadón alzado y golpe vertical hacia delante.
+- Fotograma 8: la espada clavada en el suelo delante, las dos manos en el pomo, grietas brillando en verde.
+```
+
+### 49 · La Reina Hechicera (jefa del Castillo)
+
+```
+PERSONAJE: la Reina Hechicera, unos 102 px de alto, mirando a la IZQUIERDA. Jefa.
+- Mujer alta y regia, piel pálida (#D4DEC8), mirada fría con ojos de luz espectral (#9FE05A).
+- Corona alta de puntas doradas (#D6A248) con una gema verde.
+- Melena negra larga que cae por la espalda.
+- Vestido largo negro y rojo (#9C2E30) con cuello alto abierto en abanico (como de encaje rígido) detrás de la cabeza.
+- Capa larga real con borde dorado.
+- Cetro dorado con un orbe espectral en la mano delantera.
+- Ataque: apunta el cetro hacia delante con el brazo extendido.
+- Fotograma 8: alza el cetro en alto con las dos manos, la gema de la corona y el orbe brillan.
+- La cara debe quedar por debajo del 15 % superior de la imagen.
+```
+
+### 50 · El Dragón Ancestral (jefe del Castillo)
+
+```
+PERSONAJE: el Dragón Ancestral, unos 100 px de alto y 124 px de ancho, mirando a la IZQUIERDA. Jefe. Compacto para caber: sentado sobre las patas traseras, alas plegadas y cola enroscada a sus pies.
+- Escamas antiguas negras y gris oscuro (#0A0E0D / #1B2925 / #3B5247) con el borde claro (#7A9380); vientre de placas pálidas.
+- Cabeza enorme con una corona natural de cuernos largos hacia atrás, barbas de espinas y ojos dorados (#D6A248).
+- Cicatrices, escamas que faltan y una lanza rota clavada en el cuello.
+- Alas membranosas rotas, plegadas sobre la espalda.
+- Garras delanteras enormes apoyadas en el suelo.
+- Caminar: avanza un paso con las patas delanteras. Ataque: lanza la cabeza hacia delante y abajo con las fauces abiertas.
+- Fotograma 8: cuello alzado, pecho inflado y grietas brillando en dorado y la boca con brillo dorado (sin fuego fuera de la boca).
+```
+
+### 51 · El Rey Loco (jefe del Castillo)
+
+```
+PERSONAJE: el Rey Loco, unos 104 px de alto, mirando a la IZQUIERDA. Jefe.
+- Rey viejo y demacrado, piel gris pálida (#7A9380), barba larga y blanca enmarañada, ojos desorbitados con luz espectral (#9FE05A) y sonrisa desquiciada.
+- Corona dorada (#D6A248) enorme y abollada, inclinada a un lado.
+- Manto real rojo (#9C2E30) con borde de armiño (blanco con puntos negros), lleno de rotos.
+- Debajo, una armadura antigua dorada y oxidada.
+- Cetro-espada: una espada larga ceremonial dorada en la mano delantera; en la trasera, un cáliz.
+- Ataque: tajo amplio hacia delante con la espada.
+- Fotograma 8: alza el cáliz y la espada riendo con la cabeza echada atrás.
+- La cara debe quedar por debajo del 15 % superior de la imagen.
+```
+
+> Cuando tengas las imágenes, déjalas en la raíz del repo (o en `assets/ai/` con su nombre) y dime cuáles entran en el juego: yo las renombro, las importo, les doy stats y mecánica y las meto en el bioma que toque.
