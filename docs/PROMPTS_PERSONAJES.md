@@ -1052,3 +1052,156 @@ PERSONAJE: el Rey Loco, unos 104 px de alto, mirando a la IZQUIERDA. Jefe.
 ```
 
 > Cuando tengas las imágenes, déjalas en la raíz del repo (o en `assets/ai/` con su nombre) y dime cuáles entran en el juego: yo las renombro, las importo, les doy stats y mecánica y las meto en el bioma que toque.
+
+---
+
+# Biomas nuevos (fondos en 5 franjas)
+
+Mismo formato que los fondos actuales (`assets/ai/bg_*.png`): **una imagen vertical por bioma con las 5 capas apiladas en franjas**. Se piden en la conversación de ChatGPT del proyecto, una imagen por mensaje: el bloque común más el bloque del bioma. Para los siguientes basta con decir «mismo formato y estilo» y pegar el bloque del bioma.
+
+Todo se dibuja con la **paleta del Bosque** (los verdes de siempre). El juego le pone a cada bioma su propio tono (tabla de paletas al final de esta sección), así que no hace falta que la nieve salga azul ni la lava roja: basta con que los tonos claros y oscuros estén en su sitio. Las únicas excepciones son el rojo, el oro y el verde espectral, que el juego respeta tal cual.
+
+| Archivo | Bioma | Encaja con (lote 2) |
+|---|---|---|
+| `bg_pantano.png` | Pantano | Serpiente, Hombre-seta, Avispa, Bruja del Pantano |
+| `bg_cueva.png` | Cueva / mina | Trasgo, Murciélago, Gárgola, Mímico, Señor de los Trasgos |
+| `bg_montana.png` | Montañas nevadas | Oso, Cuervo, Cazador, Huargo, Gran Jabalí |
+| `bg_desierto.png` | Desierto y ruinas | Momia, Avispa, Alquimista, Guardián de la Cripta |
+| `bg_volcan.png` | Volcán | Dragón joven, Sabueso del inframundo, Dragón Ancestral |
+| `bg_costa.png` | Costa del naufragio | Esqueleto, Cuervo, Ballestero, Viuda Negra |
+| `bg_catacumbas.png` | Catacumbas | Esqueleto, Necrófago, Momia, Nigromante |
+| `bg_torre.png` | Torre del mago | Mago de la torre, Armadura animada, Alquimista, Reina Hechicera |
+
+## Bloque común (pegar con el primer bioma)
+
+````
+Genera el fondo de un escenario de pixel art de 16 bits para un RPG de combate por turnos visto de lado, de fantasía medieval oscura. Es solo el escenario: sin personajes, sin texto y sin interfaz.
+
+FORMATO (muy importante)
+Una sola imagen VERTICAL de 1024×1536 con 5 franjas horizontales apiladas, cada una a todo el ancho y separadas por una línea de magenta puro #FF00FF de al menos 12 px de alto. Cada franja es una capa del escenario (parallax) que se repetirá en horizontal: su borde izquierdo y su borde derecho deben encajar sin costura.
+
+1. CIELO (franja superior, ~38 % de la altura): opaca, ocupa toda la franja. Cielo (o el muro del fondo si es un interior). Liso y oscuro en la parte de abajo.
+2. LEJOS (~17 %): siluetas planas y oscuras del horizonte, apoyadas en el borde inferior de la franja, sobre fondo magenta #FF00FF.
+3. PLANO MEDIO (~26 %): los objetos del escenario (árboles, rocas, columnas…) apoyados en el borde inferior de la franja, sobre fondo magenta. Repartidos y separados; en el centro de la franja, menos cosas y más bajas, porque delante combatirán los personajes.
+4. SUELO (~8 %): una tira de suelo continua y opaca vista de lado, con su borde superior irregular, sobre magenta por encima.
+5. PRIMER PLANO (~11 %): elementos muy oscuros, casi negros, SOLO en el extremo izquierdo y en el extremo derecho, apoyados en el borde inferior, sobre magenta. El centro queda vacío (magenta).
+
+ESTILO
+- Pixel art limpio, como dibujado a ~240 px de ancho y escalado con vecino más cercano: bloques grandes y cuadrados. Sin antialiasing, sin degradados suaves, sin desenfoque, sin texturas de ruido. Los degradados del cielo, con tramado (dithering) ordenado.
+- Profundidad por planos: lo lejano, plano y oscuro; lo cercano, con más detalle y contraste. Contorno oscuro en los objetos del plano medio. Luz desde arriba a la izquierda.
+- Ningún objeto suelto flotando dentro de las franjas 2 a 5: todo apoyado en el borde inferior.
+
+PALETA ESTRICTA (solo estos 8 colores, aunque el lugar sea de otro color; el juego lo recolorea después):
+#0A0E0D negro, #1B2925 oscuro, #3B5247 medio, #7A9380 claro, #D4DEC8 brillo, #9C2E30 rojo (muy poco), #D6A248 oro (muy poco: fuego, ventanas, tesoro), #9FE05A verde espectral (muy poco: magia, fuegos fatuos, cristales).
+````
+
+## Bloques de cada bioma
+
+### Pantano
+
+````
+ESCENARIO: un pantano brumoso de noche.
+- Cielo: oscuro y bajo, con una luna velada por la bruma, sin estrellas apenas.
+- Lejos: siluetas de cipreses de pantano y sauces llorones sobre agua quieta, con una cabaña sobre pilotes a un lado.
+- Plano medio: troncos podridos con raíces aéreas, juncos altos y espadañas, un muelle de tablas roto y un poste con una calavera de animal.
+- Suelo: barro oscuro y charcos con reflejos claros, nenúfares y raíces.
+- Primer plano: juncos y raíces casi negros en los extremos.
+- Detalles: unas pocas luciérnagas o fuegos fatuos en verde espectral, pegados a los juncos.
+````
+
+### Cueva / mina
+
+````
+ESCENARIO: el interior de una mina abandonada y una caverna profunda (no hay cielo).
+- Cielo (en su lugar): pared de roca oscura de la caverna con vetas claras y estalactitas colgando del borde superior.
+- Lejos: galerías y arcos de roca en penumbra, con la silueta de un puente de madera colgante.
+- Plano medio: vigas de madera de entibado, una vagoneta volcada sobre raíles, estalagmitas y racimos de cristales que brillan en verde espectral, un farol colgado con luz dorada.
+- Suelo: roca y grava con raíles de mina.
+- Primer plano: rocas y estalagmitas casi negras en los extremos.
+````
+
+### Montañas nevadas
+
+````
+ESCENARIO: un paso de montaña nevado de noche.
+- Cielo: oscuro y estrellado, con una aurora en bandas onduladas de verde espectral muy tenue cruzándolo.
+- Lejos: cordillera de picos afilados con las cumbres blancas (#D4DEC8) y laderas oscuras.
+- Plano medio: abetos cargados de nieve, rocas con nieve encima, un poste indicador de madera y los restos de un campamento (tienda rota y una hoguera apagada).
+- Suelo: nieve pisada (tonos claros) con piedras oscuras asomando.
+- Primer plano: rocas y abetos pequeños casi negros, con un borde de nieve, en los extremos.
+````
+
+### Desierto y ruinas
+
+````
+ESCENARIO: un desierto con ruinas antiguas al anochecer.
+- Cielo: despejado y oscuro, con una luna enorme muy baja en el horizonte y muchas estrellas.
+- Lejos: dunas onduladas y la silueta de una pirámide escalonada y un obelisco.
+- Plano medio: columnas rotas de un templo enterradas en la arena, una estatua colosal con cabeza de chacal caída, cactus o palmeras secas y un cráneo de animal enorme.
+- Suelo: arena con ondas de viento y losas de piedra asomando.
+- Primer plano: rocas y cráneos casi negros en los extremos.
+- Detalles: dos antorchas en las columnas con fuego dorado.
+````
+
+### Volcán
+
+````
+ESCENARIO: la ladera de un volcán activo, de noche.
+- Cielo: oscuro y cargado de humo en bandas, con resplandor en la parte baja (más claro abajo, con tramado).
+- Lejos: el cono del volcán con ríos de lava en dorado (#D6A248) bajando por la ladera.
+- Plano medio: rocas basálticas en columnas hexagonales, árboles calcinados, grietas en la roca con lava dorada y roja, y un altar de obsidiana.
+- Suelo: roca negra agrietada con vetas de lava dorada.
+- Primer plano: rocas volcánicas casi negras con bordes dorados en los extremos.
+````
+
+### Costa del naufragio
+
+````
+ESCENARIO: una playa rocosa con un barco naufragado, noche de tormenta.
+- Cielo: nubes de tormenta densas en bandas, un relámpago claro a lo lejos y un trozo de luna.
+- Lejos: el mar oscuro con olas en la línea del horizonte y la silueta de un faro en un acantilado con luz dorada.
+- Plano medio: el casco roto de un galeón varado y escorado, con un mástil partido y velas hechas jirones, rocas con algas, un ancla clavada en la arena y barriles.
+- Suelo: arena húmeda con conchas, tablones y cuerdas.
+- Primer plano: rocas y tablones rotos casi negros en los extremos.
+- Detalles: fuegos de San Telmo en verde espectral en la punta del mástil.
+````
+
+### Catacumbas
+
+````
+ESCENARIO: catacumbas subterráneas bajo el cementerio (interior, no hay cielo).
+- Cielo (en su lugar): muro de piedra con hileras de nichos y cráneos apilados (osario), en penumbra.
+- Lejos: un pasillo abovedado que se pierde en la oscuridad, con arcos sucesivos.
+- Plano medio: sarcófagos de piedra con tapas talladas, columnas con calaveras incrustadas, candelabros con velas de luz dorada y telarañas en las esquinas.
+- Suelo: losas de piedra con huesos y polvo.
+- Primer plano: montones de cráneos y huesos casi negros en los extremos.
+- Detalles: un brasero con fuego verde espectral.
+````
+
+### Torre del mago
+
+````
+ESCENARIO: lo alto de la torre de un hechicero (interior, no hay cielo).
+- Cielo (en su lugar): muro curvo de piedra con estanterías llenas de libros y un gran ventanal redondo con la luna y estrellas.
+- Lejos: una escalera de caracol que sube en la penumbra y un telescopio de latón.
+- Plano medio: mesas con alambiques y frascos, un atril con un libro abierto, un orbe flotando sobre un pedestal (pegado al pedestal) en verde espectral, pilas de libros y un esqueleto de criatura colgado.
+- Suelo: suelo de madera con un círculo mágico de runas grabado en dorado.
+- Primer plano: pilas de libros y cofres casi negros en los extremos.
+````
+
+## Paletas propuestas para el juego
+
+Los 8 papeles de siempre (contorno, oscuro, medio, claro, brillo, sangre, oro, espectral) con el tono de cada bioma. Se añaden a `tools/art/palettes.py` al importar cada fondo.
+
+| Bioma | Negro | Oscuro | Medio | Claro | Brillo | Sangre | Oro | Espectral |
+|---|---|---|---|---|---|---|---|---|
+| Pantano | `0C0E08` | `22281A` | `46502E` | `8C9460` | `E0E0B8` | `962E2A` | `D0A040` | `C8F040` |
+| Cueva | `0C0B0A` | `231F1C` | `4A4139` | `8C7F70` | `E0D6C4` | `A8342C` | `E0A83C` | `5ED0E8` |
+| Montaña | `0A0D14` | `1C2638` | `3E5170` | `8AA0BC` | `E8F0F8` | `A0303A` | `D8B060` | `7CF0C0` |
+| Desierto | `120C08` | `3A2618` | `6E4A2C` | `B88E5C` | `F2E2BE` | `A8382A` | `F0B840` | `4CD8C8` |
+| Volcán | `0C0606` | `2A1210` | `54241C` | `8E6A5A` | `F4D8B0` | `D8401C` | `FFB030` | `B060F0` |
+| Costa | `080D10` | `15262C` | `2C4C54` | `6E949A` | `D8E8E4` | `9C2E30` | `D6A248` | `7AF0D8` |
+| Catacumbas | `0A0908` | `211D19` | `453D35` | `8A8074` | `DCD4C6` | `A02A2A` | `D8A850` | `E0F070` |
+| Torre | `0A0A12` | `1E1C34` | `3E3A64` | `8480B0` | `E4E0F4` | `B0304A` | `E8B848` | `60E0F0` |
+
+> Cuando tengas las imágenes, déjalas en `assets/ai/` con el nombre de la tabla y dime cuáles entran: yo añado la paleta, importo el fondo, le pongo nombre y rótulo de entrada, y lo meto en el orden de biomas con los enemigos que le toquen.
