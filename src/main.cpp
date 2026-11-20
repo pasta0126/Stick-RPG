@@ -793,11 +793,15 @@ void drawHud() {
   c4.label(buf, 4, 125, pal::BRILLO, pal::NEGRO);
   bar(hw + 7, 125, 95 - hw - 7, 6, hero.hp, hero.hpMax, pal::SANGRE);
 
-  // Centro: encuentro en números romanos y runas del especial.
+  // Centro: capítulo en romanos y encuentro dentro de él ("II-4"), y runas
+  // del especial.
   panel(100, 112, 135, 134);
-  roman(nivel, buf);
+  char rom[16];
+  roman((nivel - 1) / bal::JEFE_CADA + 1, rom);
+  std::snprintf(buf, sizeof(buf), "%s-%d", rom, (nivel - 1) % bal::JEFE_CADA + 1);
+  bool boldLv = gfx::Canvas4::textWidth(buf, 1, true) <= 30;
   c4.label(buf, 118, 116, isBossLevel(nivel) ? pal::SANGRE : pal::ORO,
-           pal::NEGRO, 1);
+           pal::NEGRO, 1, 1, false, boldLv);
   bool ready = hero.especialListo();
   for (int i = 0; i < bal::ESPECIAL_CADA; ++i) {
     bool on = i < hero.golpesEspecial;
