@@ -473,23 +473,23 @@ REGLAS EXTRA (muy importantes)
 | 11 | `11_jabali_magenta.png` | Jabalí de colmillo negro | Bosque | 56 |
 | 12 | `12_arquero_magenta.png` | Arquero furtivo | Bosque | 70 |
 | 13 | `13_hombre_seta_magenta.png` | Hombre-seta | Bosque | 62 |
-| 14 | `14_avispa_magenta.png` | Avispa gigante (reina del enjambre) | Bosque | 60 |
-| 15 | `15_espiritu_roble_magenta.png` | Espíritu del roble | Bosque | 88 |
+| 14 | `14_avispa_magenta.png` | Avispa gigante (reina del enjambre) ~~(descartado)~~ | Bosque | 60 |
+| 15 | `15_espiritu_roble_magenta.png` | Espíritu del roble ~~(descartado)~~ | Bosque | 88 |
 | 16 | `16_trasgo_magenta.png` | Trasgo ladrón | Bosque | 54 |
 | 17 | `17_oso_magenta.png` | Oso pardo | Bosque | 84 |
-| 18 | `18_druida_magenta.png` | Druida corrupto | Bosque | 76 |
+| 18 | `18_druida_magenta.png` | Druida corrupto ~~(descartado)~~ | Bosque | 76 |
 | 19 | `19_serpiente_magenta.png` | Serpiente del pantano | Bosque | 60 |
 | 20 | `20_cazador_magenta.png` | Cazador de cabezas | Bosque | 74 |
 | 21 | `21_esqueleto_magenta.png` | Esqueleto | Cementerio | 70 |
-| 22 | `22_zombi_magenta.png` | Zombi | Cementerio | 72 |
+| 22 | `22_zombi_magenta.png` | Zombi ~~(descartado)~~ | Cementerio | 72 |
 | 23 | `23_necrofago_magenta.png` | Necrófago | Cementerio | 62 |
 | 24 | `24_fantasma_magenta.png` | Fantasma | Cementerio | 74 |
 | 25 | `25_murcielago_magenta.png` | Murciélago vampiro | Cementerio | 60 |
-| 26 | `26_sepulturero_magenta.png` | Sepulturero loco | Cementerio | 72 |
+| 26 | `26_sepulturero_magenta.png` | Sepulturero loco ~~(descartado)~~ | Cementerio | 72 |
 | 27 | `27_banshee_magenta.png` | Banshee | Cementerio | 78 |
 | 28 | `28_gargola_magenta.png` | Gárgola | Cementerio | 76 |
 | 29 | `29_sabueso_magenta.png` | Sabueso del inframundo | Cementerio | 58 |
-| 30 | `30_momia_magenta.png` | Momia | Cementerio | 74 |
+| 30 | `30_momia_magenta.png` | Momia ~~(descartado)~~ | Cementerio | 74 |
 | 31 | `31_cuervo_magenta.png` | Cuervo de la muerte | Cementerio | 56 |
 | 32 | `32_guardia_real_magenta.png` | Guardia real | Castillo | 76 |
 | 33 | `33_armadura_animada_magenta.png` | Armadura animada | Castillo | 80 |
@@ -502,17 +502,17 @@ REGLAS EXTRA (muy importantes)
 | 40 | `40_espia_magenta.png` | Espía de la corte | Castillo | 70 |
 | 41 | `41_ballestero_magenta.png` | Ballestero | Castillo | 72 |
 | 42 | `42_mastin_magenta.png` | Mastín de guerra | Castillo | 58 |
-| 52 | `52_demonio_magenta.png` | Demonio | Cualquiera | 84 |
-| 53 | `53_sucubo_magenta.png` | Súcubo | Cualquiera | 80 |
+| 52 | `52_demonio_magenta.png` | Demonio ~~(descartado)~~ | Cualquiera | 84 |
+| 53 | `53_sucubo_magenta.png` | Súcubo ~~(descartado)~~ | Cualquiera | 80 |
 | 43 | `43_bruja_pantano_magenta.png` | **Jefa:** la Bruja del Pantano | Bosque | 98 |
-| 44 | `44_gran_jabali_magenta.png` | **Jefe:** el Gran Jabalí | Bosque | 90 |
+| 44 | `44_gran_jabali_magenta.png` | **Jefe:** el Gran Jabalí ~~(descartado)~~ | Bosque | 90 |
 | 45 | `45_senor_trasgos_magenta.png` | **Jefe:** el Señor de los Trasgos | Bosque | 96 |
 | 46 | `46_nigromante_magenta.png` | **Jefe:** el Nigromante | Cementerio | 104 |
 | 47 | `47_viuda_negra_magenta.png` | **Jefa:** la Viuda Negra | Cementerio | 100 |
 | 48 | `48_guardian_cripta_magenta.png` | **Jefe:** el Guardián de la Cripta | Cementerio | 106 |
 | 49 | `49_reina_hechicera_magenta.png` | **Jefa:** la Reina Hechicera | Castillo | 102 |
 | 50 | `50_dragon_ancestral_magenta.png` | **Jefe:** el Dragón Ancestral | Castillo | 100 |
-| 51 | `51_rey_loco_magenta.png` | **Jefe:** el Rey Loco | Castillo | 104 |
+| 51 | `51_rey_loco_magenta.png` | **Jefe:** el Rey Loco ~~(descartado)~~ | Castillo | 104 |
 
 ---
 
@@ -1098,8 +1098,8 @@ Todo se dibuja con la **paleta del Bosque** (los verdes de siempre). El juego le
 | `bg_desierto.png` | Desierto y ruinas | Momia, Avispa, Alquimista, Guardián de la Cripta |
 | `bg_volcan.png` | Volcán | Dragón joven, Sabueso del inframundo, Dragón Ancestral |
 | `bg_costa.png` | Costa del naufragio | Esqueleto, Cuervo, Ballestero, Viuda Negra |
-| `bg_catacumbas.png` | Catacumbas | Esqueleto, Necrófago, Momia, Nigromante |
-| `bg_torre.png` | Torre del mago | Mago de la torre, Armadura animada, Alquimista, Reina Hechicera |
+| `bg_catacumbas.png` | Catacumbas ~~(descartado: demasiado gris)~~ | Esqueleto, Necrófago, Momia, Nigromante |
+| `bg_torre.png` | Torre del mago ~~(descartado: demasiado gris)~~ | Mago de la torre, Armadura animada, Alquimista, Reina Hechicera |
 
 ## Bloque común (pegar con el primer bioma)
 
