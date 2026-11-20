@@ -508,7 +508,7 @@ REGLAS EXTRA (muy importantes)
 | 44 | `44_gran_jabali_magenta.png` | **Jefe:** el Gran Jabalí ~~(descartado)~~ | Bosque | 90 |
 | 45 | `45_senor_trasgos_magenta.png` | **Jefe:** el Señor de los Trasgos | Bosque | 96 |
 | 46 | `46_nigromante_magenta.png` | **Jefe:** el Nigromante | Cementerio | 104 |
-| 47 | `47_viuda_negra_magenta.png` | **Jefa:** la Viuda Negra | Cementerio | 100 |
+| 47 | `47_viuda_negra_magenta.png` | **Jefa:** la Viuda Negra ~~(descartada)~~ | Cementerio | 100 |
 | 48 | `48_guardian_cripta_magenta.png` | **Jefe:** el Guardián de la Cripta | Cementerio | 106 |
 | 49 | `49_reina_hechicera_magenta.png` | **Jefa:** la Reina Hechicera | Castillo | 102 |
 | 50 | `50_dragon_ancestral_magenta.png` | **Jefe:** el Dragón Ancestral | Castillo | 100 |
