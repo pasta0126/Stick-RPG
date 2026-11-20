@@ -79,7 +79,7 @@ struct Hero {
   Combatant combatant() const;
 };
 
-// Enemigos normales (aleatorios) y 5 jefes únicos, en orden, cada 10 encuentros.
+// Enemigos normales (aleatorios) y 5 jefes únicos, en orden, cada 6 encuentros (5 normales + jefe).
 enum class EnemyType : uint8_t {
   BANDIDO, GOLEM, LOBO, OGRO,
   // Lote 2 (arte de IA): salen al azar en cualquier bioma, como los cuatro

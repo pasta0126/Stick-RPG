@@ -66,7 +66,7 @@ constexpr int   ENEMIGO_FALLO   = 10;
 constexpr float CRECE_HP        = 1.070f;  // por encuentro (exponencial)
 constexpr float CRECE_ATK       = 1.050f;
 constexpr float CRECE_DEF       = 1.065f;
-constexpr int   JEFE_CADA       = 10;      // un jefe cada N encuentros
+constexpr int   JEFE_CADA       = 6;       // un jefe cada N encuentros
 constexpr float GOLPE_FUERTE    = 2.5f;    // multiplicador tras "Preparar"
 
 // --- Botín (§6.2) -------------------------------------------------------------
