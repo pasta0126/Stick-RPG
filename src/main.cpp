@@ -675,7 +675,9 @@ void blitHalo(const gfx::Sheet& s, int layer, int frame, int x, int y,
 
 void drawHero() {
   namespace H = gfx::heroe;  // capas y animaciones (iguales en todos los héroes)
-  const gfx::HeroArt& art = gfx::kHeroArt[static_cast<int>(hero.clase)];
+  const gfx::HeroArt& art = hero.maldito
+                                ? gfx::kUndeadArt
+                                : gfx::kHeroArt[static_cast<int>(hero.clase)];
   int x0 = HERO_FX - art.ax, y0 = FEET_Y - art.ay;
   int frame;
   bool flash = false;
@@ -702,10 +704,10 @@ void drawHero() {
   auto visible = [&](int layer, int slot) {
     return slot < 0 || layer == H::BRAZO || hero.equip[slot].present;
   };
-  // Maldición no muerta (arte provisional): colores apagados y borde
-  // espectral en lugar del claro.
+  // Maldición no muerta: borde espectral en lugar del claro y, si aún no
+  // hay arte del esqueleto, colores apagados.
   Remap curse = Remap::identity();
-  if (hero.maldito) {
+  if (hero.maldito && !gfx::kUndeadOwnArt) {
     curse.to[pal::SANGRE] = pal::MEDIO;
     curse.to[pal::ORO] = pal::CLARO;
     curse.to[pal::OSCURO] = pal::NEGRO;

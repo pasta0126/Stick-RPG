@@ -86,6 +86,8 @@ def build_backgrounds():
 
 # Héroes jugables, en el orden de HeroClass (src/core/game_types.h).
 HEROES = ["heroe", "vikinga"]
+# Forma de no muerto (talismán): cualquier héroe que muere con él la toma.
+UNDEAD = "esqueleto"
 _hero = {}
 
 
@@ -105,7 +107,7 @@ def HERO(name="heroe"):
 
 def build_hero():
     print("Héroes…")
-    for name in HEROES:
+    for name in HEROES + [UNDEAD]:
         w, h, _, hl = HERO(name)
         assemble(name, w, h, [(n, hl[n]) for n in hero.LAYERS], hero.TAGS)
 
@@ -193,7 +195,7 @@ def build_tables():
         cols = ", ".join("{0x%02X, 0x%02X, 0x%02X}" % c for c in BIOMAS[b])
         pals.append(f"    {{{cols}}},  // {b}")
     includes = "\n".join(f'#include "{n}_gfx.h"' for n in
-                         HEROES + ["titulo", "titulo_fondo"] + [c.name for c in enemies.ENEMIES] +
+                         HEROES + [UNDEAD, "titulo", "titulo_fondo"] + [c.name for c in enemies.ENEMIES] +
                          ["bg_" + b for b in BIOME_ORDER])
     art = []
     for c, frames in ENEMY_ART():
@@ -237,6 +239,11 @@ struct HeroArt {{
 static const HeroArt kHeroArt[] = {{
 {chr(10).join(f"    {{&{n}::sheet, {HERO(n)[2][0]}, {HERO(n)[2][1]}}},  // {n}" for n in HEROES)}
 }};
+
+// Héroe maldito (talismán). Si aún no hay arte propio es una copia del
+// caballero y el juego lo tiñe.
+static const HeroArt kUndeadArt = {{&{UNDEAD}::sheet, {HERO(UNDEAD)[2][0]}, {HERO(UNDEAD)[2][1]}}};
+constexpr bool kUndeadOwnArt = {"true" if import_ai.load_hero(UNDEAD) else "false"};
 
 struct EnemyArt {{
   const Sheet* sheet;

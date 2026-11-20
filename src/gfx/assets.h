@@ -4,6 +4,7 @@
 #include "sprite.h"
 #include "heroe_gfx.h"
 #include "vikinga_gfx.h"
+#include "esqueleto_gfx.h"
 #include "titulo_gfx.h"
 #include "titulo_fondo_gfx.h"
 #include "salteador_gfx.h"
@@ -45,6 +46,11 @@ static const HeroArt kHeroArt[] = {
     {&heroe::sheet, 26, 89},  // heroe
     {&vikinga::sheet, 32, 91},  // vikinga
 };
+
+// Héroe maldito (talismán). Si aún no hay arte propio es una copia del
+// caballero y el juego lo tiñe.
+static const HeroArt kUndeadArt = {&esqueleto::sheet, 26, 89};
+constexpr bool kUndeadOwnArt = false;
 
 struct EnemyArt {
   const Sheet* sheet;
