@@ -502,6 +502,8 @@ REGLAS EXTRA (muy importantes)
 | 40 | `40_espia_magenta.png` | Espía de la corte | Castillo | 70 |
 | 41 | `41_ballestero_magenta.png` | Ballestero | Castillo | 72 |
 | 42 | `42_mastin_magenta.png` | Mastín de guerra | Castillo | 58 |
+| 52 | `52_demonio_magenta.png` | Demonio | Cualquiera | 84 |
+| 53 | `53_sucubo_magenta.png` | Súcubo | Cualquiera | 80 |
 | 43 | `43_bruja_pantano_magenta.png` | **Jefa:** la Bruja del Pantano | Bosque | 98 |
 | 44 | `44_gran_jabali_magenta.png` | **Jefe:** el Gran Jabalí | Bosque | 90 |
 | 45 | `45_senor_trasgos_magenta.png` | **Jefe:** el Señor de los Trasgos | Bosque | 96 |
@@ -918,6 +920,33 @@ PERSONAJE: un mastín de guerra con armadura, unos 58 px de alto y 84 px de larg
 - Ojos rojos y colmillos claros.
 - Caminar: trote. Ataque: salto con mordisco hacia delante.
 - Fotograma 8: plantado, cabeza baja, dientes al aire y babeando, ojos en verde espectral.
+```
+
+### 52 · Demonio
+
+```
+PERSONAJE: un demonio menor, unos 84 px de alto, mirando a la IZQUIERDA. Fuerte y salvaje.
+- Cuerpo musculoso y encorvado, piel rojo oscuro (#9C2E30) con sombras oscuras (#1B2925) y placas óseas claras (#7A9380) en hombros y antebrazos.
+- Cabeza con dos cuernos grandes curvados hacia atrás, orejas puntiagudas, fauces con colmillos y ojos dorados (#D6A248) brillantes.
+- Alas de murciélago pequeñas y rotas, plegadas a la espalda.
+- Patas de cabra con pezuñas negras, cola larga terminada en punta de flecha, recogida detrás.
+- Garras largas; en la mano delantera, un tridente de hierro negro.
+- Ataque: estocada con el tridente hacia delante.
+- Fotograma 8: echa los brazos atrás rugiendo, los cuernos y los ojos brillan en verde espectral.
+```
+
+### 53 · Súcubo
+
+```
+PERSONAJE: una súcubo, demonio femenino, unos 80 px de alto, mirando a la IZQUIERDA. Ágil y traicionera, roba vida.
+- Mujer demoníaca esbelta de piel violácea oscura (usa #3B5247 / #7A9380), cabello largo negro que ondea hacia atrás.
+- Dos cuernos finos y curvados hacia atrás, ojos verde espectral (#9FE05A) y una sonrisa con colmillos.
+- Armadura ligera oscura: corpiño de cuero negro con placas y ribetes dorados (#D6A248), hombreras con pinchos y una falda larga abierta hecha jirones. Ropa que cubre, nada provocativo.
+- Alas de murciélago grandes, medio plegadas a la espalda, y una cola fina terminada en punta de corazón, recogida.
+- Botas altas de tacón con pezuña. Garras largas en las manos.
+- Un látigo corto enroscado en la mano delantera (pegado a la mano).
+- Ataque: zarpazo con las garras hacia delante.
+- Fotograma 8: alas abiertas a medias, una mano con un brillo verde espectral pegado a la palma.
 ```
 
 ---

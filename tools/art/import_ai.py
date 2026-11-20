@@ -66,6 +66,8 @@ SOURCES = {
     "espia": ("40_espia_magenta.png", 70),
     "ballestero": ("41_ballestero_magenta.png", 72),
     "mastin": ("42_mastin_magenta.png", 58),
+    "demonio": ("52_demonio_magenta.png", 84),
+    "sucubo": ("53_sucubo_magenta.png", 80),
     "bruja_pantano": ("43_bruja_pantano_magenta.png", 98),
     "gran_jabali": ("44_gran_jabali_magenta.png", 90),
     "senor_trasgos": ("45_senor_trasgos_magenta.png", 96),
