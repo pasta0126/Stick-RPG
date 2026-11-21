@@ -1,6 +1,7 @@
 #pragma once
 // Héroe inicial, enemigos, botín y curación (GDD §5–§7).
 
+#include "balance.h"
 #include "game_types.h"
 #include "rng.h"
 
@@ -23,7 +24,8 @@ struct Loot {
 
 Rareza rollRareza(Rng& rng, int luck, bool jefe);
 Item makeItem(Rng& rng, Slot slot, int nivel, Rareza rareza);
-Loot rollLoot(Rng& rng, int nivel, int luck, bool jefe);
+Loot rollLoot(Rng& rng, int nivel, int luck, bool jefe,
+              int probPocion = bal::PROB_POCION);
 
 // Devuelven los HP realmente recuperados / ganados.
 int healVictory(Hero& h);      // §6.1

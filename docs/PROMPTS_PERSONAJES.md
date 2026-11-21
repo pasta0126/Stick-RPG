@@ -1286,6 +1286,8 @@ Los 8 papeles de siempre (contorno, oscuro, medio, claro, brillo, sangre, oro, e
 
 # Héroes nuevos (mismo método que el héroe v2)
 
+> Elegidos y ya en el juego (2026-11-21): **Samurái, Hechicera, Pícara y Druida** (con el Caballero y la Vikinga, 6 héroes). El resto de la tabla queda descartado.
+
 Cada héroe se hace en **dos mensajes dentro de la misma conversación**: primero la tira (bloque común de la tira y el bloque del héroe) y después el mapa de piezas (bloque común del mapa y la lista de piezas del héroe). Se guardan en `assets/ai/` como `<nombre>.png` y `<nombre>_mapa.png`.
 
 Todos usan las **6 piezas** del héroe, porque el botín las cambia: casco, pechera, botas, mano trasera (en el código, el escudo), brazo con arma y cuerpo. El arma y la pieza de la mano trasera cambian de nombre según el héroe.

@@ -41,6 +41,32 @@ constexpr int VIKINGA_DEF     = 1;
 constexpr int VIKINGA_CRITDMG = 80;
 constexpr int VIKINGA_FALLO   = 12;
 
+// Samurái: crítico alto y poca vida; zona perfecta de la carga más ancha.
+constexpr int   SAMURAI_HP      = 50;
+constexpr int   SAMURAI_DEF     = 2;
+constexpr int   SAMURAI_CRIT    = 15;
+constexpr int   SAMURAI_CRITDMG = 60;
+constexpr float SAMURAI_ZONA    = 0.84f;  // el doble de ancha que la normal
+
+// Hechicera: ataque alto y defensa nula; especial cada 2 golpes.
+constexpr int HECHICERA_HP       = 55;
+constexpr int HECHICERA_ATK      = 10;
+constexpr int HECHICERA_DEF      = 0;
+constexpr int HECHICERA_ESPECIAL = 2;
+
+// Pícara: crítico alto y defensa baja; más botín raro (suerte) y más pociones.
+constexpr int PICARA_HP     = 55;
+constexpr int PICARA_DEF    = 1;
+constexpr int PICARA_CRIT   = 12;
+constexpr int PICARA_LUCK   = 10;
+constexpr int PICARA_FALLO  = 6;
+constexpr int PICARA_POCION = 30;  // %
+
+// Druida: equilibrado, se regenera un poco en cada ataque propio.
+constexpr int DRUIDA_ATK   = 7;
+constexpr int DRUIDA_REGEN = 2;   // % de la vida máx. por ataque
+constexpr int TOPE_REGEN   = 15;  // % de la vida máx. por combate
+
 // --- Curación (§6) ------------------------------------------------------------
 constexpr int CURA_VICTORIA  = 20;  // % de vida máx.
 constexpr int CURA_JEFE      = 50;  // % de la vida que falta, al aparecer un jefe

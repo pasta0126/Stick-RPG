@@ -1,13 +1,15 @@
 // Simulador de balance: juega miles de partidas con un jugador automático y
 // muestra cuántos enemigos se derrotan. Uso:
 //   ./build/sim [--games N] [--seed S] [--skill P] [--policy charge|normal]
-//               [--class caballero|vikinga] [--verbose]
+//               [--class caballero|vikinga|samurai|hechicera|picara|druida]
+//               [--verbose]
 //   skill = probabilidad de soltar la carga en la zona perfecta (0..1).
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <strings.h>
 #include <string>
 #include <vector>
 
@@ -34,10 +36,14 @@ float itemScore(const Item& it) {
          it.get(Stat::VAMP) * 0.5f;
 }
 
-float playerCharge(Rng& rng, const Options& o) {
+// skill = probabilidad de acertar la zona perfecta normal; con una zona más
+// ancha (Samurái) la probabilidad crece en proporción a su anchura.
+float playerCharge(Rng& rng, const Options& o, float zona) {
   if (!o.charge) return 1.0f;
-  if (rng.chancef(o.skill)) return chargeMultiplier(rng.uniform(bal::ZONA_PERFECTA, 1.0f));
-  return chargeMultiplier(rng.uniform(0.0f, bal::ZONA_PERFECTA));
+  float p = o.skill * (1.0f - zona) / (1.0f - bal::ZONA_PERFECTA);
+  if (p > 1) p = 1;
+  if (rng.chancef(p)) return chargeMultiplier(rng.uniform(zona, 1.0f), zona);
+  return chargeMultiplier(rng.uniform(0.0f, zona), zona);
 }
 
 struct RunStats {
@@ -58,7 +64,7 @@ RunStats playRun(Rng& rng, const Options& o) {
     bool heroDead = false;
     while (true) {
       HeroTurnResult hr = (o.charge && hero.especialListo())
-                              ? b.heroSpecial(playerCharge(rng, o))
+                              ? b.heroSpecial(playerCharge(rng, o, hero.info().zonaPerfecta))
                               : b.heroAttack();
       ++st.turns;
       st.maxHit = std::max(st.maxHit, hr.atk.damage);
@@ -78,7 +84,8 @@ RunStats playRun(Rng& rng, const Options& o) {
     }
     ++st.defeated;
     healVictory(hero);
-    Loot loot = rollLoot(rng, nivel, hero.eff(Stat::LUCK), isBossLevel(nivel));
+    Loot loot = rollLoot(rng, nivel, hero.eff(Stat::LUCK), isBossLevel(nivel),
+                         hero.info().probPocion);
     if (loot.pocion) {
       if (hero.hp * 2 < hero.hpMax) potionRecover(hero);
       else potionMaxHp(hero);
@@ -104,8 +111,16 @@ int main(int argc, char** argv) {
     else if (arg("--seed")) o.seed = std::strtoull(argv[++i], nullptr, 10);
     else if (arg("--skill")) o.skill = static_cast<float>(std::atof(argv[++i]));
     else if (arg("--policy")) o.charge = std::strcmp(argv[++i], "normal") != 0;
-    else if (arg("--class")) o.clase = std::strcmp(argv[++i], "vikinga") == 0
-                                         ? HeroClass::VIKINGA : HeroClass::CABALLERO;
+    else if (arg("--class")) {
+      const char* n = argv[++i];
+      bool found = false;
+      for (int c = 0; c < HERO_CLASS_COUNT; ++c)
+        if (strcasecmp(n, heroClassName(static_cast<HeroClass>(c))) == 0) {
+          o.clase = static_cast<HeroClass>(c);
+          found = true;
+        }
+      if (!found) { std::fprintf(stderr, "heroe desconocido: %s\n", n); return 1; }
+    }
     else if (std::strcmp(argv[i], "--verbose") == 0) o.verbose = true;
     else { std::fprintf(stderr, "argumento desconocido: %s\n", argv[i]); return 1; }
   }

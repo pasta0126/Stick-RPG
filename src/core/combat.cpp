@@ -4,14 +4,14 @@
 
 #include "balance.h"
 
-float chargeMultiplier(float f) {
+float chargeMultiplier(float f, float zona) {
   if (f < 0) f = 0;
   if (f > 1) f = 1;
-  if (f >= bal::ZONA_PERFECTA) return bal::CARGA_PERFECTA;
+  if (f >= zona) return bal::CARGA_PERFECTA;
   return bal::CARGA_MIN + (bal::CARGA_MAX - bal::CARGA_MIN) * f;
 }
 
-bool chargeIsPerfect(float f) { return f >= bal::ZONA_PERFECTA; }
+bool chargeIsPerfect(float f, float zona) { return f >= zona; }
 
 float chargeFill(uint32_t heldMs) {
   if (heldMs <= bal::T_UMBRAL_MS) return 0.0f;
@@ -51,7 +51,7 @@ HeroTurnResult Battle::attack(float mult, bool special) {
   // El contador se mantiene entre combates; los fallos también cuentan.
   if (special)
     hero_.golpesEspecial = 0;
-  else if (hero_.golpesEspecial < bal::ESPECIAL_CADA)
+  else if (hero_.golpesEspecial < hero_.info().especialCada)
     ++hero_.golpesEspecial;
   r.atk = resolveAttack(rng_, hero_.combatant(), enemy_.c, mult);
   enemy_.hp -= r.atk.damage;
@@ -63,6 +63,20 @@ HeroTurnResult Battle::attack(float mult, bool special) {
     int before = hero_.hp;
     hero_.hp = hero_.hp + heal > hero_.hpMax ? hero_.hpMax : hero_.hp + heal;
     r.healed = hero_.hp - before;
+  }
+  // Regeneración propia del héroe (Druida): un % de la vida máx. por ataque,
+  // con tope por combate para que no se eternice contra enemigos que apenas
+  // le hacen daño.
+  int regen = hero_.info().regen;
+  int tope = hero_.hpMax * bal::TOPE_REGEN / 100 - regenado_;
+  if (regen > 0 && hero_.hp < hero_.hpMax && tope > 0) {
+    int heal = hero_.hpMax * regen / 100;
+    if (heal < 1) heal = 1;
+    if (heal > tope) heal = tope;
+    regenado_ += heal;
+    int before = hero_.hp;
+    hero_.hp = hero_.hp + heal > hero_.hpMax ? hero_.hpMax : hero_.hp + heal;
+    r.healed += hero_.hp - before;
   }
   if (enemy_.hp <= 0) {
     enemy_.hp = 0;

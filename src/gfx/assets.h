@@ -4,6 +4,10 @@
 #include "sprite.h"
 #include "heroe_gfx.h"
 #include "vikinga_gfx.h"
+#include "samurai_gfx.h"
+#include "hechicera_gfx.h"
+#include "picara_gfx.h"
+#include "druida_gfx.h"
 #include "esqueleto_gfx.h"
 #include "titulo_gfx.h"
 #include "titulo_fondo_gfx.h"
@@ -80,6 +84,10 @@ struct HeroArt {
 static const HeroArt kHeroArt[] = {
     {&heroe::sheet, 26, 89},  // heroe
     {&vikinga::sheet, 32, 91},  // vikinga
+    {&samurai::sheet, 29, 95},  // samurai
+    {&hechicera::sheet, 42, 78},  // hechicera
+    {&picara::sheet, 50, 87},  // picara
+    {&druida::sheet, 43, 80},  // druida
 };
 
 // Esqueleto: arte guardado para un futuro héroe seleccionable (aún no se usa).

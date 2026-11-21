@@ -1,12 +1,14 @@
 #pragma once
 // Reglas de combate (GDD §4).
 
+#include "balance.h"
 #include "game_types.h"
 #include "rng.h"
 
 // Multiplicador del ataque cargado según el llenado f ∈ [0, 1] (§4.3).
-float chargeMultiplier(float f);
-bool chargeIsPerfect(float f);
+// zona: inicio de la zona perfecta (el Samurái la tiene más ancha).
+float chargeMultiplier(float f, float zona = bal::ZONA_PERFECTA);
+bool chargeIsPerfect(float f, float zona = bal::ZONA_PERFECTA);
 
 // Llenado de la barra tras mantener A durante heldMs (barra cíclica).
 float chargeFill(uint32_t heldMs);
@@ -25,7 +27,7 @@ AttackResult resolveAttack(Rng& rng, const Combatant& a, const Combatant& d,
 
 struct HeroTurnResult {
   AttackResult atk;
-  int healed = 0;  // vida robada por VAMP
+  int healed = 0;  // vida robada por VAMP + regeneración del héroe
   bool extraTurn = false;
   bool enemyDead = false;
 };
@@ -52,7 +54,7 @@ class Battle {
   // Probabilidad (%) de turno extra en este momento (con encadenamiento).
   float extraChance() const;
   int chain() const { return chain_; }
-  void reset() { chain_ = 0; }
+  void reset() { chain_ = 0; regenado_ = 0; }
 
  private:
   HeroTurnResult attack(float mult, bool special);
@@ -61,4 +63,5 @@ class Battle {
   Enemy& enemy_;
   Rng& rng_;
   int chain_ = 0;  // turnos extra consecutivos
+  int regenado_ = 0;  // vida regenerada en este combate (tiene tope)
 };

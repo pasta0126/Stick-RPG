@@ -87,7 +87,7 @@ def build_backgrounds():
 
 
 # Héroes jugables, en el orden de HeroClass (src/core/game_types.h).
-HEROES = ["heroe", "vikinga"]
+HEROES = ["heroe", "vikinga", "samurai", "hechicera", "picara", "druida"]
 # Esqueleto: futuro héroe seleccionable (su arte se sigue exportando).
 UNDEAD = "esqueleto"
 # En la tira del esqueleto el escudo cambia de lado en la preparación (2) y la

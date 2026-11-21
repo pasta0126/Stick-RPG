@@ -68,25 +68,20 @@ EnemyProfile profile(EnemyType t) {
 Hero makeHero(HeroClass c) {
   Hero h;
   h.clase = c;
-  h.hpMax = h.hp = bal::HEROE_HP;
-  h.base[static_cast<int>(Stat::ATK)] = bal::HEROE_ATK;
-  h.base[static_cast<int>(Stat::DEF)] = bal::HEROE_DEF;
-  h.base[static_cast<int>(Stat::CRIT)] = bal::HEROE_CRIT;
-  h.base[static_cast<int>(Stat::CRIT_DMG)] = bal::HEROE_CRITDMG;
+  const HeroClassInfo& in = heroInfo(c);
+  h.hpMax = h.hp = in.hp;
+  h.base[static_cast<int>(Stat::ATK)] = in.atk;
+  h.base[static_cast<int>(Stat::DEF)] = in.def;
+  h.base[static_cast<int>(Stat::CRIT)] = in.crit;
+  h.base[static_cast<int>(Stat::CRIT_DMG)] = in.critDmg;
   h.base[static_cast<int>(Stat::EXTRA)] = bal::HEROE_EXTRA;
-  h.base[static_cast<int>(Stat::LUCK)] = bal::HEROE_LUCK;
-  h.fallo = bal::HEROE_FALLO;
+  h.base[static_cast<int>(Stat::LUCK)] = in.luck;
+  h.fallo = in.fallo;
   h.equip[static_cast<int>(Slot::CASCO)] = basic(Slot::CASCO, Stat::DEF, 1);
   h.equip[static_cast<int>(Slot::PECHERA)] = basic(Slot::PECHERA, Stat::DEF, 2);
   h.equip[static_cast<int>(Slot::BOTAS)] = basic(Slot::BOTAS, Stat::DEF, 1);
   h.equip[static_cast<int>(Slot::ESPADA)] = basic(Slot::ESPADA, Stat::ATK, 2);
   // Escudo vacío (§5.1).
-  if (c == HeroClass::VIKINGA) {
-    h.base[static_cast<int>(Stat::ATK)] = bal::VIKINGA_ATK;
-    h.base[static_cast<int>(Stat::DEF)] = bal::VIKINGA_DEF;
-    h.base[static_cast<int>(Stat::CRIT_DMG)] = bal::VIKINGA_CRITDMG;
-    h.fallo = bal::VIKINGA_FALLO;
-  }
   return h;
 }
 
@@ -222,9 +217,9 @@ Item makeItem(Rng& rng, Slot slot, int nivel, Rareza rareza) {
   return it;
 }
 
-Loot rollLoot(Rng& rng, int nivel, int luck, bool jefe) {
+Loot rollLoot(Rng& rng, int nivel, int luck, bool jefe, int probPocion) {
   Loot l;
-  if (!jefe && rng.chance(bal::PROB_POCION)) {
+  if (!jefe && rng.chance(probPocion)) {
     l.pocion = true;
     return l;
   }

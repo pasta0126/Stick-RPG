@@ -26,13 +26,46 @@ bool statIsPercent(Stat s) {
 
 namespace {
 const char* gWeaponName = "Espada";
+const char* gOffhandName = "Escudo";
+
+// Mismo orden que HeroClass. Ver GDD §3 (selección de héroe).
+const HeroClassInfo kHeroInfo[] = {
+    // nombre, arma, mano trasera, hp, atk, def, crit, c.dmg, luck, fallo,
+    // golpes para el especial, zona perfecta, regeneración, prob. de poción
+    {"Caballero", "Espada",  "Escudo",   bal::HEROE_HP, bal::HEROE_ATK, bal::HEROE_DEF,
+     bal::HEROE_CRIT, bal::HEROE_CRITDMG, bal::HEROE_LUCK, bal::HEROE_FALLO,
+     bal::ESPECIAL_CADA, bal::ZONA_PERFECTA, 0, bal::PROB_POCION},
+    {"Vikinga",   "Hacha",   "Escudo",   bal::HEROE_HP, bal::VIKINGA_ATK, bal::VIKINGA_DEF,
+     bal::HEROE_CRIT, bal::VIKINGA_CRITDMG, bal::HEROE_LUCK, bal::VIKINGA_FALLO,
+     bal::ESPECIAL_CADA, bal::ZONA_PERFECTA, 0, bal::PROB_POCION},
+    {"Samurai",   "Katana",  "Vaina",    bal::SAMURAI_HP, bal::HEROE_ATK, bal::SAMURAI_DEF,
+     bal::SAMURAI_CRIT, bal::SAMURAI_CRITDMG, bal::HEROE_LUCK, bal::HEROE_FALLO,
+     bal::ESPECIAL_CADA, bal::SAMURAI_ZONA, 0, bal::PROB_POCION},
+    {"Hechicera", "Baculo",  "Grimorio", bal::HECHICERA_HP, bal::HECHICERA_ATK, bal::HECHICERA_DEF,
+     bal::HEROE_CRIT, bal::HEROE_CRITDMG, bal::HEROE_LUCK, bal::HEROE_FALLO,
+     bal::HECHICERA_ESPECIAL, bal::ZONA_PERFECTA, 0, bal::PROB_POCION},
+    {"Picara",    "Daga",    "Punal",    bal::PICARA_HP, bal::HEROE_ATK, bal::PICARA_DEF,
+     bal::PICARA_CRIT, bal::HEROE_CRITDMG, bal::PICARA_LUCK, bal::PICARA_FALLO,
+     bal::ESPECIAL_CADA, bal::ZONA_PERFECTA, 0, bal::PICARA_POCION},
+    {"Druida",    "Cayado",  "Escudo",   bal::HEROE_HP, bal::DRUIDA_ATK, bal::HEROE_DEF,
+     bal::HEROE_CRIT, bal::HEROE_CRITDMG, bal::HEROE_LUCK, bal::HEROE_FALLO,
+     bal::ESPECIAL_CADA, bal::ZONA_PERFECTA, bal::DRUIDA_REGEN, bal::PROB_POCION},
+};
+static_assert(sizeof(kHeroInfo) / sizeof(kHeroInfo[0]) == HERO_CLASS_COUNT,
+              "una ficha por héroe");
+}  // namespace
+
+const HeroClassInfo& heroInfo(HeroClass c) {
+  int i = static_cast<int>(c);
+  return kHeroInfo[i < HERO_CLASS_COUNT ? i : 0];
 }
 
-void setWeaponName(const char* name) { gWeaponName = name; }
-
-const char* heroClassName(HeroClass c) {
-  return c == HeroClass::VIKINGA ? "Vikinga" : "Caballero";
+void setSlotNames(HeroClass c) {
+  gWeaponName = heroInfo(c).weapon;
+  gOffhandName = heroInfo(c).offhand;
 }
+
+const char* heroClassName(HeroClass c) { return heroInfo(c).name; }
 
 const char* slotName(Slot s) {
   switch (s) {
@@ -40,7 +73,7 @@ const char* slotName(Slot s) {
     case Slot::PECHERA: return "Pechera";
     case Slot::BOTAS: return "Botas";
     case Slot::ESPADA: return gWeaponName;
-    case Slot::ESCUDO: return "Escudo";
+    case Slot::ESCUDO: return gOffhandName;
     default: return "?";
   }
 }
@@ -125,7 +158,7 @@ int Hero::eff(Stat s) const {
   }
 }
 
-bool Hero::especialListo() const { return golpesEspecial >= bal::ESPECIAL_CADA; }
+bool Hero::especialListo() const { return golpesEspecial >= info().especialCada; }
 
 Combatant Hero::combatant() const {
   Combatant c;

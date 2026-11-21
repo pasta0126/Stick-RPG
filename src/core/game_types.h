@@ -9,11 +9,25 @@ constexpr int STAT_COUNT = static_cast<int>(Stat::COUNT);
 enum class Slot : uint8_t { CASCO, PECHERA, BOTAS, ESPADA, ESCUDO, COUNT };
 
 // Héroes jugables (se elige al empezar). Mismo orden que kHeroArt.
-enum class HeroClass : uint8_t { CABALLERO, VIKINGA, COUNT };
+enum class HeroClass : uint8_t { CABALLERO, VIKINGA, SAMURAI, HECHICERA, PICARA,
+                                 DRUIDA, COUNT };
 constexpr int HERO_CLASS_COUNT = static_cast<int>(HeroClass::COUNT);
-const char* heroClassName(HeroClass c);  // "Caballero", "Vikinga"
-// El arma del héroe se llama distinto según la clase ("Espada" / "Hacha").
-void setWeaponName(const char* name);
+
+// Ficha de cada héroe: nombres, estadísticas iniciales y su mecánica propia.
+struct HeroClassInfo {
+  const char* name;     // "Caballero", ... (sin tildes: fuente ASCII)
+  const char* weapon;   // nombre del arma en el botín ("Espada", "Katana", ...)
+  const char* offhand;  // nombre de la pieza de la mano trasera ("Escudo", ...)
+  int hp, atk, def, crit, critDmg, luck, fallo;
+  int especialCada;     // golpes normales para habilitar la carga
+  float zonaPerfecta;   // inicio de la zona perfecta de la barra (0..1)
+  int regen;            // % de vida máx. recuperado en cada ataque propio
+  int probPocion;       // % de que el botín sea una poción
+};
+const HeroClassInfo& heroInfo(HeroClass c);
+const char* heroClassName(HeroClass c);
+// El arma y la mano trasera se llaman distinto según el héroe de la partida.
+void setSlotNames(HeroClass c);
 constexpr int SLOT_COUNT = static_cast<int>(Slot::COUNT);
 
 enum class Rareza : uint8_t { COMUN, RARA, EPICA, COUNT };
@@ -69,6 +83,7 @@ struct Hero {
   Item equip[SLOT_COUNT];
 
   bool especialListo() const;
+  const HeroClassInfo& info() const { return heroInfo(clase); }
 
   // Suma base + equipo, sin topes.
   int raw(Stat s) const;

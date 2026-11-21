@@ -65,7 +65,18 @@ Landscape game with **dark medieval fantasy** pixel art and 8 colours per biome 
 
 An extra turn is a normal hero turn and is controlled the same way. While A is held, B does nothing.
 
-**Hero select:** after the title the player picks the hero in a carousel: the chosen hero stands large in the centre plate, the neighbours sit smaller, dimmed and slightly dissolved at the sides, and two breathing gold arrows show there are more. B spins right, a click of the power button spins left (it does not pause on this screen). Planned roster: Caballero, Vikinga, Samurái, Hechicera, Pícara, Druida. *Caballero*: base stats. *Vikinga* (axe and round shield): ATK 9, DEF 1, crit damage +80 %, miss 12 % (`VIKINGA_*` in `balance.h`); the simulator puts both at ~35 enemies on average. The record is shared.
+**Hero select:** after the title the player picks the hero in a carousel: the chosen hero stands large in the centre plate, the neighbours sit smaller, dimmed and slightly dissolved behind it at the sides, and two breathing gold arrows show there are more. B spins right, a click of the power button spins left (it does not pause on this screen). Each hero is a row of `kHeroInfo` (`game_types.cpp`) with its stats and its own rule; the weapon and back-hand slot take the hero's names in the loot screen.
+
+| Hero | Weapon / back hand | Stats (vs. Caballero) | Own rule |
+|---|---|---|---|
+| Caballero | Espada / Escudo | base: HP 60, ATK 8, DEF 3, crit 5 %, crit dmg +50 %, miss 8 % | — |
+| Vikinga | Hacha / Escudo | ATK 9, DEF 1, crit dmg +80 %, miss 12 % | — |
+| Samurai | Katana / Vaina | HP 50, DEF 2, crit 15 %, crit dmg +60 % | Perfect charge zone twice as wide (from 84 %) |
+| Hechicera | Baculo / Grimorio | HP 55, ATK 10, DEF 0 | Special every 2 hits instead of 3 (2 runes) |
+| Picara | Daga / Punal | HP 55, DEF 1, crit 12 %, luck 10, miss 6 % | Loot is a potion 30 % of the time instead of 25 % |
+| Druida | Cayado / Escudo | ATK 7 | Heals 2 % of max HP on each own attack, up to 15 % per fight |
+
+Simulator (20 000 runs, skill 0.5), mean enemies defeated: Caballero 29, Vikinga 29, Samurai 31, Hechicera 32, Picara 37, Druida 37. The record is shared.
 
 **B toggles sound at any moment** (title, combat, intros, pause, defeat) and shows a short “SONIDO SI / NO” notice; the only exception is the reward screens, where B switches panel.
 

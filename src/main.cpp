@@ -216,7 +216,7 @@ void startEncounter() {
 
 void newGame() {
   hero = makeHero(elegido);
-  setWeaponName(elegido == HeroClass::VIKINGA ? "Hacha" : "Espada");
+  setSlotNames(elegido);
   nivel = 1;
   derrotados = 0;
   golpeMax = 0;
@@ -469,7 +469,7 @@ void updateHeroTurn() {
       if (!charging) audio::sfx(600, 30);
       charging = true;
       chargeF = chargeFill(held);
-      bool perf = chargeIsPerfect(chargeF);
+      bool perf = chargeIsPerfect(chargeF, hero.info().zonaPerfecta);
       if (perf && !inPerfect) audio::sfx(1760, 40);
       inPerfect = perf;
     }
@@ -481,8 +481,9 @@ void updateHeroTurn() {
   bool charged = held > bal::T_UMBRAL_MS + bal::T_CARGA_MIN_MS;
   float f = chargeFill(held);
   aArmed = charging = false;
-  startHeroAttack(charged, charged ? chargeMultiplier(f) : 1.0f,
-                  charged && chargeIsPerfect(f));
+  float zona = hero.info().zonaPerfecta;
+  startHeroAttack(charged, charged ? chargeMultiplier(f, zona) : 1.0f,
+                  charged && chargeIsPerfect(f, zona));
 }
 
 void updateLoot(bool potion) {
@@ -549,7 +550,8 @@ void update() {
       break;
     case St::VICTORY:
       if (since(stT) >= T_VICTORIA) {
-        loot = rollLoot(rng, nivel, hero.eff(Stat::LUCK), isBossLevel(nivel));
+        loot = rollLoot(rng, nivel, hero.eff(Stat::LUCK), isBossLevel(nivel),
+                        hero.info().probPocion);
         sel = 0;
         setState(loot.pocion ? St::LOOT_POTION : St::LOOT_ITEM);
       }
@@ -768,8 +770,10 @@ void drawHud() {
   // Héroe (espejo de la placa del enemigo): nombre arriba; vida y barra debajo.
   panel(1, 112, 98, 134);
   icon(HEART, 6, 5, 116, '#', pal::NEGRO, 'r', pal::SANGRE);
-  const char* heroName =
-      hero.clase == HeroClass::VIKINGA ? "VIKINGA" : "CABALLERO";
+  char heroName[16];
+  std::snprintf(heroName, sizeof(heroName), "%s", heroClassName(hero.clase));
+  for (char* ch = heroName; *ch; ++ch)
+    if (*ch >= 'a' && *ch <= 'z') *ch = static_cast<char>(*ch - 32);
   c4.label(heroName, 15, 116, pal::BRILLO, pal::NEGRO);
   std::snprintf(buf, sizeof(buf), "%d/%d", hero.hp, hero.hpMax);
   int hw = gfx::Canvas4::textWidth(buf, 1, true);
@@ -786,10 +790,12 @@ void drawHud() {
   c4.label(buf, 118, 116, isBossLevel(nivel) ? pal::SANGRE : pal::ORO,
            pal::NEGRO, 1, 1, false, boldLv);
   bool ready = hero.especialListo();
-  for (int i = 0; i < bal::ESPECIAL_CADA; ++i) {
+  int runas = hero.info().especialCada;  // 3, o 2 la Hechicera
+  int rx = 118 - (runas * 7 - 2) / 2;
+  for (int i = 0; i < runas; ++i) {
     bool on = i < hero.golpesEspecial;
     bool blink = ready && (gt / 250) % 2 == 0;
-    icon(RUNE5, 5, 108 + i * 7, 125, '#', on ? pal::MEDIO : pal::OSCURO, 'o',
+    icon(RUNE5, 5, rx + i * 7, 125, '#', on ? pal::MEDIO : pal::OSCURO, 'o',
          on ? (blink ? pal::BRILLO : pal::ESPECTRAL) : pal::NEGRO);
   }
 
@@ -812,7 +818,7 @@ void drawHud() {
 void drawChargeBar() {
   const int x0 = 8, y0 = 6, w = W - 16, h = 9;
   panel(x0 - 4, y0 - 4, x0 + w + 3, y0 + h + 3);
-  int zone = static_cast<int>(w * bal::ZONA_PERFECTA);
+  int zone = static_cast<int>(w * hero.info().zonaPerfecta);
   c4.rect(x0, y0, w, h, pal::OSCURO);
   c4.shade(x0 + zone, y0, w - zone, h, pal::ORO, 8);
   int f = static_cast<int>(w * chargeF);
@@ -1108,7 +1114,11 @@ void drawTitle() {
 // Estilo de juego de cada héroe (dos líneas bajo su sprite).
 void heroStyle(HeroClass c, const char*& l1, const char*& l2) {
   switch (c) {
-    case HeroClass::VIKINGA: l1 = "ATAQUE Y CRITICO"; l2 = "MENOS DEFENSA"; return;
+    case HeroClass::VIKINGA: l1 = "MAS ATAQUE"; l2 = "MENOS DEFENSA"; return;
+    case HeroClass::SAMURAI: l1 = "MUCHO CRITICO"; l2 = "CARGA FACIL"; return;
+    case HeroClass::HECHICERA: l1 = "MUCHO ATAQUE"; l2 = "ESPECIAL RAPIDO"; return;
+    case HeroClass::PICARA: l1 = "MAS SUERTE"; l2 = "MAS POCIONES"; return;
+    case HeroClass::DRUIDA: l1 = "EQUILIBRADO"; l2 = "SE REGENERA"; return;
     default: l1 = "MAS DEFENSA"; l2 = "EQUILIBRADO"; return;
   }
 }
@@ -1121,7 +1131,7 @@ void carouselHero(HeroClass c, float rel) {
   const gfx::HeroArt& art = gfx::kHeroArt[static_cast<int>(c)];
   float d = std::fabs(rel);
   float k = d < 1 ? d : 1;
-  int fx = W / 2 - 6 + static_cast<int>(std::lround(rel * 84));
+  int fx = W / 2 - 6 + static_cast<int>(std::lround(rel * 90));
   int fy = static_cast<int>(std::lround(lerp(98, 90, k)));
   if (d < 0.02f) {
     int frame = H::IDLE.frameAt(gt);
@@ -1179,8 +1189,27 @@ void drawSelect() {
   carPos += diff * 0.35f;
   if (std::fabs(carTarget - carPos) < 0.02f) carPos = static_cast<float>(carTarget);
 
+  // Los de los lados van detrás de la placa central (segundo plano); el que
+  // está en el centro (o llegando a él), delante. De lejos a cerca.
+  auto heroes = [&](bool front) {
+    if (HERO_CLASS_COUNT < 2) {
+      if (front) carouselHero(static_cast<HeroClass>(sel), 0);
+      return;
+    }
+    int base = static_cast<int>(std::floor(carPos + 0.5f));
+    for (int ring = 2; ring >= 0; --ring)
+      for (int sgn = -1; sgn <= 1; sgn += 2) {
+        if (ring == 0 && sgn > 0) break;
+        int slot = base + ring * sgn;
+        float rel = slot - carPos;
+        if (std::fabs(rel) > 1.6f || (std::fabs(rel) <= 0.5f) != front) continue;
+        carouselHero(static_cast<HeroClass>(wrapHero(slot)), rel);
+      }
+  };
+  heroes(false);
+
   // Placa central fija: nombre arriba y estilo de juego abajo.
-  const int x0 = 70, x1 = 169, y0 = 3, y1 = 131, cx = (x0 + x1) / 2;
+  const int x0 = 64, x1 = 175, y0 = 3, y1 = 131, cx = (x0 + x1) / 2;
   panel(x0, y0, x1, y1);
   HeroClass c = static_cast<HeroClass>(sel);
   txt(B9, heroClassName(c), cx, 16, pal::ORO, middle_center, NONE);
@@ -1188,24 +1217,7 @@ void drawSelect() {
   heroStyle(c, l1, l2);
   c4.label(l1, cx, 108, pal::CLARO, pal::NEGRO, 1);
   c4.label(l2, cx, 118, pal::MEDIO, pal::NEGRO, 1);
-
-  // Héroes: de los más alejados al del centro, para que este quede delante.
-  if (HERO_CLASS_COUNT > 1) {
-    int base = static_cast<int>(std::floor(carPos + 0.5f));
-    for (int ring = 2; ring >= 0; --ring)
-      for (int sgn = -1; sgn <= 1; sgn += 2) {
-        if (ring == 0 && sgn > 0) break;
-        int slot = base + ring * sgn;
-        float rel = slot - carPos;
-        if (std::fabs(rel) > 1.6f) continue;
-        // Con pocos héroes, no repetir en un lado el que ya está en el otro.
-        if (ring > 0 && HERO_CLASS_COUNT < 3 && sgn < 0 && std::fabs(rel) > 0.5f)
-          continue;
-        carouselHero(static_cast<HeroClass>(wrapHero(slot)), rel);
-      }
-  } else {
-    carouselHero(c, 0);
-  }
+  heroes(true);
   choiceFrame(x0, y0, x1, y1, true);
 
   if (HERO_CLASS_COUNT > 1) {
