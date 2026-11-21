@@ -54,7 +54,7 @@ Landscape game with **dark medieval fantasy** pixel art and 8 colours per biome 
 | **State**          | **Button A**                                                              | **Button B**                       |
 |--------------------|---------------------------------------------------------------------------|------------------------------------|
 | Title              | Start                                                                     | Sound on / off                     |
-| Hero select        | Confirm the highlighted hero                                              | Switch hero (Caballero / Vikinga)  |
+| Hero select        | Confirm the hero in the centre                                            | Spin carousel right (power: left)  |
 | Biome intro        | Skip (after a short delay)                                                | —                                  |
 | Enemy walking in   | —                                                                         | —                                  |
 | Hero turn          | Tap: normal attack. Hold: charge the special (when ready, §4.3).          | Sound on / off                     |
@@ -65,7 +65,7 @@ Landscape game with **dark medieval fantasy** pixel art and 8 colours per biome 
 
 An extra turn is a normal hero turn and is controlled the same way. While A is held, B does nothing.
 
-**Hero select:** after the title the player picks the hero. *Caballero*: base stats. *Vikinga* (axe and round shield): ATK 9, DEF 1, crit damage +80 %, miss 12 % (`VIKINGA_*` in `balance.h`); the simulator puts both at ~35 enemies on average. The record is shared.
+**Hero select:** after the title the player picks the hero in a carousel: the chosen hero stands large in the centre plate, the neighbours sit smaller, dimmed and slightly dissolved at the sides, and two breathing gold arrows show there are more. B spins right, a click of the power button spins left (it does not pause on this screen). Planned roster: Caballero, Vikinga, Samurái, Hechicera, Pícara, Druida. *Caballero*: base stats. *Vikinga* (axe and round shield): ATK 9, DEF 1, crit damage +80 %, miss 12 % (`VIKINGA_*` in `balance.h`); the simulator puts both at ~35 enemies on average. The record is shared.
 
 **B toggles sound at any moment** (title, combat, intros, pause, defeat) and shows a short “SONIDO SI / NO” notice; the only exception is the reward screens, where B switches panel.
 

@@ -103,6 +103,33 @@ class Canvas4 {
     }
   }
 
+  // Como blit, pero escalado (vecino más cercano). scale256: 256 = tamaño
+  // real. (ax, ay) es el punto del sprite que cae en (x, y) de pantalla.
+  void blitScaled(const Sheet& s, int layer, int frame, int x, int y, int ax,
+                  int ay, int scale256, const Remap& remap, int dissolve = 0) {
+    if (scale256 <= 0) return;
+    const uint8_t* p = s.cel(layer, frame);
+    int dw = s.w * scale256 / 256, dh = s.h * scale256 / 256;
+    int ox = x - ax * scale256 / 256, oy = y - ay * scale256 / 256;
+    for (int j = 0; j < dh; ++j) {
+      int py = oy + j;
+      if (py < 0 || py >= h_) continue;
+      int sy = j * 256 / scale256;
+      if (sy >= s.h) break;
+      const uint8_t* row = p + sy * (s.w / 2);
+      for (int i = 0; i < dw; ++i) {
+        int sx = i * 256 / scale256;
+        if (sx >= s.w) break;
+        uint8_t b = row[sx >> 1];
+        uint8_t c = (sx & 1) ? (b & 0x0F) : (b >> 4);
+        if (c == s.key) continue;
+        int px = ox + i;
+        if (dissolve && bayer(px, py, dissolve)) continue;
+        pset(px, py, remap.to[c]);
+      }
+    }
+  }
+
   // Capa repetida en horizontal (fondos, nubes). y0: fila de pantalla.
   void blitWrapAt(const Sheet& s, int layer, int xoff, int y0) {
     const uint8_t* p = s.cel(layer, 0);

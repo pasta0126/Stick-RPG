@@ -117,6 +117,10 @@ int shakeAmp = 0;
 int enemyX = ENEMY_START;
 Loot loot;
 int sel = 0;
+// Carrusel de héroes: carTarget es la posición pedida (sin envolver, para que
+// el giro siempre vaya en el sentido pulsado) y carPos la dibujada.
+int carTarget = 0;
+float carPos = 0;
 HeroClass elegido = HeroClass::CABALLERO;  // héroe de la partida
 
 // ---------------------------------------------------------------- utilidades
@@ -251,7 +255,8 @@ void onEnter(St s) {
       audio::jingleInicio();
       break;
     case St::SELECT:
-      sel = static_cast<int>(elegido);
+      sel = carTarget = static_cast<int>(elegido);
+      carPos = static_cast<float>(carTarget);
       break;
     case St::BIOME_INTRO:
       audio::jingleBioma();
@@ -403,13 +408,23 @@ void updateTitle() {
   }
 }
 
-// Elegir héroe: B cambia de personaje, A lo confirma.
+int wrapHero(int i) {
+  i %= HERO_CLASS_COUNT;
+  return i < 0 ? i + HERO_CLASS_COUNT : i;
+}
+
+// Gira el carrusel de héroes: +1 a la derecha, -1 a la izquierda.
+void spinCarousel(int dir) {
+  carTarget += dir;
+  sel = wrapHero(carTarget);
+  audio::sfx(dir > 0 ? 770 : 690, 30);
+}
+
+// Elegir héroe en el carrusel: B gira a la derecha, el botón de encendido a
+// la izquierda y A confirma el del centro.
 void updateSelect() {
   if (since(stT) < 250) return;
-  if (M5.BtnB.wasPressed()) {
-    sel = (sel + 1) % HERO_CLASS_COUNT;
-    audio::sfx(770, 30);
-  }
+  if (M5.BtnB.wasPressed()) spinCarousel(+1);
   if (M5.BtnA.wasPressed()) {
     elegido = static_cast<HeroClass>(sel);
     audio::sfx(990, 60, true);
@@ -1090,33 +1105,113 @@ void drawTitle() {
            pal::MEDIO, pal::NEGRO, 2);
 }
 
-// Placa de un héroe en la pantalla de selección: nombre, sprite respirando
-// con todo el equipo y su estilo de juego.
-void heroColumn(HeroClass c, int x0, int x1, bool selected) {
+// Estilo de juego de cada héroe (dos líneas bajo su sprite).
+void heroStyle(HeroClass c, const char*& l1, const char*& l2) {
+  switch (c) {
+    case HeroClass::VIKINGA: l1 = "ATAQUE Y CRITICO"; l2 = "MENOS DEFENSA"; return;
+    default: l1 = "MAS DEFENSA"; l2 = "EQUILIBRADO"; return;
+  }
+}
+
+// Héroe del carrusel. rel: distancia al centro (0 = elegido, ±1 = lados).
+// El del centro va a tamaño real con halo y respira; los de los lados, más
+// pequeños, apagados y algo difuminados, como en segundo plano.
+void carouselHero(HeroClass c, float rel) {
   namespace H = gfx::heroe;
-  const int y0 = 3, y1 = 131;
-  panel(x0, y0, x1, y1);
-  int cx = (x0 + x1) / 2;
-  txt(B9, heroClassName(c), cx, 16, pal::ORO, middle_center, NONE);
   const gfx::HeroArt& art = gfx::kHeroArt[static_cast<int>(c)];
-  int frame = selected ? H::IDLE.frameAt(gt) : H::IDLE.from;
-  int fx = cx - 6, fy = 100;  // pies
+  float d = std::fabs(rel);
+  float k = d < 1 ? d : 1;
+  int fx = W / 2 - 6 + static_cast<int>(std::lround(rel * 84));
+  int fy = static_cast<int>(std::lround(lerp(98, 90, k)));
+  if (d < 0.02f) {
+    int frame = H::IDLE.frameAt(gt);
+    int x0 = fx - art.ax, y0 = fy - art.ay;
+    for (int l = 0; l < H::LAYER_COUNT; ++l) blitHalo(*art.sheet, l, frame, x0, y0);
+    for (int l = 0; l < H::LAYER_COUNT; ++l)
+      c4.blit(*art.sheet, l, frame, x0, y0, Remap::identity());
+    return;
+  }
+  // Apagado: cada tono baja un escalón (el oro y la magia quedan en medio).
+  static const Remap dim = [] {
+    Remap r = Remap::identity();
+    r.to[pal::OSCURO] = pal::NEGRO;
+    r.to[pal::MEDIO] = pal::OSCURO;
+    r.to[pal::CLARO] = pal::MEDIO;
+    r.to[pal::BRILLO] = pal::CLARO;
+    r.to[pal::SANGRE] = pal::OSCURO;
+    r.to[pal::ORO] = pal::MEDIO;
+    r.to[pal::ESPECTRAL] = pal::MEDIO;
+    return r;
+  }();
+  int scale = static_cast<int>(lerp(256, 166, k));
+  const Remap& rm = k > 0.5f ? dim : Remap::identity();
+  int dissolve = static_cast<int>(4 * k);
   for (int l = 0; l < H::LAYER_COUNT; ++l)
-    blitHalo(*art.sheet, l, frame, fx - art.ax, fy - art.ay);
-  for (int l = 0; l < H::LAYER_COUNT; ++l)
-    c4.blit(*art.sheet, l, frame, fx - art.ax, fy - art.ay, Remap::identity());
-  const char* l1 = c == HeroClass::VIKINGA ? "ATAQUE Y CRITICO" : "MAS DEFENSA";
-  const char* l2 = c == HeroClass::VIKINGA ? "MENOS DEFENSA" : "EQUILIBRADO";
-  c4.label(l1, cx, 108, pal::CLARO, pal::NEGRO, 1);
-  c4.label(l2, cx, 118, pal::MEDIO, pal::NEGRO, 1);
-  choiceFrame(x0, y0, x1, y1, selected);
+    c4.blitScaled(*art.sheet, l, H::IDLE.from, fx, fy, art.ax, art.ay, scale,
+                  rm, dissolve);
+}
+
+// Flecha lateral del carrusel que respira hacia fuera. dir: -1 izq, +1 der.
+void carouselArrow(int cx, int cy, int dir) {
+  float b = 0.5f + 0.5f * std::sin(gt * 6.2832f / 1100.0f);
+  int off = static_cast<int>(std::lround(b * 3)) * dir;
+  uint8_t col = b > 0.7f ? pal::BRILLO : pal::ORO;
+  // Triángulo de 4 columnas con contorno negro; la punta mira hacia fuera.
+  for (int k = -1; k <= 4; ++k) {
+    int x = cx + off + dir * k;
+    int h = k < 0 ? 4 : 4 - k;  // la punta (k = 4) es la columna más corta
+    for (int j = -h; j <= h; ++j)
+      c4.pset(x, cy + j, pal::NEGRO);
+  }
+  for (int k = 0; k < 4; ++k) {
+    int x = cx + off + dir * k;
+    int h = 3 - k;
+    for (int j = -h; j <= h; ++j) c4.pset(x, cy + j, col);
+  }
 }
 
 void drawSelect() {
   c4.blit(gfx::titulo_fondo::sheet, 0, 0, 0, 0, Remap::identity());
   c4.shade(0, 0, W, H, pal::NEGRO, 9);
-  heroColumn(HeroClass::CABALLERO, 3, 117, sel == 0);
-  heroColumn(HeroClass::VIKINGA, 122, 236, sel == 1);
+
+  // Desliza la posición dibujada hacia la pedida (~150 ms por paso).
+  float diff = carTarget - carPos;
+  carPos += diff * 0.35f;
+  if (std::fabs(carTarget - carPos) < 0.02f) carPos = static_cast<float>(carTarget);
+
+  // Placa central fija: nombre arriba y estilo de juego abajo.
+  const int x0 = 70, x1 = 169, y0 = 3, y1 = 131, cx = (x0 + x1) / 2;
+  panel(x0, y0, x1, y1);
+  HeroClass c = static_cast<HeroClass>(sel);
+  txt(B9, heroClassName(c), cx, 16, pal::ORO, middle_center, NONE);
+  const char *l1, *l2;
+  heroStyle(c, l1, l2);
+  c4.label(l1, cx, 108, pal::CLARO, pal::NEGRO, 1);
+  c4.label(l2, cx, 118, pal::MEDIO, pal::NEGRO, 1);
+
+  // Héroes: de los más alejados al del centro, para que este quede delante.
+  if (HERO_CLASS_COUNT > 1) {
+    int base = static_cast<int>(std::floor(carPos + 0.5f));
+    for (int ring = 2; ring >= 0; --ring)
+      for (int sgn = -1; sgn <= 1; sgn += 2) {
+        if (ring == 0 && sgn > 0) break;
+        int slot = base + ring * sgn;
+        float rel = slot - carPos;
+        if (std::fabs(rel) > 1.6f) continue;
+        // Con pocos héroes, no repetir en un lado el que ya está en el otro.
+        if (ring > 0 && HERO_CLASS_COUNT < 3 && sgn < 0 && std::fabs(rel) > 0.5f)
+          continue;
+        carouselHero(static_cast<HeroClass>(wrapHero(slot)), rel);
+      }
+  } else {
+    carouselHero(c, 0);
+  }
+  choiceFrame(x0, y0, x1, y1, true);
+
+  if (HERO_CLASS_COUNT > 1) {
+    carouselArrow(6, 66, -1);
+    carouselArrow(W - 7, 66, +1);
+  }
 }
 
 void drawBiomeIntro() {
@@ -1340,6 +1435,10 @@ void handleIdle() {
 void handlePower() {
   if (M5.BtnPWR.pressedFor(T_APAGAR_MS)) powerOff();
   if (M5.BtnPWR.wasClicked()) {
+    if (st == St::SELECT && !paused) {  // en la selección gira el carrusel
+      if (since(stT) >= 250) spinCarousel(-1);
+      return;
+    }
     paused = !paused;
     pausedAtMs = millis();
     aArmed = charging = false;
